@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/favicon.ico" type="image/x-icon" rel="icon" />
+    <title>SpicyOS</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+    <script src="./src/assets/js/three.r134.min.js"></script>
+    <script src="./src/assets/js/vanta.net.min.js"></script>
+    <script>
+    VANTA.NET({
+      el: "body",
+      mouseControls: true,
+      touchControls: true,
+      gyroControls: false,
+      minHeight: window.innerHeight,
+      minWidth: window.innerWidth,
+      scale: 1.00,
+      scaleMobile: 1.00
+    })
+    </script>
+  </body>
+</html>

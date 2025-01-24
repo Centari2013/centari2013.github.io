@@ -1,0 +1,42 @@
+File: /etc/shadow
+
+What is /etc/shadow?
+The /etc/shadow file is the secure companion to /etc/passwd. It stores encrypted password hashes and other information related to user accounts. Access to this file is restricted to root or privileged users to ensure the security of user passwords.
+
+Structure of /etc/shadow:
+Each line in /etc/shadow represents a user and contains the following fields, separated by colons (:):
+
+    Username: The name of the user account.
+    Password Hash: The hashed password for the user. If this field contains * or !, it means the account is locked or password-based login is disabled.
+    Last Password Change: The number of days since January 1, 1970, when the password was last changed.
+    Minimum Age: The minimum number of days that must pass before the user can change their password.
+    Maximum Age: The maximum number of days a password is valid before it must be changed.
+    Warning Period: The number of days before a password expires that the user is warned.
+    Inactive Period: The number of days of inactivity after password expiration before the account is disabled.
+    Expiration Date: The number of days since January 1, 1970, when the account will be disabled. A blank field means the account does not expire.
+    Reserved Field: Currently unused, but reserved for future use.
+
+Example of a typical /etc/shadow entry:
+
+zaria:$6$randomsalt$hashedpassword:19345:0:99999:7:::
+
+What does each field mean in this example?
+
+    zaria: The username for the account.
+    $6$randomsalt$hashedpassword: The encrypted password hash. $6$ indicates the hashing algorithm (SHA-512 in this case).
+    19345: The date of the last password change, expressed as the number of days since January 1, 1970.
+    0: The minimum password age (password can be changed any time).
+    99999: The maximum password age (essentially infinite in this example).
+    7: The warning period (user will be warned 7 days before their password expires).
+    :::: Empty fields for inactive period, expiration date, and reserved field.
+
+Why is /etc/shadow important?
+This file protects password hashes from unauthorized access, which would allow attackers to attempt brute-force attacks. By separating password storage from the more accessible /etc/passwd, modern systems ensure greater security for user authentication.
+
+Security Note:
+
+    Access to /etc/shadow is restricted to the root user or system administrators. This is critical because password hashes, while encrypted, are still vulnerable to brute-force or dictionary attacks if obtained.
+    Always use strong passwords and consider enabling additional security measures like two-factor authentication.
+
+Fun Fact:
+The introduction of /etc/shadow as a separate file was a major step forward in securing Unix-like operating systems. Before this, password hashes were stored directly in /etc/passwd, which was world-readable.

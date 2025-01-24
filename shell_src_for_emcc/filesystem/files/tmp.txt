@@ -1,0 +1,42 @@
+Directory: /var/tmp
+
+What is /var/tmp?
+The /var/tmp directory is a temporary storage location for files that applications or processes may need to keep across system reboots. Unlike the /tmp directory, which is often cleared when the system restarts, files in /var/tmp are meant to persist longer.
+
+What's stored here?
+
+    Temporary Files:
+    Applications or processes that require temporary file storage for extended periods use this directory.
+    Example:
+        Partially downloaded files from software installers.
+        Large, temporary working files for media editing or rendering tools.
+
+    Session Data:
+    Services that need to resume tasks after a reboot might save session-related files here.
+
+Key Characteristics:
+
+    Longer File Lifespan:
+    Unlike /tmp, the system does not automatically clear /var/tmp on reboot. Files remain until manually deleted or cleaned by a maintenance process.
+
+    Shared Access:
+    Multiple applications can store their temporary data here. Files created in /var/tmp often have default read-write permissions for the system.
+
+Can I delete files in /var/tmp?
+Yes, but be careful.
+
+    Removing files while an application is running might cause errors or unexpected behavior.
+    If you're cleaning up disk space, focus on files that haven't been accessed for a while.
+    Example:
+
+    find /var/tmp -type f -atime +7 -delete
+
+Best Practices:
+
+    Use /var/tmp for larger or long-term temporary files:
+    Applications should use /tmp for short-lived data and /var/tmp for files that need to persist longer.
+    Regular Maintenance:
+    While the system doesn't clear /var/tmp automatically, you can set up cron jobs to periodically clean it up.
+
+Trivia:
+Think of /var/tmp as a “safe house” for temporary files—secure for a while but not meant for long-term living. When in doubt, tidy it up, but leave the currently “occupied” files alone.

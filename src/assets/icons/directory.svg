@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="100%"
+   height="100%"
+   viewBox="0 0 32 32"
+   version="1.1"
+   id="svg1"
+   enable-background="new 0 0 32 32"
+   inkscape:version="1.4 (1:1.4+202410161351+e7c3feb100)"
+   sodipodi:docname="file_manager.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="rect1"
+       class="selected"
+       
+       style="fill:none;stroke-width:1.2;stroke-dasharray:none"
+       d="m 2.9663455,4.8290911 h 9.7163635 l 3.898182,3.4909092 H 29.0318 L 28.973618,27.170909 H 2.9663455 Z"
+       sodipodi:nodetypes="ccccccc" />
+  </g>
+</svg>
