@@ -6,7 +6,7 @@ import topLevelAwait from 'vite-plugin-top-level-await'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/centari2013.github.io/",
+  base: "/",
   plugins: [
     vue(), 
     svgLoader(),
