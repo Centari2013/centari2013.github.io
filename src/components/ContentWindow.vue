@@ -14,17 +14,17 @@
     }"
     ref="resizableWindow"
   >
-    <div id="n-resize" @mousedown="startResize($event, 'n')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="nw-resize" @mousedown="startResize($event, 'nw')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="ne-resize" @mousedown="startResize($event, 'ne')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="sw-resize" @mousedown="startResize($event, 'sw')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="se-resize" @mousedown="startResize($event, 'se')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="e-resize" @mousedown="startResize($event, 'e')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="w-resize" @mousedown="startResize($event, 'w')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="s-resize" @mousedown="startResize($event, 's')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="n-resize" @mousedown="startResize($event, 'n')" @touchstart="startResize($event, 'n')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="nw-resize" @mousedown="startResize($event, 'nw')" @touchstart="startResize($event, 'nw')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="ne-resize" @mousedown="startResize($event, 'ne')" @touchstart="startResize($event, 'ne')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="sw-resize" @mousedown="startResize($event, 'sw')" @touchstart="startResize($event, 'sw')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="se-resize" @mousedown="startResize($event, 'se')" @touchstart="startResize($event, 'se')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="e-resize" @mousedown="startResize($event, 'e')" @touchstart="startResize($event, 'e')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="w-resize" @mousedown="startResize($event, 'w')" @touchstart="startResize($event, 'w')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="s-resize" @mousedown="startResize($event, 's')" @touchstart="startResize($event, 's')" :style="{ zIndex: `${zIndex + 1}`}"></div>
 
     <!-- Vertical Title Bar -->
-    <div class="titlebar" @mousedown="startDrag">
+    <div class="titlebar" @mousedown="startDrag" @touchstart="startDrag">
       <!-- Buttons Container -->
       <div class="button-container">
         <button class="titlebar-button" @click="closeApp">
@@ -296,25 +296,46 @@ export default {
         this.appsStore.setAppMaximize(this.id, true);
       }
     },
+    normalizeEvent(event) {
+      if (event.type.startsWith("touch")) {
+        return {
+          clientX: event.touches[0].clientX,
+          clientY: event.touches[0].clientY,
+        };
+      }
+      return {
+        clientX: event.clientX,
+        clientY: event.clientY,
+      };
+    },
     startDrag(event) {
       if (this.disableMovement) return;
       this.isDragging = true;
+
+      const eventXY = this.normalizeEvent(event);
+
       this.dragStart = {
-        x: event.clientX - this.current_dimensions.position.left,
-        y: event.clientY - this.current_dimensions.position.top,
+        x: eventXY.clientX - this.current_dimensions.position.left,
+        y: eventXY.clientY - this.current_dimensions.position.top,
       };
+      
       window.addEventListener("mousemove", this.drag);
+      window.addEventListener("touchmove", this.drag);
       window.addEventListener("mouseup", this.stopDrag);
+      window.addEventListener("touchend", this.stopDrag);
     },
     stopDrag() {
       this.isDragging = false;
       window.removeEventListener("mousemove", this.drag);
+      window.removeEventListener("touchmove", this.drag);
       window.removeEventListener("mouseup", this.stopDrag);
+      window.removeEventListener("touchend", this.stopDrag);
     },
     drag(event) {
       if (this.isDragging) {
-        this.current_dimensions.position.top = event.clientY - this.dragStart.y;
-        this.current_dimensions.position.left = event.clientX - this.dragStart.x;
+        const eventXY = this.normalizeEvent(event);
+        this.current_dimensions.position.top = eventXY.clientY - this.dragStart.y;
+        this.current_dimensions.position.left = eventXY.clientX - this.dragStart.x;
       }
     },
     startResize(event, direction) {
@@ -327,24 +348,32 @@ export default {
         top: this.current_dimensions.position.top,
         left: this.current_dimensions.position.left,
       };
+
+      const eventXY = this.normalizeEvent(event);
       this.startMousePosition = {
-        x: event.clientX,
-        y: event.clientY,
+        x: eventXY.clientX,
+        y: eventXY.clientY,
       };
-      window.addEventListener("mousemove", this.resize);
-      window.addEventListener("mouseup", this.stopResize);
+      window.addEventListener("mousemove", this.drag);
+      window.addEventListener("touchmove", this.drag);
+      window.addEventListener("mouseup", this.stopDrag);
+      window.addEventListener("touchend", this.stopDrag);
     },
     stopResize() {
       this.isResizing = false;
-      window.removeEventListener("mousemove", this.resize);
-      window.removeEventListener("mouseup", this.stopResize);
+      window.removeEventListener("mousemove", this.drag);
+      window.removeEventListener("touchmove", this.drag);
+      window.removeEventListener("mouseup", this.stopDrag);
+      window.removeEventListener("touchend", this.stopDrag);
     },
     resize(event) {
       this.$el.classList.remove("resizing");
       if (!this.isResizing) return;
       this.appsStore.setAppMaximize(this.id, false);
-      const dx = event.clientX - this.startMousePosition.x;
-      const dy = event.clientY - this.startMousePosition.y;
+
+      const eventXY = this.normalizeEvent(event);
+      const dx = eventXY.clientX - this.startMousePosition.x;
+      const dy = eventXY.clientY - this.startMousePosition.y;
       let newDimensions = { ...this.startDimensions };
 
       switch (this.resizeDirection) {
