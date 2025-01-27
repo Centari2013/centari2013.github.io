@@ -28,13 +28,13 @@
       <!-- Buttons Container -->
       <div class="button-container">
         <button class="titlebar-button" @click="closeApp">
-          <CloseIcon class="task-icon" />
+          <CloseIcon class="task-icon" width="100%" height="100%"/>
         </button>
         <button class="titlebar-button" @click="minimizeApp">
-          <MinimizeIcon class="task-icon" />
+          <MinimizeIcon class="task-icon" width="100%" height="100%"/>
         </button>
         <button class="titlebar-button" @click="maximizeApp">
-          <MaximizeIcon class="task-icon" />
+          <MaximizeIcon class="task-icon" width="100%" height="100%"/>
         </button>
         <!-- Title -->
         <span class="title-spacer"></span>
