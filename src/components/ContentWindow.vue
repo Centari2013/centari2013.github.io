@@ -354,17 +354,17 @@ export default {
         x: eventXY.clientX,
         y: eventXY.clientY,
       };
-      window.addEventListener("mousemove", this.drag);
-      window.addEventListener("touchmove", this.drag);
-      window.addEventListener("mouseup", this.stopDrag);
-      window.addEventListener("touchend", this.stopDrag);
+      window.addEventListener("mousemove", this.resize);
+      window.addEventListener("touchmove", this.resize);
+      window.addEventListener("mouseup", this.stopResize);
+      window.addEventListener("touchend", this.stopResize);
     },
     stopResize() {
       this.isResizing = false;
-      window.removeEventListener("mousemove", this.drag);
-      window.removeEventListener("touchmove", this.drag);
-      window.removeEventListener("mouseup", this.stopDrag);
-      window.removeEventListener("touchend", this.stopDrag);
+      window.removeEventListener("mousemove", this.resize);
+      window.removeEventListener("touchmove", this.resize);
+      window.removeEventListener("mouseup", this.stopResize);
+      window.removeEventListener("touchend", this.stopResize);
     },
     resize(event) {
       this.$el.classList.remove("resizing");
