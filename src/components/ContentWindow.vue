@@ -302,7 +302,7 @@ export default {
     },
     
     startResize(event, direction) {
-      obj.appsStore.setAppMaximize(obj.id, false);
+      this.appsStore.setAppMaximize(obj.id, false);
       startResize(this, event, direction);
     },
   
