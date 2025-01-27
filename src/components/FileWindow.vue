@@ -14,24 +14,24 @@
     }"
     ref="resizableWindow"
   >
-    <div id="n-resize" @mousedown="startResize($event, 'n')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="nw-resize" @mousedown="startResize($event, 'nw')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="ne-resize" @mousedown="startResize($event, 'ne')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="sw-resize" @mousedown="startResize($event, 'sw')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="se-resize" @mousedown="startResize($event, 'se')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="e-resize" @mousedown="startResize($event, 'e')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="w-resize" @mousedown="startResize($event, 'w')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="s-resize" @mousedown="startResize($event, 's')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+  <div id="n-resize" @mousedown="startResize($event, 'n')" @touchstart="startResize($event, 'n')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="nw-resize" @mousedown="startResize($event, 'nw')" @touchstart="startResize($event, 'nw')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="ne-resize" @mousedown="startResize($event, 'ne')" @touchstart="startResize($event, 'ne')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="sw-resize" @mousedown="startResize($event, 'sw')" @touchstart="startResize($event, 'sw')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="se-resize" @mousedown="startResize($event, 'se')" @touchstart="startResize($event, 'se')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="e-resize" @mousedown="startResize($event, 'e')" @touchstart="startResize($event, 'e')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="w-resize" @mousedown="startResize($event, 'w')" @touchstart="startResize($event, 'w')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="s-resize" @mousedown="startResize($event, 's')" @touchstart="startResize($event, 's')" :style="{ zIndex: `${zIndex + 1}`}"></div>
 
     <!-- Vertical Title Bar -->
-    <div class="file_titlebar" @mousedown="startDrag">
+    <div class="file_titlebar" @mousedown="startDrag" @touchstart="startDrag">
       <!-- Buttons Container -->
       <div class="button-container">
         <button class="titlebar-button" @click="closeApp">
-          <CloseIcon class="task-icon" />
+          <CloseIcon class="task-icon" height="100%" width="100%"/>
         </button>
         <button class="titlebar-button" @click="maximizeApp">
-          <MaximizeIcon class="task-icon" />
+          <MaximizeIcon class="task-icon" height="100%" width="100%"/>
         </button>
         <!-- Title -->
         <span class="title-spacer"></span>
@@ -58,6 +58,7 @@ import MaximizeIcon from "../assets/icons/maximize.svg";
 import FileViewerView from "./views/FileViewerView.vue";
 import { useAppsStore } from "./stores/apps";
 import { gsap } from "gsap";
+import { startDrag, startResize } from "./utilities/dragAndResize";
 
 export default {
   components: { CloseIcon, MaximizeIcon, FileViewerView },
@@ -230,102 +231,11 @@ export default {
       }
     },
     startDrag(event) {
-      if (this.disableMovement) return;
-      this.isDragging = true;
-      this.dragStart = {
-        x: event.clientX - this.current_dimensions.position.left,
-        y: event.clientY - this.current_dimensions.position.top,
-      };
-      window.addEventListener("mousemove", this.drag);
-      window.addEventListener("mouseup", this.stopDrag);
-    },
-    stopDrag() {
-      this.isDragging = false;
-      window.removeEventListener("mousemove", this.drag);
-      window.removeEventListener("mouseup", this.stopDrag);
-    },
-    drag(event) {
-      if (this.isDragging) {
-        this.current_dimensions.position.top = event.clientY - this.dragStart.y;
-        this.current_dimensions.position.left = event.clientX - this.dragStart.x;
-      }
+      startDrag(this, event);
     },
     startResize(event, direction) {
-      this.isResizing = true;
-      this.$el.classList.add("resizing");
-      this.resizeDirection = direction;
-      this.startDimensions = {
-        width: this.current_dimensions.size.width,
-        height: this.current_dimensions.size.height,
-        top: this.current_dimensions.position.top,
-        left: this.current_dimensions.position.left,
-      };
-      this.startMousePosition = {
-        x: event.clientX,
-        y: event.clientY,
-      };
-      window.addEventListener("mousemove", this.resize);
-      window.addEventListener("mouseup", this.stopResize);
-    },
-    stopResize() {
-      this.isResizing = false;
-      this.$el.classList.remove("resizing");
-      window.removeEventListener("mousemove", this.resize);
-      window.removeEventListener("mouseup", this.stopResize);
-    },
-    resize(event) {
-      if (!this.isResizing) return;
-      this.appsStore.setFileMaximize(this.item, false);
-      const dx = event.clientX - this.startMousePosition.x;
-      const dy = event.clientY - this.startMousePosition.y;
-      let newDimensions = { ...this.startDimensions };
-
-      switch (this.resizeDirection) {
-        case "n":
-          newDimensions.height = Math.max(this.startDimensions.height - dy, this.minSize.height);
-          newDimensions.top = this.startDimensions.top + dy;
-          break;
-        case "s":
-          newDimensions.height = Math.max(this.startDimensions.height + dy, this.minSize.height);
-          break;
-        case "e":
-          newDimensions.width = Math.max(this.startDimensions.width + dx, this.minSize.width);
-          break;
-        case "w":
-          newDimensions.width = Math.max(this.startDimensions.width - dx, this.minSize.width);
-          newDimensions.left = this.startDimensions.left + dx;
-          break;
-        case "ne":
-          newDimensions.height = Math.max(this.startDimensions.height - dy, this.minSize.height);
-          newDimensions.top = this.startDimensions.top + dy;
-          newDimensions.width = Math.max(this.startDimensions.width + dx, this.minSize.width);
-          break;
-        case "nw":
-          newDimensions.height = Math.max(this.startDimensions.height - dy, this.minSize.height);
-          newDimensions.top = this.startDimensions.top + dy;
-          newDimensions.width = Math.max(this.startDimensions.width - dx, this.minSize.width);
-          newDimensions.left = this.startDimensions.left + dx;
-          break;
-        case "se":
-          newDimensions.height = Math.max(this.startDimensions.height + dy, this.minSize.height);
-          newDimensions.width = Math.max(this.startDimensions.width + dx, this.minSize.width);
-          break;
-        case "sw":
-          newDimensions.height = Math.max(this.startDimensions.height + dy, this.minSize.height);
-          newDimensions.width = Math.max(this.startDimensions.width - dx, this.minSize.width);
-          newDimensions.left = this.startDimensions.left + dx;
-          break;
-      }
-
-      this.current_dimensions.size = {
-        width: newDimensions.width,
-        height: newDimensions.height,
-      };
-
-      this.current_dimensions.position = {
-        top: newDimensions.top,
-        left: newDimensions.left,
-      };
+      obj.appsStore.setFileMaximize(obj.id, false);
+      startResize(this, event, direction);
     },
   
     

@@ -60,6 +60,7 @@ import MaximizeIcon from "../assets/icons/maximize.svg";
 import { useAppsStore } from "./stores/apps";
 import { ref } from "vue";
 import { gsap } from "gsap";
+import { startResize, startDrag } from './utilities/dragAndResize'
 
 export default {
   setup() {
@@ -296,133 +297,15 @@ export default {
         this.appsStore.setAppMaximize(this.id, true);
       }
     },
-    normalizeEvent(event) {
-      if (event.type.startsWith("touch")) {
-        return {
-          clientX: event.touches[0].clientX,
-          clientY: event.touches[0].clientY,
-        };
-      }
-      return {
-        clientX: event.clientX,
-        clientY: event.clientY,
-      };
-    },
     startDrag(event) {
-      if (this.disableMovement) return;
-      this.isDragging = true;
-
-      const eventXY = this.normalizeEvent(event);
-
-      this.dragStart = {
-        x: eventXY.clientX - this.current_dimensions.position.left,
-        y: eventXY.clientY - this.current_dimensions.position.top,
-      };
-      
-      window.addEventListener("mousemove", this.drag);
-      window.addEventListener("touchmove", this.drag);
-      window.addEventListener("mouseup", this.stopDrag);
-      window.addEventListener("touchend", this.stopDrag);
+      startDrag(this, event);
     },
-    stopDrag() {
-      this.isDragging = false;
-      window.removeEventListener("mousemove", this.drag);
-      window.removeEventListener("touchmove", this.drag);
-      window.removeEventListener("mouseup", this.stopDrag);
-      window.removeEventListener("touchend", this.stopDrag);
-    },
-    drag(event) {
-      if (this.isDragging) {
-        const eventXY = this.normalizeEvent(event);
-        this.current_dimensions.position.top = eventXY.clientY - this.dragStart.y;
-        this.current_dimensions.position.left = eventXY.clientX - this.dragStart.x;
-      }
-    },
+    
     startResize(event, direction) {
-      this.$el.classList.add("resizing");
-      this.isResizing = true;
-      this.resizeDirection = direction;
-      this.startDimensions = {
-        width: this.current_dimensions.size.width,
-        height: this.current_dimensions.size.height,
-        top: this.current_dimensions.position.top,
-        left: this.current_dimensions.position.left,
-      };
-
-      const eventXY = this.normalizeEvent(event);
-      this.startMousePosition = {
-        x: eventXY.clientX,
-        y: eventXY.clientY,
-      };
-      window.addEventListener("mousemove", this.resize);
-      window.addEventListener("touchmove", this.resize);
-      window.addEventListener("mouseup", this.stopResize);
-      window.addEventListener("touchend", this.stopResize);
+      obj.appsStore.setAppMaximize(obj.id, false);
+      startResize(this, event, direction);
     },
-    stopResize() {
-      this.isResizing = false;
-      window.removeEventListener("mousemove", this.resize);
-      window.removeEventListener("touchmove", this.resize);
-      window.removeEventListener("mouseup", this.stopResize);
-      window.removeEventListener("touchend", this.stopResize);
-    },
-    resize(event) {
-      this.$el.classList.remove("resizing");
-      if (!this.isResizing) return;
-      this.appsStore.setAppMaximize(this.id, false);
-
-      const eventXY = this.normalizeEvent(event);
-      const dx = eventXY.clientX - this.startMousePosition.x;
-      const dy = eventXY.clientY - this.startMousePosition.y;
-      let newDimensions = { ...this.startDimensions };
-
-      switch (this.resizeDirection) {
-        case "n":
-          newDimensions.height = Math.max(this.startDimensions.height - dy, this.minSize.height);
-          newDimensions.top = this.startDimensions.top + dy;
-          break;
-        case "s":
-          newDimensions.height = Math.max(this.startDimensions.height + dy, this.minSize.height);
-          break;
-        case "e":
-          newDimensions.width = Math.max(this.startDimensions.width + dx, this.minSize.width);
-          break;
-        case "w":
-          newDimensions.width = Math.max(this.startDimensions.width - dx, this.minSize.width);
-          newDimensions.left = this.startDimensions.left + dx;
-          break;
-        case "ne":
-          newDimensions.height = Math.max(this.startDimensions.height - dy, this.minSize.height);
-          newDimensions.top = this.startDimensions.top + dy;
-          newDimensions.width = Math.max(this.startDimensions.width + dx, this.minSize.width);
-          break;
-        case "nw":
-          newDimensions.height = Math.max(this.startDimensions.height - dy, this.minSize.height);
-          newDimensions.top = this.startDimensions.top + dy;
-          newDimensions.width = Math.max(this.startDimensions.width - dx, this.minSize.width);
-          newDimensions.left = this.startDimensions.left + dx;
-          break;
-        case "se":
-          newDimensions.height = Math.max(this.startDimensions.height + dy, this.minSize.height);
-          newDimensions.width = Math.max(this.startDimensions.width + dx, this.minSize.width);
-          break;
-        case "sw":
-          newDimensions.height = Math.max(this.startDimensions.height + dy, this.minSize.height);
-          newDimensions.width = Math.max(this.startDimensions.width - dx, this.minSize.width);
-          newDimensions.left = this.startDimensions.left + dx;
-          break;
-      }
-
-      this.current_dimensions.size = {
-        width: newDimensions.width,
-        height: newDimensions.height,
-      };
-
-      this.current_dimensions.position = {
-        top: newDimensions.top,
-        left: newDimensions.left,
-      };
-    },
+  
   },
 };
 </script>
