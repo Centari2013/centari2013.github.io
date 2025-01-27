@@ -22,7 +22,6 @@ export function initializeTerminal(terminalContainer, parentWindow) {
 function printIntro(art, terminal) {
     terminal.wrap = false;
     terminal.write(art);
-    terminal.options.fontSize = 16;
     terminal.wrap = true;
 }
 
@@ -41,9 +40,11 @@ Type 'help' to get started.      \r\n
 
 
 function terminalSetup(terminalContainer, parentWindow) {
+    let fontSize = 16;
+    if (isMobile()) fontSize = 12;
     const term = new Terminal({
         cursorBlink: true,
-        fontSize: 12,
+        fontSize: fontSize,
         theme: {
             foreground: "#fee801",
             background: "#450327",

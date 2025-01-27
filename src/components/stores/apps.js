@@ -7,7 +7,7 @@ export const useAppsStore = defineStore('apps', {
   state: () => ({
     // All apps (shared and unique)
     allApps: [
-      { id: 'terminal', name: 'Terminal', image: 'terminal', shared: true, minWidth: 495},
+      { id: 'terminal', name: 'Terminal', image: 'terminal', shared: true, minWidth: isMobile() ? 400 : 495},
       { id: 'file_manager', name: 'File Manager', image: 'directory', shared: true}
     ],
 

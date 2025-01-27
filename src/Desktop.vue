@@ -81,7 +81,7 @@ export default {
 
     const getRandomPosition = (id) => {
       if (!randomPositions.has(id)) {
-        const x = Math.floor(Math.random() * (window.innerWidth - (1 / 3 * window.innerWidth))); // Adjust to avoid overflow
+        const x = Math.floor(Math.random() * (window.innerWidth - (2 / 3 * window.innerWidth))); // Adjust to avoid overflow
         const y = Math.floor(Math.random() * (window.innerHeight - (3 / 4 * window.innerHeight)));
         randomPositions.set(id, { top: y, left: x });
       }

@@ -27,8 +27,9 @@ export default {
     },
 };
 </script>
-<style>
+<style scoped>
 #terminal {
     @apply h-full w-full;
 }
 </style>
+
