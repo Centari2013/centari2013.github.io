@@ -1,5 +1,5 @@
 # Zaria Burton  
-+1 (786) 285-7362  
++1 (786) 575-6564  
 Miami Gardens, FL  
 [zaria.burton2000@gmail.com](mailto:zaria.burton2000@gmail.com)  
 [linkedin.com/in/zariaburton](https://linkedin.com/in/zariaburton)  
@@ -8,7 +8,9 @@ Miami Gardens, FL
 ---
 
 ## OBJECTIVE  
-Detail-oriented IT professional with a Bachelor of Arts in Computer Science from Florida State University, currently pursuing a Master of Science in Information Technology. Proficient in programming, database management, and data analytics, with experience in backend development and process optimization. Actively seeking a role in software development or IT operations to further enhance technical skills and contribute to team success.
+Software developer with experience in backend development, database management, and UI/UX design. Strong
+problem-solving skills and a passion for building scalable, efficient systems. Seeking a role in software development
+to contribute technical expertise and creative solutions.
 
 ---
 
@@ -27,35 +29,44 @@ Minor in Crime Scene Investigation
 ---
 
 ## SKILLS  
-
-**Technical Skills**  
-PostgreSQL, Python, Git, Low Code Development, Unix/Linux, Windows OS, MacOS, SQL, NoSQL, REST, GraphQL, UML, Agile/Scrum  
-
-**Soft Skills**  
-Team Leadership, Project Management, Collaboration, Problem-Solving, Customer Support  
+Programming: Python, JavaScript, Rust, C++, SQL, NoSQLBackend: PostgreSQL, REST, GraphQL, Emscripten, Unix/Linux, GitFrontend: Vue.js, Pinia, Vite, Figma, UI/UX DesignOther: Database Indexing, Query Optimization, Data Warehousing, Performance Tuning
 
 ---
 
 ## EXPERIENCE  
 
+### Technical Assistant  
+**Toothpik** | Remote (Jan 2024 – Present)  
+- Contributed to AI model training and dataset curation to support sustainable waste management initiatives.  
+- Assisted in developing pilot programs focused on sustainability innovation, refining workflows in cross-functional teams.  
+- Gained hands-on experience with AI tools, data analysis, and strategies for applying machine learning in environmental technology.  
+
 ### Payment Operations Analyst  
 **Digitech Sarnova** | Miami Lakes, FL (Jul 2021 - Feb 2024)  
-- Automated key billing processes by developing Python-based document generators, reducing billing errors by 50% and improving payment collection times.  
-- Led the creation of financial data reports using SQL to track payment success rates and ensure data integrity across internal systems.  
-- Collaborated with cross-functional teams to streamline billing workflows, improving team efficiency and process transparency.  
+- Automated billing processes with Python-based document generators, reducing errors by 50% and improving payment collection.  
+- Developed SQL-driven financial reports to track payment success rates and ensure data integrity.  
+- Streamlined billing workflows, improving team efficiency and process transparency.  
 
 ### Client Solutions Specialist  
 **Florida Department of Children and Families** | Miami Gardens, FL (May 2020 - Aug 2020)  
-- Provided expert support on federal assistance programs, resolving client issues through both email and phone channels with a 98% satisfaction rate.  
-- Contributed to COVID-19 task force initiatives by streamlining client communications and improving access to testing resources.  
-- Enhanced the user experience for the EBT online service portal by troubleshooting and providing feedback to development teams for system improvements.  
-- Built strong client relationships and improved processes through continuous feedback on client support tools and platforms.  
+- Provided client support for federal assistance programs, resolving 98% of issues via email and phone.  
+- Enhanced EBT portal UX by troubleshooting issues and providing feedback to development teams.  
+- Assisted in COVID-19 task force initiatives, improving client access to critical resources.  
+
+### Front Desk Volunteer  
+**Susan B. Anthony Recovery Center** | Pembroke Pines, FL (Aug 2015 – Jun 2019)  
+- Managed administrative tasks, scheduling, and client interactions in a high-paced recovery center.  
+- Ensured accurate record-keeping and maintained confidentiality in client documentation.  
+- Developed strong customer service and multitasking skills while supporting individuals in recovery.  
 
 ---
 
 ## PROJECTS  
 
-- **Project F-SEA (Database Access and Management System)** (personal)  
+- **SpicyOS - Interactive Portfolio Operating System (personal) <-- You are here!**  
+  Designed and developed a cyberpunk-themed fake operating system to showcase programming projects. Built a custom file system and terminal (PyroShell) using Emscripten/C++. Implemented interactive UI elements with Vue.js, Pinia, and Vite. Integrated a project viewer for seamless navigation and deployed on GitHub Pages. *(Current)*  
+
+- **Project F-SEA (Database Access and Management System) (personal)**  
   Designed and implemented a secure, relational database system using Python, JavaScript, GraphQL, and PostgreSQL. Developed a custom search engine for efficient data retrieval and employed advanced database management techniques to ensure robust data integrity and user-friendly access. *(Current)*  
 
 - **Backend API Development for Polling Website and Discord Bot**  
@@ -65,7 +76,8 @@ Team Leadership, Project Management, Collaboration, Problem-Solving, Customer Su
   Programmed servo-driven jaw movements synchronized with audio for realistic speech illusion. Integrated audio playback via DFPlayer Mini and designed a custom mechanical structure for seamless operation. *(Sep 2023 - Oct 2023)*  
 
 - **MIT XV6 Customized OS in C (coursework)**  
-  Enhanced the MIT XV6 Unix-based operating system by developing a process scheduling algorithm and a new shell for Unix command execution as part of an advanced operating system course. *(Sep 2022 - Dec 2022)*  
+  Enhanced the MIT XV6 Unix-based operating system by developing a process scheduling algorithm and a new shell for Unix command execution as part of an advanced OS course. *(Sep 2022 - Dec 2022)*  
 
 - **Maze-Solving AI (coursework)**  
   Developed a maze-solving AI using Python to demonstrate reinforcement learning algorithm applications. *(Jan 2022 - May 2022)*  
+

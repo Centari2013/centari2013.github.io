@@ -234,7 +234,7 @@ export default {
       startDrag(this, event);
     },
     startResize(event, direction) {
-      this.appsStore.setFileMaximize(this.id, false);
+      this.appsStore.setFileMaximize(this.item, false);
       startResize(this, event, direction);
     },
   

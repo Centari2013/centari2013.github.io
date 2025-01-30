@@ -5,7 +5,7 @@ OUTPUT_DIR=".."
 DEST_DIR="../src/assets/js/terminal/"
 
 # Create necessary base64 data
-/usr/bin/python3 /Users/spicykneecaps/Projects/portfolio-shell/shell_src_for_emcc/encoders/to_base64.py
+ /usr/bin/python3 /Users/spicykneecaps/Projects/centari2013.github.io/shell_src_for_emcc/encoders/to_base64.py
 
 # Make sure the output directory exists
 mkdir -p $OUTPUT_DIR
@@ -22,5 +22,7 @@ echo 'window.SystemModule = Module;' >> $OUTPUT_DIR/system.js
 
 # Move system.js to the destination directory, overwriting the existing file
 mv -f $OUTPUT_DIR/system.js $DEST_DIR
+
+mv -f $OUTPUT_DIR/system.data $OUTPUT_DIR/system.wasm $OUTPUT_DIR/public
 
 echo "system.js has been compiled and moved successfully."
