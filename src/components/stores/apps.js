@@ -8,7 +8,8 @@ export const useAppsStore = defineStore('apps', {
     // All apps (shared and unique)
     allApps: [
       { id: 'terminal', name: 'Terminal', image: 'terminal', shared: true, minWidth: isMobile() ? 400 : 495},
-      { id: 'file_manager', name: 'File Manager', image: 'directory', shared: true}
+      { id: 'file_manager', name: 'File Manager', image: 'directory', shared: true},
+      { id: 'browser', name: 'Browser', image: 'browser', shared: true},
     ],
 
     openApps: [], // [{ id: 'terminal', zIndex: 1, ... }]

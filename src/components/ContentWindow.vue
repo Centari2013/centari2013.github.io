@@ -61,6 +61,7 @@ import { useAppsStore } from "./stores/apps";
 import { ref } from "vue";
 import { gsap } from "gsap";
 import { startResize, startDrag } from './utilities/dragAndResize'
+import BrowserView from "./views/BrowserView.vue";
 
 export default {
   setup() {
@@ -123,6 +124,9 @@ export default {
       } else if (this.id === "file_manager") {
         this.title = "File Manager";
         return FileManagerView;
+      }else if (this.id === "browser") {
+        this.title = "Browser";
+        return BrowserView;
       }
       return null;
     },

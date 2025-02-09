@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="100%"
+   height="100%"
+   viewBox="0 0 32 32"
+   version="1.1"
+   id="svg1"
+   enable-background="new 0 0 32 32"
+   inkscape:version="1.4 (1:1.4+202410161351+e7c3feb100)"
+   sodipodi:docname="spicyos_browser.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+
+  <!-- Optional: set a title for accessibility -->
+  <title>SpicyOS Browser Icon</title>
+
+  <!-- Inkscape’s default namedview (not strictly required) -->
+  <sodipodi:namedview
+       id="namedview1"
+       pagecolor="#ffffff"
+       bordercolor="#666666"
+       borderopacity="1"
+       inkscape:pageshadow="2"
+       inkscape:pageopacity="0"
+       inkscape:pagecheckerboard="0"
+       inkscape:deskcolor="#d1d1d1" />
+
+  <defs id="defs1" />
+
+  <!-- Main layer -->
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+
+    <!-- Outer circle (drawn as a path of arcs) -->
+    <path
+      id="outerCircle"
+      style="fill:none;stroke-width:1;stroke-dasharray:none;"
+      d="
+        M 16,1
+        A 15,15 0 0,1 31,16
+        A 15,15 0 0,1 16,31
+        A 15,15 0 0,1 1,16
+        A 15,15 0 0,1 16,1
+        Z
+      "
+      />
+
+    <!-- Each elliptical orbit is defined as a flattened ellipse (two arcs),
+         then rotated around the center (16,16). -->
+
+    <!-- First ellipse (rotation -30) -->
+    <path
+      id="orbit1"
+      style="fill:none;stroke-width:1;stroke-dasharray:none;"
+      transform="rotate(-30,16,16)"
+      d="
+        M 30.5,16
+        A 14.5,4 0 0,1 1.5,16
+        A 14.5,4 0 0,1 30.5,16
+        Z
+      "
+      />
+
+    <!-- Second ellipse (rotation -70) -->
+    <path
+      id="orbit2"
+      style="fill:none;stroke-width:1;stroke-dasharray:none;"
+      transform="rotate(-70,16,16)"
+      d="
+        M 30.5,16
+        A 14.5,4 0 0,1 1.5,16
+        A 14.5,4 0 0,1 30.5,16
+        Z
+      "
+      />
+
+    <!-- Third ellipse (rotation 10) -->
+    <path
+      id="orbit3"
+      style="fill:none;stroke-width:1;stroke-dasharray:none;"
+      transform="rotate(10,16,16)"
+      d="
+        M 30.5,16
+        A 14.5,4 0 0,1 1.5,16
+        A 14.5,4 0 0,1 30.5,16
+        Z
+      "
+      />
+
+    <!-- Fourth ellipse (rotation 50) -->
+    <path
+      id="orbit4"
+      style="fill:none;stroke-width:1;stroke-dasharray:none;"
+      transform="rotate(50,16,16)"
+      d="
+        M 30.5,16
+        A 14.5,4 0 0,1 1.5,16
+        A 14.5,4 0 0,1 30.5,16
+        Z
+      "
+      />
+
+  </g>
+</svg>
