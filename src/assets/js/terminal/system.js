@@ -35,7 +35,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpqgojy3ah.js
+// include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmps8capd3u.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -213,25 +213,25 @@ Module['FS_createPath']("/filesystem", "files", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/filesystem/file_system.cpp", "start": 0, "end": 7885}, {"filename": "/filesystem/file_system.h", "start": 7885, "end": 15964}, {"filename": "/filesystem/files/.DS_Store", "start": 15964, "end": 22112}, {"filename": "/filesystem/files/about_me.md", "start": 22112, "end": 24311}, {"filename": "/filesystem/files/cache.txt", "start": 24311, "end": 26128}, {"filename": "/filesystem/files/echo.txt", "start": 26128, "end": 27257}, {"filename": "/filesystem/files/files.cpp", "start": 27257, "end": 4895045}, {"filename": "/filesystem/files/files.h", "start": 4895045, "end": 4895642}, {"filename": "/filesystem/files/gcc.txt", "start": 4895642, "end": 4898327}, {"filename": "/filesystem/files/hiiii.jpeg", "start": 4898327, "end": 6178060}, {"filename": "/filesystem/files/hostname.txt", "start": 6178060, "end": 6179679}, {"filename": "/filesystem/files/its_a_me.jpeg", "start": 6179679, "end": 6871667}, {"filename": "/filesystem/files/log.txt", "start": 6871667, "end": 6873961}, {"filename": "/filesystem/files/ls.txt", "start": 6873961, "end": 6875110}, {"filename": "/filesystem/files/mel_cosplay_makeup.jpeg", "start": 6875110, "end": 7571150}, {"filename": "/filesystem/files/passwd.txt", "start": 7571150, "end": 7573259}, {"filename": "/filesystem/files/python3.txt", "start": 7573259, "end": 7575533}, {"filename": "/filesystem/files/resume.md", "start": 7575533, "end": 7580297}, {"filename": "/filesystem/files/shadow.txt", "start": 7580297, "end": 7583194}, {"filename": "/filesystem/files/tmp.txt", "start": 7583194, "end": 7585095}, {"filename": "/filesystem/initialize_spcy_fs.cpp", "start": 7585095, "end": 7590350}, {"filename": "/filesystem/initialize_spcy_fs.h", "start": 7590350, "end": 7590564}], "remote_package_size": 7590564});
+    loadPackage({"files": [{"filename": "/filesystem/file_system.cpp", "start": 0, "end": 7885}, {"filename": "/filesystem/file_system.h", "start": 7885, "end": 15964}, {"filename": "/filesystem/files/.DS_Store", "start": 15964, "end": 22112}, {"filename": "/filesystem/files/about_me.md", "start": 22112, "end": 24319}, {"filename": "/filesystem/files/cache.txt", "start": 24319, "end": 26136}, {"filename": "/filesystem/files/echo.txt", "start": 26136, "end": 27265}, {"filename": "/filesystem/files/files.cpp", "start": 27265, "end": 4895325}, {"filename": "/filesystem/files/files.h", "start": 4895325, "end": 4895922}, {"filename": "/filesystem/files/gcc.txt", "start": 4895922, "end": 4898607}, {"filename": "/filesystem/files/hiiii.jpeg", "start": 4898607, "end": 6178340}, {"filename": "/filesystem/files/hostname.txt", "start": 6178340, "end": 6179959}, {"filename": "/filesystem/files/its_a_me.jpeg", "start": 6179959, "end": 6871947}, {"filename": "/filesystem/files/log.txt", "start": 6871947, "end": 6874241}, {"filename": "/filesystem/files/ls.txt", "start": 6874241, "end": 6875390}, {"filename": "/filesystem/files/mel_cosplay_makeup.jpeg", "start": 6875390, "end": 7571430}, {"filename": "/filesystem/files/passwd.txt", "start": 7571430, "end": 7573539}, {"filename": "/filesystem/files/python3.txt", "start": 7573539, "end": 7575813}, {"filename": "/filesystem/files/resume.md", "start": 7575813, "end": 7580661}, {"filename": "/filesystem/files/shadow.txt", "start": 7580661, "end": 7583558}, {"filename": "/filesystem/files/tmp.txt", "start": 7583558, "end": 7585459}, {"filename": "/filesystem/initialize_spcy_fs.cpp", "start": 7585459, "end": 7590714}, {"filename": "/filesystem/initialize_spcy_fs.h", "start": 7590714, "end": 7590928}], "remote_package_size": 7590928});
 
   })();
 
-// end include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpqgojy3ah.js
-// include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpk3y67dfl.js
+// end include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmps8capd3u.js
+// include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpk6dyn0pm.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpk3y67dfl.js
-// include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpso3cg8z8.js
+  // end include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpk6dyn0pm.js
+// include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpd0hsnr9y.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpso3cg8z8.js
+  // end include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpd0hsnr9y.js
 
 
 // Sometimes an existing Module object exists with properties

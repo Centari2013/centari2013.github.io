@@ -36,10 +36,10 @@ Programming: Python, JavaScript, Rust, C++, SQL, NoSQLBackend: PostgreSQL, REST,
 ## EXPERIENCE  
 
 ### Technical Assistant  
-**Toothpik** | Remote (Jan 2024 – Present)  
-- Contributed to AI model training and dataset curation to support sustainable waste management initiatives.  
-- Assisted in developing pilot programs focused on sustainability innovation, refining workflows in cross-functional teams.  
-- Gained hands-on experience with AI tools, data analysis, and strategies for applying machine learning in environmental technology.  
+**Toothpik** | Remote (Jan 2024 – Present)   
+- Designed and led the machine learning workflow for trash classification using Roboflow, including dataset curation, augmentation, and model training.
+- Advised the CEO on tech stack decisions—explaining limitations, feasibility, and startup-ready options like native vs. web apps and scalable infrastructure.
+- Set the foundation for MVP development by translating complex AI concepts into actionable, low-cost strategies for a sustainable prototype.
 
 ### Payment Operations Analyst  
 **Digitech Sarnova** | Miami Lakes, FL (Jul 2021 - Feb 2024)  
