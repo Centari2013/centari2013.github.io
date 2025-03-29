@@ -35,8 +35,8 @@ Programming: Python, JavaScript, Rust, C++, SQL, NoSQLBackend: PostgreSQL, REST,
 
 ## EXPERIENCE  
 
-### Technical Assistant  
-**Toothpik** | Remote (Jan 2024 – Present)   
+### Lead Software Developer  
+**Toothpik (Startup)** | Remote (Jan 2024 – Present)   
 - Designed and led the machine learning workflow for trash classification using Roboflow, including dataset curation, augmentation, and model training.
 - Advised the CEO on tech stack decisions—explaining limitations, feasibility, and startup-ready options like native vs. web apps and scalable infrastructure.
 - Set the foundation for MVP development by translating complex AI concepts into actionable, low-cost strategies for a sustainable prototype.
