@@ -3,7 +3,7 @@
 Welcome to **SpicyOS :chili:**, my interactive portfolio and a showcase of creativity, technical skill, and problem-solving. My name is Zaria, and I'm excited to share my journey and work with you.
 
 ## Who Am I? :woman_technologist:
-- A **backend developer** with a love for bold design and innovative technology.
+- A **developer** with a love for fun!
 - A creative thinker with a background in **CompSci, InfoTech, Crime Scene Investigation** and a passion for blending creativity with engineering.
 - An organized and detail-oriented professional who loves crafting functional and visually appealing solutions.
 
@@ -15,7 +15,7 @@ Welcome to **SpicyOS :chili:**, my interactive portfolio and a showcase of creat
 - Interactive and responsive design with cyberpunk-inspired visuals.
 - A demonstration of technical expertise and attention to user experience.
 
-This project reflects my dedication to creating engaging, innovative systems that are as enjoyable to use as they are technically sound.
+This project reflects my dedication to creating engaging, innovative systems that are as enjoyable to use as they are technically sound. This is all built in Vue.js, Tailwind 3, and C++!
 
 ---
 
