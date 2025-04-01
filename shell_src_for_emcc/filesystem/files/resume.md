@@ -3,81 +3,80 @@
 Miami Gardens, FL  
 [zaria.burton2000@gmail.com](mailto:zaria.burton2000@gmail.com)  
 [linkedin.com/in/zariaburton](https://linkedin.com/in/zariaburton)  
-[github.com/Centari2013](https://github.com/Centari2013)
+[centari2013.github.io](https://centari2013.github.io)  
 
 ---
 
-## OBJECTIVE  
-Software developer with experience in backend development, database management, and UI/UX design. Strong
-problem-solving skills and a passion for building scalable, efficient systems. Seeking a role in software development
-to contribute technical expertise and creative solutions.
+## Summary  
+Software developer with a sharp backend focus, deep database knowledge, and a portfolio of unconventional, high-impact builds—from interactive OS mockups to custom APIs and system tools. Adept in Python, JavaScript, PostgreSQL, Vue, and GraphQL. Skilled at turning complexity into functional, scalable solutions. Looking for remote roles where real code matters more than performative fluff.
 
 ---
 
-## EDUCATION  
-
-**Master of Information Technology**  
-Florida State University (Expected May 2026)  
-Relevant Coursework: Data Mining & Analytics, Advanced Web Development, Information Architecture, Information Behavior  
-
-**Bachelor of Computer Science**  
-Florida State University (2019 - 2023)  
-Minor in Crime Scene Investigation  
-- Member of Google Student Developer Club  
-- Member of WiCS  
+## Skills  
+**Languages**: Python, JavaScript, Rust, C++, SQL  
+**Frameworks**: Vue.js, Pinia, Vite, Emscripten  
+**Backend**: PostgreSQL, REST APIs, GraphQL, NoSQL  
+**Tooling**: Git, Unix/Linux, Roboflow, Figma  
+**Core Competencies**: API design, database performance tuning, scalable system design  
 
 ---
 
-## SKILLS  
-Programming: Python, JavaScript, Rust, C++, SQL, NoSQLBackend: PostgreSQL, REST, GraphQL, Emscripten, Unix/Linux, GitFrontend: Vue.js, Pinia, Vite, Figma, UI/UX DesignOther: Database Indexing, Query Optimization, Data Warehousing, Performance Tuning
+## Projects  
+
+- **SpicyOS - Cyberpunk Portfolio Operating System**  
+  Interactive web-based OS built with Vue.js, Pinia, and Emscripten/C++. Features a terminal (PyroShell), custom file manager, and GitHub-linked project viewer. Designed for showcasing technical depth in a dynamic, immersive UI. Deployed via GitHub Pages.
+
+- **Project F-SEA - Structured Data Access Platform**  
+  Built a relational data access system over PostgreSQL with a custom search engine using Python and GraphQL. Emphasized schema design, indexing, and efficient retrieval. Designed to serve as the backend for a live information-based site.
+
+- **Polling API + Discord Bot**  
+  Led API and bot integration for a polling web app using Rust. Designed data flow, implemented database optimizations, and enhanced bot responsiveness. Oversaw technical direction for a remote team of five.
+
+- **Jacque - Talking Arduino Skull**  
+  Servo-controlled mechanical skull that syncs speech audio with jaw movement. Programmed audio playback using DFPlayer Mini and C, and designed structural components for smooth actuation. Focused on embedded systems and physical interaction.
 
 ---
 
-## EXPERIENCE  
+## Experience  
 
 ### Lead Software Developer  
-**Toothpik (Startup)** | Remote (Jan 2024 – Present)   
-- Designed and led the machine learning workflow for trash classification using Roboflow, including dataset curation, augmentation, and model training.
-- Advised the CEO on tech stack decisions—explaining limitations, feasibility, and startup-ready options like native vs. web apps and scalable infrastructure.
-- Set the foundation for MVP development by translating complex AI concepts into actionable, low-cost strategies for a sustainable prototype.
+**Toothpik (Startup)** | Remote  
+*Jan 2025 - Present*  
+- Built the ML pipeline for trash classification using Roboflow; handled dataset curation, training, and augmentation.  
+- Translated complex AI concepts into startup-ready dev plans; advised CEO on technical feasibility and infrastructure scaling.  
+- Scoped and kicked off MVP features, balancing speed, cost, and future scalability.
 
 ### Payment Operations Analyst  
-**Digitech Sarnova** | Miami Lakes, FL (Jul 2021 - Feb 2024)  
-- Automated billing processes with Python-based document generators, reducing errors by 50% and improving payment collection.  
-- Developed SQL-driven financial reports to track payment success rates and ensure data integrity.  
-- Streamlined billing workflows, improving team efficiency and process transparency.  
+**Digitech Sarnova** | Miami Lakes, FL  
+*Jul 2021 - Feb 2024*  
+- Automated invoice processing via Python, reducing manual errors by 50%.  
+- Created SQL reports to audit payment performance and ensure financial data accuracy.  
+- Optimized billing workflows to cut down processing time and increase transparency.
 
 ### Client Solutions Specialist  
-**Florida Department of Children and Families** | Miami Gardens, FL (May 2020 - Aug 2020)  
-- Provided client support for federal assistance programs, resolving 98% of issues via email and phone.  
-- Enhanced EBT portal UX by troubleshooting issues and providing feedback to development teams.  
-- Assisted in COVID-19 task force initiatives, improving client access to critical resources.  
+**Florida Department of Children and Families** | Miami Gardens, FL  
+*May 2020 - Aug 2020*  
+- Resolved 98% of client support requests for federal benefits programs.  
+- Provided UX feedback for EBT access portal to reduce login failures and increase access reliability.  
+- Supported COVID-19 aid response and outreach initiatives.
 
 ### Front Desk Volunteer  
-**Susan B. Anthony Recovery Center** | Pembroke Pines, FL (Aug 2015 – Jun 2019)  
-- Managed administrative tasks, scheduling, and client interactions in a high-paced recovery center.  
-- Ensured accurate record-keeping and maintained confidentiality in client documentation.  
-- Developed strong customer service and multitasking skills while supporting individuals in recovery.  
+**Susan B. Anthony Recovery Center** | Pembroke Pines, FL  
+*Aug 2015 - Jun 2019*  
+- Handled client coordination and appointment scheduling in a clinical recovery setting.  
+- Maintained confidential documentation and streamlined front desk systems.  
+- Built early communication, multitasking, and triage skills.
 
 ---
 
-## PROJECTS  
+## Education  
 
-- **SpicyOS - Interactive Portfolio Operating System (personal) <-- You are here!**  
-  Designed and developed a cyberpunk-themed fake operating system to showcase programming projects. Built a custom file system and terminal (PyroShell) using Emscripten/C++. Implemented interactive UI elements with Vue.js, Pinia, and Vite. Integrated a project viewer for seamless navigation and deployed on GitHub Pages. *(Current)*  
+**Master of Information Technology**  
+Florida State University *(Expected May 2026)*  
+Relevant Coursework: Data Mining & Analytics, Advanced Web Development, Information Architecture, Information Behavior
 
-- **Project F-SEA (Database Access and Management System) (personal)**  
-  Designed and implemented a secure, relational database system using Python, JavaScript, GraphQL, and PostgreSQL. Developed a custom search engine for efficient data retrieval and employed advanced database management techniques to ensure robust data integrity and user-friendly access. *(Current)*  
-
-- **Backend API Development for Polling Website and Discord Bot**  
-  Led a team of five to develop a backend API and a Discord bot for a polling website using Rust. Integrated the bot seamlessly, improving user engagement and optimizing database design for scalability and security. *(Aug 2023 - Dec 2023)*  
-
-- **Talking Arduino Skull (Jacque)**  
-  Programmed servo-driven jaw movements synchronized with audio for realistic speech illusion. Integrated audio playback via DFPlayer Mini and designed a custom mechanical structure for seamless operation. *(Sep 2023 - Oct 2023)*  
-
-- **MIT XV6 Customized OS in C (coursework)**  
-  Enhanced the MIT XV6 Unix-based operating system by developing a process scheduling algorithm and a new shell for Unix command execution as part of an advanced OS course. *(Sep 2022 - Dec 2022)*  
-
-- **Maze-Solving AI (coursework)**  
-  Developed a maze-solving AI using Python to demonstrate reinforcement learning algorithm applications. *(Jan 2022 - May 2022)*  
-
+**Bachelor of Computer Science**  
+Florida State University *(2019 - 2023)*  
+Minor in Crime Scene Investigation  
+- Member of Google Student Developer Club  
+- Member of WiCS
