@@ -16,8 +16,7 @@
 export default {
   data() {
     return {
-      currentUrl: "https://centari2013.github.io/",
-      FSEA: "https://centari2013.github.io/FSEA/",
+      currentUrl: "https://centari2013.github.io/SoundRoom",
     }
   },
   methods: {
