@@ -23,6 +23,10 @@ Software developer with a sharp backend focus, deep database knowledge, and a po
 
 ## Projects  
 
+- **[SoundRoom - Spatial Audio Study Environment](https://centari2013.github.io/SoundRoom)**
+Built an immersive 3D sound management tool in Vue with Web Audio API and Konva. Features draggable directional sound sources, listener cone filtering, and a preview-based library system. Architected core audio engine with global gain control, dynamic canvas rendering, and modular state management.
+
+
 - **SpicyOS - Cyberpunk Portfolio Operating System**  
   Interactive web-based OS built with Vue.js, Pinia, and Emscripten/C++. Features a terminal (PyroShell), custom file manager, and GitHub-linked project viewer. Designed for showcasing technical depth in a dynamic, immersive UI. Deployed via GitHub Pages.
 
