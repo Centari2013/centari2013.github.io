@@ -8,7 +8,7 @@ Miami Gardens, FL
 ---
 
 ## Summary  
-Software developer with a sharp backend focus, deep database knowledge, and a portfolio of unconventional, high-impact builds—from interactive OS mockups to custom APIs and system tools. Adept in Python, JavaScript, PostgreSQL, Vue, and GraphQL. Skilled at turning complexity into functional, scalable solutions. Looking for remote roles where real code matters more than performative fluff.
+Software developer with a sharp backend focus, deep database knowledge, and a portfolio of unconventional, high-impact builds-from interactive OS mockups to custom APIs and system tools. Adept in Python, JavaScript, PostgreSQL, Vue, and GraphQL. Skilled at turning complexity into functional, scalable solutions. Looking for remote roles where real code matters more than performative fluff.
 
 ---
 
