@@ -97,4 +97,13 @@ button:focus-visible {
   @apply h-full w-full p-2 !important;
 }
 
+.page-content h2 {
+  @apply text-xl font-bold text-primary-base mt-6 mb-2 border-b border-primary-base;
+}
+
+.page-content h3 {
+  @apply text-lg font-semibold text-primary-base mt-4 mb-1;
+}
+
+
 

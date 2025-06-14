@@ -77,19 +77,24 @@ export default {
 
   // Emoji options for marked
   const emojiOptions = {
-    emojis: {
-      "star": "🌟",
-      "chili": "🌶️",
-      "laptop": "💻",
-      "rainbow": "🌈",
-      "briefcase": "💼",
-      "woman_technologist": "👩🏽‍💻",
-      "heart": "❤️",
-      "tada": "🎉",
-      // Add more emoji shortcuts here if needed
-    },
-    renderer: (token) => token.emoji, // Render emojis directly
-  };
+  emojis: {
+    "star": "🌟",
+    "chili": "🌶️",
+    "laptop": "💻",
+    "rainbow": "🌈",
+    "briefcase": "💼",
+    "woman_technologist": "👩🏽‍💻",
+    "heart": "❤️",
+    "tada": "🎉",
+    // add new ones from README
+    "arrow_right": "➡️",
+    "computer": "🖥️",
+    "mag": "🔍",
+    "handshake": "🤝"
+  },
+  renderer: (token) => token.emoji,
+};
+
 
   // Apply emoji options (only once)
   if (!marked.extensions?.emojiApplied) {
@@ -148,7 +153,19 @@ export default {
   @apply text-red-500 font-bold; /* Styling for unsupported file types */
 }
 
-/* Optional: Add responsive behavior */
+.page-content ul {
+  @apply list-disc pl-6 mb-4;
+}
+
+.page-content ol {
+  @apply list-decimal pl-6 mb-4;
+}
+
+.page-content li {
+  @apply mb-1;
+}
+
+
 @media (max-width: 768px) {
   .image-preview {
     @apply max-w-full max-h-[80vh]; /* Adjust image size for smaller screens */

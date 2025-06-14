@@ -4,12 +4,15 @@
     <div class="sidebar">
       <h2 class="sidebar-title">Directories</h2>
       <ul>
-        <li class="sidebar-item" @click="chdir(home_ptr)">Home</li>
-        <li class="sidebar-item" @click="chdir(desktop_ptr)">Desktop</li>
-        <li class="sidebar-item" @click="chdir(downloads_ptr)">Downloads</li>
-        <li class="sidebar-item" @click="chdir(documents_ptr)">Documents</li>
-        <li class="sidebar-item" @click="chdir(pictures_ptr)">Pictures</li>
-        <li class="sidebar-item" @click="chdir(root_ptr)">Root</li>
+        <li
+          v-for="dir in sidebarDirs"
+          :key="dir.name"
+          class="sidebar-item"
+          :class="{ 'selected-sidebar-item': activePtr === dir.ptr }"
+          @click="chdir(toRaw(dir.ptr))"
+        >
+          {{ dir.name }}
+        </li>
       </ul>
     </div>
 
@@ -72,6 +75,7 @@ setup() {
     const disableBack = ref(true);
     const disableForward = ref(true);
     const directoryTitle = ref("Directory");
+    const activePtr = ref(null);
 
     // Fetch directory contents
     const getDirContents = () => {
@@ -89,6 +93,7 @@ setup() {
     // Navigation methods
     const chdir = (item) => {
       SystemModule.cd(item);
+      activePtr.value = item; // <-- track current ptr
       contents.value = getDirContents();
       syncButtonState();
     };
@@ -122,8 +127,10 @@ setup() {
     // On mounted, initialize contents and button states
     onMounted(() => {
       contents.value = getDirContents();
+      activePtr.value = SystemModule.get_cur_fs_dir(); // Set current dir on load
       syncButtonState();
     });
+
 
     const downloads_ptr = SystemModule.get_downloads_dir_ptr();
     const home_ptr = SystemModule.get_home_dir_ptr();
@@ -131,6 +138,15 @@ setup() {
     const pictures_ptr = SystemModule.get_pictures_dir_ptr();
     const desktop_ptr = SystemModule.get_desktop_dir_ptr();
     const root_ptr = SystemModule.get_root_dir_ptr();
+
+    const sidebarDirs = ref([
+    { name: "Home", ptr: home_ptr },
+    { name: "Desktop", ptr: desktop_ptr },
+    { name: "Downloads", ptr: downloads_ptr },
+    { name: "Documents", ptr: documents_ptr },
+    { name: "Pictures", ptr: pictures_ptr },
+    { name: "Root", ptr: root_ptr }
+    ]);
 
     return {
       contents,
@@ -147,7 +163,9 @@ setup() {
       root_ptr,
       desktop_ptr,
       directoryTitle,
-      toRaw
+      toRaw,
+      sidebarDirs,
+      activePtr
     };
   },
 };
@@ -199,6 +217,10 @@ setup() {
 
 .sidebar-item {
   @apply hover:bg-primary-shadow p-2 rounded cursor-pointer text-primary-accent-light;
+}
+
+.selected-sidebar-item {
+  @apply bg-primary-shadow font-bold;
 }
 
 .file-content {
