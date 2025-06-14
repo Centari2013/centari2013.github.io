@@ -5,7 +5,7 @@ OUTPUT_DIR=".."
 DEST_DIR="../src/assets/js/terminal/"
 
 # Create necessary base64 data
- /usr/bin/python3 /Users/spicykneecaps/Projects/centari2013.github.io/shell_src_for_emcc/encoders/to_base64.py
+ /usr/bin/python3 ./encoders/to_base64.py
 
 # Make sure the output directory exists
 mkdir -p $OUTPUT_DIR
