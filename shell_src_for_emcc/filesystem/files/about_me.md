@@ -1,39 +1,53 @@
-# About Me :star:
+# Welcome to SpicyOS :chili:
 
-Welcome to **SpicyOS :chili:**, my interactive portfolio and a showcase of creativity, technical skill, and problem-solving. My name is Zaria, and I'm excited to share my journey and work with you.
-
-## Who Am I? :woman_technologist:
-- A **developer** with a love for fun!
-- A creative thinker with a background in **CompSci, InfoTech, Crime Scene Investigation** and a passion for blending creativity with engineering.
-- An organized and detail-oriented professional who loves crafting functional and visually appealing solutions.
+This isn't just a portfolio. It's a custom-built, cyberpunk-themed operating system interface in your browser. I'm **Zaria**, welcome to my world!
 
 ---
 
-## What is SpicyOS? :chili:
-**SpicyOS** is not your typical portfolio-it's an immersive experience that showcases:
-- **A custom-built operating system interface**, featuring functional apps like a file manager and terminal.
-- Interactive and responsive design with cyberpunk-inspired visuals.
-- A demonstration of technical expertise and attention to user experience.
+## :woman_technologist: About Me
 
-This project reflects my dedication to creating engaging, innovative systems that are as enjoyable to use as they are technically sound. This is all built in Vue.js, Tailwind 3, and C++!
+- Full Stack Developer with a CompSci brain and an artist's eye (or at least I try haha).  
+- Academic background in **Computer Science**, **Information Technology**, and **Crime Scene Investigation** (very fun stuff).    
+- Enthused by fun UIs, file structures, and turning weird ideas into working code.
 
 ---
 
-## Highlights :rainbow:
-- **Strong technical foundation**: My expertise includes back-end development, database design, and building efficient systems.
-- **Attention to detail**: I prioritize clean, maintainable code and polished user interfaces. (Code cleanup is currently under way. Sometimes deadlines mean a little mess haha!)
-- **Creative problem-solver**: I enjoy tackling challenges with innovative solutions, ensuring functionality and design go hand in hand.
+## :computer: What is SpicyOS?
+
+**SpicyOS** is a fake desktop environment I built as my portfolio because standard websites were putting me to sleep. This thing includes:
+
+- A working **terminal** inspired by POSIX shells  
+- A **file system** and window manager built in Vue  
+- Backend logic compiled from **C++ to WebAssembly** via Emscripten  
+- Animations, sound effects, and actual structure under the surface
+
+Everything is handcrafted in **Vue 3**, **Tailwind CSS v4**, **GSAP**, and **C++**.
+
+### Why C++??
+- I am paying homage to my technical roots. I was raised in the jungle of low-level code and therefore I embrace the grit.
 
 ---
 
-## Why Work With Me? :briefcase:
-I bring a unique perspective to every project, combining creativity with technical know-how. Here's what you can expect:
-- An eye for design, with a focus on creating seamless user experiences.
-- A solid technical background, ensuring robust and efficient solutions.
-- A collaborative and results-driven mindset, with a passion for learning and growth.
+## :mag: Highlights
+
+- **Technical Depth** - Not just UI. There's WASM, shell parsing, canvas drawing, and performance logic under the hood. A truly fun and beautiful headache!
+- **Design Obsession** - I care about layout, responsiveness, and motion. You'll feel it.  
+- **Real Systems Thinking** - I treat this like an OS, not a site. Files matter. State matters. Architecture matters.  
+- **Messy on Purpose** - Codebase cleanup is ongoing. Prioritized features and concept over perfection.
 
 ---
 
-Feel free to explore **SpicyOS**, and if you are interested in collaborating or have any questions, I'd love to hear from you. Let's build something amazing together! 
+## :handshake: Why Work With Me?
 
-P.S. You can find my resume in the documents folder! 
+- I take pride in the work *under* the visual. If it looks good, it also runs well.  
+- I'm fluent in both low-level and high-level thinking: from shell commands to component trees.  
+- I don't build projects because I *can*. I build them because I *can't not* (my ideas will eat me alive otherwise).
+
+---
+
+Explore the desktop, open the apps, dig through the folders.  
+If you're curious or interested in working together - I'm always open to real conversations.
+
+P.S. My resume lives in the `Documents` folder if you're interested.
+
+Feel free to reach me here: [zaria.burton2000@gmail.com](mailto:zaria.burton2000@gmail.com)

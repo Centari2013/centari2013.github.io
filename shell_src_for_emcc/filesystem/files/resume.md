@@ -3,73 +3,64 @@
 Miami Gardens, FL  
 [zaria.burton2000@gmail.com](mailto:zaria.burton2000@gmail.com)  
 [linkedin.com/in/zariaburton](https://linkedin.com/in/zariaburton)  
-[centari2013.github.io](https://centari2013.github.io)  
+[github.com/centari2013](https://github.com/centari2013)  
 
 ---
 
 ## Summary  
-Software developer with a sharp backend focus, deep database knowledge, and a portfolio of unconventional, high-impact builds-from interactive OS mockups to custom APIs and system tools. Adept in Python, JavaScript, PostgreSQL, Vue, and GraphQL. Skilled at turning complexity into functional, scalable solutions. Looking for remote roles where real code matters more than performative fluff.
+Full Stack Engineer with expertise in modern JavaScript and Vue, delivering scalable web applications that integrate robust front-end designs with efficient backend solutions. Demonstrates proficiency in transforming complex requirements into high-performance, maintainable components while optimizing user experience and operational workflows. Experienced in API design and responsive development, ensuring reliable, cross-browser solutions.
 
 ---
 
 ## Skills  
 **Languages**: Python, JavaScript, Rust, C++, SQL  
 **Frameworks**: Vue.js, Pinia, Vite, Emscripten  
-**Backend**: PostgreSQL, REST APIs, GraphQL, NoSQL  
-**Tooling**: Git, Unix/Linux, Roboflow, Figma  
-**Core Competencies**: API design, database performance tuning, scalable system design  
-
----
-
-## Projects  
-
-- **[SoundRoom - Spatial Audio Study Environment](https://centari2013.github.io/SoundRoom)**
-Built an immersive 3D sound management tool in Vue with Web Audio API and Konva. Features draggable directional sound sources, listener cone filtering, and a preview-based library system. Architected core audio engine with global gain control, dynamic canvas rendering, and modular state management.
-
-
-- **SpicyOS - Cyberpunk Portfolio Operating System**  
-  Interactive web-based OS built with Vue.js, Pinia, and Emscripten/C++. Features a terminal (PyroShell), custom file manager, and GitHub-linked project viewer. Designed for showcasing technical depth in a dynamic, immersive UI. Deployed via GitHub Pages.
-
-- **Project F-SEA - Structured Data Access Platform**  
-  Built a relational data access system over PostgreSQL with a custom search engine using Python and GraphQL. Emphasized schema design, indexing, and efficient retrieval. Designed to serve as the backend for a live information-based site.
-
-- **Polling API + Discord Bot**  
-  Led API and bot integration for a polling web app using Rust. Designed data flow, implemented database optimizations, and enhanced bot responsiveness. Oversaw technical direction for a remote team of five.
-
-- **Jacque - Talking Arduino Skull**  
-  Servo-controlled mechanical skull that syncs speech audio with jaw movement. Programmed audio playback using DFPlayer Mini and C, and designed structural components for smooth actuation. Focused on embedded systems and physical interaction.
+**Backend**: REST APIs, GraphQL, PostgreSQL, NoSQL  
+**Frontend**: HTML5, CSS3, responsive design, state management  
+**Tools**: Git, Unix/Linux, Roboflow, Figma, build tools  
+**Core Competencies**: API design, database tuning, scalable systems, information architecture, team management, Agile
 
 ---
 
 ## Experience  
 
-### Lead Software Developer  
+### Founding Contract Developer (MVP Build)  
 **Toothpik (Startup)** | Remote  
-*Jan 2025 - Present*  
-- Built the ML pipeline for trash classification using Roboflow; handled dataset curation, training, and augmentation.  
-- Translated complex AI concepts into startup-ready dev plans; advised CEO on technical feasibility and infrastructure scaling.  
-- Scoped and kicked off MVP features, balancing speed, cost, and future scalability.
+*Jan 2025 – Apr 2025*  
+- Engineered ML pipeline for trash classification using Roboflow; handled dataset curation, training, and augmentation.  
+- Developed scalable backend for image uploads, classification, and admin tools with optimized API integration.  
+- Delivered handoff-ready MVP and advised CEO on infrastructure scaling and technical feasibility.
 
 ### Payment Operations Analyst  
 **Digitech Sarnova** | Miami Lakes, FL  
-*Jul 2021 - Feb 2024*  
-- Automated invoice processing via Python, reducing manual errors by 50%.  
-- Created SQL reports to audit payment performance and ensure financial data accuracy.  
-- Optimized billing workflows to cut down processing time and increase transparency.
+*Jul 2021 – Feb 2024*  
+- Automated payment reconciliation using Python with data validation for scalable and responsive web applications.  
+- Created SQL audit tools to track billing issues and support RESTful API workflows.  
+- Optimized financial data pipelines, improving transparency and performance.
 
-### Client Solutions Specialist  
-**Florida Department of Children and Families** | Miami Gardens, FL  
-*May 2020 - Aug 2020*  
-- Resolved 98% of client support requests for federal benefits programs.  
-- Provided UX feedback for EBT access portal to reduce login failures and increase access reliability.  
-- Supported COVID-19 aid response and outreach initiatives.
+---
 
-### Front Desk Volunteer  
-**Susan B. Anthony Recovery Center** | Pembroke Pines, FL  
-*Aug 2015 - Jun 2019*  
-- Handled client coordination and appointment scheduling in a clinical recovery setting.  
-- Maintained confidential documentation and streamlined front desk systems.  
-- Built early communication, multitasking, and triage skills.
+## Projects  
+
+- **[SoundRoom – Spatial Audio Study Environment](https://centari2013.github.io/SoundRoom)**  
+  Vue + Web Audio API platform with 3D sound emitters, gain control, and modular canvas rendering.  
+  Supports directional filtering, draggable sound objects, and interactive preview.
+
+- **SpicyOS – Cyberpunk Portfolio Operating System (you are here!)**  
+  Web-based interactive OS portfolio using Vue, Pinia, and Emscripten/C++.  
+  Includes live terminal, file system, and plans for GitHub project integration.
+
+- **Project F-SEA – Structured Data Access Platform**  
+  Schema-first backend with PostgreSQL, GraphQL, and Python.  
+  Indexed data platform designed for fast, queryable access and live data-driven applications.
+
+- **Polling API + Discord Bot (Rust)**  
+  Built real-time polling system with Rust; led API development and event-driven backend.  
+  Managed code quality and team contributions for distributed contributors.
+
+- **Jacque – Talking Arduino Skull**  
+  Embedded system syncing audio with servo actuation; used DFPlayer Mini (C).  
+  Focused on timing logic, physical computing, and expressive motion.
 
 ---
 
@@ -77,10 +68,11 @@ Built an immersive 3D sound management tool in Vue with Web Audio API and Konva.
 
 **Master of Information Technology**  
 Florida State University *(Expected May 2026)*  
-Relevant Coursework: Data Mining & Analytics, Advanced Web Development, Information Architecture, Information Behavior
+- Google Student Developer Club  
+- Women in Computer Science  
+- Coursework: Data Mining & Analytics, Advanced Web Development, Information Architecture, Information Behavior
 
 **Bachelor of Computer Science**  
-Florida State University *(2019 - 2023)*  
-Minor in Crime Scene Investigation  
-- Member of Google Student Developer Club  
-- Member of WiCS
+Florida State University *(2019 – 2023)*  
+- Google Student Developer Club  
+- Women in Computer Science
