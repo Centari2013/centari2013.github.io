@@ -1,5 +1,13 @@
 # SpicyOS 🌶️💻
 
+![MIT License](https://img.shields.io/badge/License-MIT-green.svg)
+![Built with Vue](https://img.shields.io/badge/Built%20with-Vue%203-4fc08d?logo=vue.js&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Styled%20with-TailwindCSS-38bdf8?logo=tailwindcss&logoColor=white)
+![WebAssembly](https://img.shields.io/badge/Powered%20by-WebAssembly-654ff0?logo=webassembly&logoColor=white)
+![C++](https://img.shields.io/badge/Engineered%20in-C++-00599C?logo=c%2B%2B&logoColor=white)
+![Open Source Love](https://img.shields.io/badge/made%20with-strife%20💀-black)
+
+
 **SpicyOS** is a cyberpunk-inspired, fake operating system built entirely in the browser — serving as an unconventional developer portfolio and UI playground. It’s part terminal emulator, part desktop manager, part fever dream. Designed to break from the tired grid of “minimalist” portfolio sites, SpicyOS is fully interactive, highly stylized, and packed with hand-built components.
 
 ![SpicyOS Preview](https://github.com/user-attachments/assets/04156c32-4d07-4a04-aeee-f0080c815355)
