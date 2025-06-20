@@ -14,7 +14,7 @@
     }"
     ref="resizableWindow"
   >
-  <div id="n-resize" @mousedown="startResize($event, 'n')" @touchstart="startResize($event, 'n')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <div id="n-resize" @mousedown="startResize($event, 'n')" @touchstart="startResize($event, 'n')" :style="{ zIndex: `${zIndex + 1}`}"></div>
     <div id="nw-resize" @mousedown="startResize($event, 'nw')" @touchstart="startResize($event, 'nw')" :style="{ zIndex: `${zIndex + 1}`}"></div>
     <div id="ne-resize" @mousedown="startResize($event, 'ne')" @touchstart="startResize($event, 'ne')" :style="{ zIndex: `${zIndex + 1}`}"></div>
     <div id="sw-resize" @mousedown="startResize($event, 'sw')" @touchstart="startResize($event, 'sw')" :style="{ zIndex: `${zIndex + 1}`}"></div>
@@ -24,7 +24,7 @@
     <div id="s-resize" @mousedown="startResize($event, 's')" @touchstart="startResize($event, 's')" :style="{ zIndex: `${zIndex + 1}`}"></div>
 
     <!-- Vertical Title Bar -->
-    <div class="file_titlebar" @mousedown="startDrag" @touchstart="startDrag">
+    <div class="titlebar" @mousedown="startDrag" @touchstart="startDrag">
       <!-- Buttons Container -->
       <div class="button-container">
         <button class="titlebar-button" @click="closeApp">
@@ -284,7 +284,7 @@ export default {
   @apply absolute bottom-0 w-full h-1 cursor-ns-resize;
 }
 
-.file_titlebar {
+.titlebar {
   @apply flex flex-col pl-4 pr-3 pt-5 text-sm font-bold cursor-move select-none h-full w-20 ;
   @apply bg-primary-dark-base;
 }
