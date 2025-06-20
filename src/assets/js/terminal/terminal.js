@@ -1,22 +1,14 @@
 //terminal.js
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from '@xterm/addon-fit';
-import '@/assets/js/terminal/system';
 import "@xterm/xterm/css/xterm.css";
 
 // Function to initialize the terminal
 export function initializeTerminal(terminalContainer, parentWindow) {
     const term = terminalSetup(terminalContainer, parentWindow);
 
-    if (SystemModule) {
-        // Initialize the terminal in the Module object
-        SystemModule.set_terminal(term);
-    } else {
-        SystemModule.onRuntimeInitialized = () => {
-            console.log("SystemModule initialized!");
-            SystemModule.set_terminal(term); // Initialize terminal
-        };
-    }
+    SystemModule.set_terminal(term);
+  
 }
 
 function printIntro(art, terminal) {
