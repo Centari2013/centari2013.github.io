@@ -41,15 +41,15 @@
   </div>
 </template>
 <script>
-import Icon from './components/Icon.vue';
-import { useAppsStore } from './components/stores/apps';
-import Taskbar from './components/Taskbar.vue';
-import ContentWindow from './components/ContentWindow.vue';
-import FileWindow from './components/FileWindow.vue';
+import Icon from '@/components/Icon.vue';
+import { useAppsStore } from '@/components/stores/apps';
+import Taskbar from '@/components/Taskbar.vue';
+import ContentWindow from '@/components/ContentWindow.vue';
+import FileWindow from '@/components/FileWindow.vue';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
-import makeDirectoryItems from './components/utilities/makeDirectoryItems';
-import makeFileItems from './components/utilities/makeFileItems';
+import makeDirectoryItems from '@/components/utilities/makeDirectoryItems';
+import makeFileItems from '@/components/utilities/makeFileItems';
 
 export default {
   components: { Icon, Taskbar, ContentWindow, FileWindow },

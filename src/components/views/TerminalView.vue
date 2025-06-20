@@ -4,7 +4,7 @@
 </template>
 
 <script>
-import "../../assets/js/terminal/system.js"
+import "@/assets/js/terminal/system.js"
 import { initializeTerminal } from '../../assets/js/terminal/terminal.js';
 
 export default {

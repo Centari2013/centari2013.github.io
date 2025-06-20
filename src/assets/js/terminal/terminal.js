@@ -1,7 +1,7 @@
 //terminal.js
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from '@xterm/addon-fit';
-import './system';
+import '@/assets/js/terminal/system';
 import "@xterm/xterm/css/xterm.css";
 
 // Function to initialize the terminal

@@ -12,8 +12,8 @@
 </template>
 
 <script>
-import Icon from './Icon.vue';
-import { useAppsStore } from './stores/apps';
+import Icon from '@/components/Icon.vue';
+import { useAppsStore } from '@/components/stores/apps';
 import { computed } from 'vue';
 
 export default {

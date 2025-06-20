@@ -53,12 +53,12 @@
 </template>
 
 <script>
-import CloseIcon from "../assets/icons/close.svg";
-import MaximizeIcon from "../assets/icons/maximize.svg";
-import FileViewerView from "./views/FileViewerView.vue";
-import { useAppsStore } from "./stores/apps";
+import CloseIcon from "@/assets/icons/close.svg";
+import MaximizeIcon from "@/assets/icons/maximize.svg";
+import FileViewerView from "@/components/views/FileViewerView.vue";
+import { useAppsStore } from "@/components/stores/apps";
 import { gsap } from "gsap";
-import { startDrag, startResize } from "./utilities/dragAndResize";
+import { startDrag, startResize } from "@/components/utilities/dragAndResize";
 
 export default {
   components: { CloseIcon, MaximizeIcon, FileViewerView },

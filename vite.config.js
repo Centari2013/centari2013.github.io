@@ -13,5 +13,12 @@ export default defineConfig({
     wasm(),
     topLevelAwait(),
   ],
-    
+  resolve: {
+    alias: [
+      {
+        find: '@',
+        replacement: '/src'
+      },
+    ]
+  },
 })
