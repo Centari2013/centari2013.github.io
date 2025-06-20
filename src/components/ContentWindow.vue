@@ -54,10 +54,9 @@
 <script>
 import { defineAsyncComponent } from 'vue';
 
-//const TerminalView = defineAsyncComponent(() => import("./views/TerminalView.vue"));
-//const FileManagerView = defineAsyncComponent(() => import("./views/FileManagerView.vue"));
-import TerminalView from "./views/TerminalView.vue";
-import FileManagerView from "./views/FileManagerView.vue";
+const TerminalView = defineAsyncComponent(() => import("./views/TerminalView.vue"));
+const FileManagerView = defineAsyncComponent(() => import("./views/FileManagerView.vue"));
+
 import CloseIcon from "@/assets/icons/close.svg";
 import MinimizeIcon from "@/assets/icons/minimize.svg";
 import MaximizeIcon from "@/assets/icons/maximize.svg";
