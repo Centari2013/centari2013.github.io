@@ -9,24 +9,25 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.10",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
     "augmented-ui": "^2.0.0",
-    "autoprefixer": "^10.4.20",
-    "gsap": "^3.12.7",
-    "marked": "^15.0.6",
-    "marked-emoji": "^1.4.3",
-    "pinia": "^2.3.0",
-    "postcss-cli": "^11.0.0",
-    "tailwindcss": "^3.4.17",
-    "vite-plugin-top-level-await": "^1.4.4",
+    "autoprefixer": "^10.4.21",
+    "gsap": "^3.13.0",
+    "marked": "^15.0.12",
+    "marked-emoji": "^2.0.0",
+    "pinia": "^3.0.3",
+    "postcss-cli": "^11.0.1",
+    "tailwindcss": "^4.1.10",
+    "vite-plugin-top-level-await": "^1.5.0",
     "vite-plugin-wasm": "^3.4.1",
-    "vue": "^3.5.13"
+    "vue": "^3.5.17"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.1",
+    "@vitejs/plugin-vue": "^5.2.4",
     "rollup-plugin-visualizer": "^6.0.3",
-    "vite": "^6.0.6",
+    "vite": "^6.3.5",
     "vite-svg-loader": "^5.1.0"
   }
 }

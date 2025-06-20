@@ -117,6 +117,8 @@ export default {
 </script>
 
 <style>
+@reference '../../style.css';
+
 .doc-viewer {
   @apply w-full h-full flex flex-col items-center p-0; /* Container for all file previews */
 }

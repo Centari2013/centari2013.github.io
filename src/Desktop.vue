@@ -6,7 +6,6 @@
     <template v-for="app in openApps" :key="app.id">
         <ContentWindow
           ref="window"
-          class="fixed"
           :id="app.id"
           :initialPosition="getRandomPosition(app.id)"
           :minWidth="app.minWidth"
@@ -16,7 +15,6 @@
     <template v-for="file in openFiles" :key="file.item">
         <FileWindow
           ref="window"
-          class="fixed"
           :item="file.item"
           :title="file.item.name"
           :initialPosition="getRandomPosition(file.item)"
@@ -113,15 +111,17 @@ export default {
 
 
 <style scoped>
+@reference './style.css';
+
 .desktop {
   @apply flex flex-col items-center pb-5 justify-end align-middle;
-  @apply w-full h-full;
+  @apply w-full h-full relative;
 }
 
 #filespace {
-  @apply grid gap-4 h-full w-full p-3;
-  grid-template-columns: repeat(auto-fit, minmax(150px, max-content)); /* Adjust 150px as needed */
-  z-index: 0;
+  @apply absolute inset-0 z-0 grid gap-4 p-3;
+  grid-template-columns: repeat(auto-fit, minmax(150px, max-content));
+  pointer-events: auto; /* let clicks through to files */
 }
 
 .d :deep(path) {
@@ -156,8 +156,6 @@ export default {
 .file-item:hover::before {
   opacity: 0.1; /* Fade in on hover */
 }
-
-
 
 .file-info {
   @apply flex items-center justify-between;

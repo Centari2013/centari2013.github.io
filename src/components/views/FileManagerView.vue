@@ -172,6 +172,8 @@ setup() {
 </script>
 
 <style scoped>
+@reference '../../style.css';
+
 /* General File Viewer Styles */
 .navigation-buttons {
   @apply flex

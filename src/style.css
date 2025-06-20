@@ -1,8 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-@import "tailwindcss";
+@import 'tailwindcss' layer(utilities);
 
 @theme {
   /* Max Width */
@@ -20,7 +18,7 @@
   /* Primary Colors */
   --color-primary-base: #660f31;
   --color-primary-shadow: #450327;
-  --color-primary-bg: #835B86;
+  --color-primary-bg: #835b86;
   --color-primary-accent-light: #9c173b;
   --color-primary-accent-bright: #ff0546;
   --color-primary-dark-base: #270022;
@@ -35,9 +33,7 @@
   /* Accent Yellow */
   --color-accent-yellow-base: #fee801;
   --color-accent-yellow-shadow: #9c8e00;
-
 }
-
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;

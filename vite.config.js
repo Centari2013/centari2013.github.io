@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue'
 import svgLoader from 'vite-svg-loader'
 import topLevelAwait from 'vite-plugin-top-level-await'
 import { visualizer } from 'rollup-plugin-visualizer'
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ mode }) => {
   const isAnalyze = mode === 'analyze'
@@ -11,6 +12,7 @@ export default defineConfig(({ mode }) => {
   return {
     base: "/",
     plugins: [
+      tailwindcss(),
       vue(),
       svgLoader(),
       wasm(),

@@ -47,6 +47,7 @@ export default {
 </script>
 
 <style scoped>
+@reference '../style.css';
 
 .icon-svg {
   @apply justify-center cursor-pointer h-4/5 aspect-square; 
@@ -63,7 +64,7 @@ export default {
 }
 
 .taskbar {
-  @apply bg-primary-shadow bg-opacity-50;
+  @apply bg-primary-shadow/50;
   @apply flex items-center justify-center space-x-5;
   width: 90%;
   height: 12%;

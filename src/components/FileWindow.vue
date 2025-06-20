@@ -244,8 +244,10 @@ export default {
 </script>
 
 <style>
+@reference '../style.css';
+
 .file-window {
-  @apply flex overflow-hidden max-h-full max-w-full;
+  @apply flex overflow-hidden max-h-full max-w-full fixed;
   --aug-border-bg: #ff0546;
   --aug-border-opacity: 0.25;
 }
