@@ -2,6 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "tailwindcss";
+
+@theme {
+  /* Max Width */
+  --container-1\/4: 25%;
+  --container-1\/2: 50%;
+  --container-3\/4: 75%;
+  --container-full: 100%;
+
+  /* Max Height */
+  --spacing-1\/4: 25%;
+  --spacing-1\/2: 50%;
+  --spacing-3\/4: 75%;
+  --spacing-full: 100%;
+
+  /* Primary Colors */
+  --color-primary-base: #660f31;
+  --color-primary-shadow: #450327;
+  --color-primary-bg: #835B86;
+  --color-primary-accent-light: #9c173b;
+  --color-primary-accent-bright: #ff0546;
+  --color-primary-dark-base: #270022;
+  --color-primary-dark-shadow: #17001d;
+  --color-primary-dark-deep: #09010d;
+
+  /* Alerts */
+  --color-alerts-base: #0098db;
+  --color-alerts-accent: #0ce6f2;
+  --color-alerts-shadow: #1e579c;
+
+  /* Accent Yellow */
+  --color-accent-yellow-base: #fee801;
+  --color-accent-yellow-shadow: #9c8e00;
+
+}
+
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
