@@ -123,15 +123,15 @@ button:focus-visible {
 
 /* Custom CSS file */
 .xterm {
-  @apply w-full h-full pl-1 pt-1 pb-3 !important; /* Apply !important if necessary */
+  @apply w-full h-full pl-1 pt-1 pb-3; /* Apply !important if necessary */
 }
 
 .xterm-viewport {
-  @apply h-full overflow-scroll !important;
+  @apply h-full overflow-scroll;
 }
 
 .xterm-screen {
-  @apply h-full w-full p-2 !important;
+  @apply h-full w-full p-2;
 }
 
 .page-content h2 {
