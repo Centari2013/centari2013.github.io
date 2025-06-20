@@ -52,8 +52,6 @@
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue';
-
 import TerminalView from "@/components/views/TerminalView.vue";
 import FileManagerView from "@/components/views/FileManagerView.vue";
 import CloseIcon from "@/assets/icons/close.svg";
