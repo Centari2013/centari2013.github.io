@@ -43,12 +43,11 @@
 import Icon from '@/components/Icon.vue';
 import { useAppsStore } from '@/components/stores/apps';
 import Taskbar from '@/components/Taskbar.vue';
-import { defineAsyncComponent } from 'vue';
+import { ref, toRaw, defineAsyncComponent } from 'vue';
 
 const ContentWindow = defineAsyncComponent(() => import("@/components/ContentWindow.vue"));
 import FileWindow from '@/components/FileWindow.vue';
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
 import makeDirectoryItems from '@/components/utilities/makeDirectoryItems';
 import { makeFileItems, makeFileItem } from '@/components/utilities/makeFileItems';
 
@@ -93,8 +92,7 @@ export default {
       const appsStore = useAppsStore();
 
       if (item.is_shortcut) {
-        const target = item.object.get_target();
-        console.log(target)
+        const target = SystemModule.resolve_shortcut(toRaw(item.object));
         if (target) {
           appsStore.openFile(makeFileItem(target));
         } else {

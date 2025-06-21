@@ -75,6 +75,11 @@ FileSystem::Directory* get_desktop_dir_ptr() {
     return s.get_desktop_dir_ptr();
 }
 
+FileSystem::Directory::File* resolve_shortcut(FileSystem::Directory::File* f) {
+    return (f && f->is_shortcut) ? f->shortcut_target.lock().get() : nullptr;
+}
+
+
 // Expose the functions to JavaScript
 EMSCRIPTEN_BINDINGS(terminal) {
     emscripten::function("set_terminal", &set_terminal); // Expose set_terminal
@@ -116,5 +121,7 @@ EMSCRIPTEN_BINDINGS(file_manager) {
     emscripten::function("get_root_dir_ptr", &get_root_dir_ptr, emscripten::allow_raw_pointers());
     emscripten::function("get_documents_dir_ptr", &get_documents_dir_ptr, emscripten::allow_raw_pointers());
     emscripten::function("get_desktop_dir_ptr", &get_desktop_dir_ptr, emscripten::allow_raw_pointers());
+
+    emscripten::function("resolve_shortcut", &resolve_shortcut, emscripten::allow_raw_pointers());
     
 }

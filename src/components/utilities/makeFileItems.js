@@ -27,8 +27,6 @@ export function makeFileItem (f) {
         is_shortcut: f.is_shortcut
     };
 
-    console.log(file_object)
-
     return file_object;
 };
 

@@ -46,9 +46,7 @@ std::shared_ptr<FileSystem> create_spicy_linux_filesystem() {
     auto resume_shortcut = std::make_shared<FileSystem::Directory::File>("Resume", "shortcut");
     resume_shortcut->is_shortcut = true;
     resume_shortcut->shortcut_target = resume_ptr;
-    auto resume_ptr2 = std::make_shared<FileSystem::Directory::File>("Resume", "md", resume_md_data());
     user1_desktop->files.push_back(resume_shortcut);
-    user1_desktop->files.push_back(resume_ptr2);
     user1->directories.push_back(std::move(user1_desktop));
 
     auto user1_pictures = std::make_unique<FileSystem::Directory>("Pictures", user1.get());
