@@ -3,6 +3,7 @@
     @mousedown="handleClick"
     data-augmented-ui="tl-clip tr-clip bl-scoop-x both"
     class="base-window"
+    :class="{'opacity-75': opaque}"
     :style="{
       zIndex: `${zIndex}`,
       top: `${state.currentDimensions.position.top}px`,
@@ -37,7 +38,7 @@
           <MaximizeIcon class="task-icon" width="100%" height="100%"/>
         </button>
         <button class="titlebar-button">
-          <EyeClose @click="opaque = !opaque" class=" rotate-90 task-icon" v-if="!opaque"/>
+          <EyeClose @click="opaque = !opaque" class=" rotate-90 task-icon" v-if="opaque"/>
           <EyeOpen @click="opaque = !opaque" class="rotate-90 task-icon" v-else/>
         </button>
         <!-- Title -->
@@ -315,7 +316,7 @@ defineExpose({
 @reference '../style.css';
 
 .base-window {
-  @apply flex overflow-hidden opacity-75 max-h-full max-w-full fixed;
+  @apply flex overflow-hidden max-h-full max-w-full fixed;
   --aug-border-bg: #ff0546;
   --aug-border-opacity: 0.25;
 }
