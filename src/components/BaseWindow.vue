@@ -31,10 +31,14 @@
           <CloseIcon class="task-icon" width="100%" height="100%"/>
         </button>
         <button class="titlebar-button" @click="minimizeWindow" v-if="showMinimizeButton">
-          <MinimizeIcon class="task-icon" width="100%" height="100%"/>
+          <MinimizeIcon class="task-icon rotate-90" width="100%" height="100%"/>
         </button>
         <button class="titlebar-button" @click="maximizeWindow">
           <MaximizeIcon class="task-icon" width="100%" height="100%"/>
+        </button>
+        <button class="titlebar-button">
+          <EyeClose @click="opaque = !opaque" class=" rotate-90 task-icon" v-if="!opaque"/>
+          <EyeOpen @click="opaque = !opaque" class="rotate-90 task-icon" v-else/>
         </button>
         <!-- Title -->
         <span class="title-spacer"></span>
@@ -55,11 +59,15 @@
 import CloseIcon from "@/assets/icons/close.svg";
 import MinimizeIcon from "@/assets/icons/minimize.svg";
 import MaximizeIcon from "@/assets/icons/maximize.svg";
+import EyeClose from "@/assets/icons/eyeClose.svg"
+import EyeOpen from "@/assets/icons/eyeOpen.svg"
 
 import { ref, reactive, onMounted, useTemplateRef, onBeforeUnmount } from "vue";
 import { gsap } from "gsap";
 import { startResize, startDrag } from '@/components/utilities/dragAndResize.js'
 import BrowserView from "@/components/views/BrowserView.vue";
+
+const opaque = ref(false)
 
 const props = defineProps([
   'initialPosition',
@@ -374,6 +382,14 @@ defineExpose({
   white-space: nowrap;
 }
 
+.task-icon path,
+.task-icon circle,
+.task-icon line,
+.task-icon polyline,
+.task-icon polygon {
+  @apply stroke-primary-accent-light;
+}
+
 .task-icon path {
   @apply fill-primary-accent-light;
 }
@@ -382,12 +398,23 @@ defineExpose({
   filter: drop-shadow(0 0 1px #ff0546) drop-shadow(0 0 5px #ff0546);
 }
 
+
 .task-icon:hover {
   filter: drop-shadow(0 0 5px #0098db) drop-shadow(0 0 10px #0098db);
 }
-
+.task-icon:hover circle,
+.task-icon:hover line,
+.task-icon:hover polyline,
+.task-icon:hover polygon,
 .task-icon:hover path {
   @apply fill-alerts-base;
+}
+.task-icon:hover circle,
+.task-icon:hover line,
+.task-icon:hover polyline,
+.task-icon:hover polygon,
+.task-icon:hover path {
+  @apply stroke-alerts-base;
 }
 
 .resize {

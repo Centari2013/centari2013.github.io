@@ -1,0 +1,13 @@
+<!-- Eye with slash through it -->
+<svg
+  width="100%" height="100%"
+  viewBox="0 0 24 24"
+  fill="blsck"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M1 12c3-4 7-6 11-6s8 2 11 6c-3 4-7 6-11 6s-8-2-11-6z"/>
+  <path d="M3 3l18 18"/>
+</svg>
