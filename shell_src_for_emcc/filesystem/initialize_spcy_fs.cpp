@@ -31,7 +31,8 @@ std::shared_ptr<FileSystem> create_spicy_linux_filesystem() {
     auto user1 = std::make_unique<FileSystem::Directory>("SpicyKneecaps", home.get());
     auto user1_docs = std::make_unique<FileSystem::Directory>("Documents", user1.get());
     fs->set_documents_dir_ptr(user1_docs.get());
-    user1_docs->files.push_back(std::make_unique<FileSystem::Directory::File>("Resume", "md", resume_md_data()));
+    auto resume_ptr = std::make_shared<FileSystem::Directory::File>("Resume", "md", resume_md_data());
+    user1_docs->files.push_back(resume_ptr);
     user1->directories.push_back(std::move(user1_docs));
 
     auto user1_downloads = std::make_unique<FileSystem::Directory>("Downloads", user1.get());
@@ -42,7 +43,12 @@ std::shared_ptr<FileSystem> create_spicy_linux_filesystem() {
 
     auto user1_desktop = std::make_unique<FileSystem::Directory>("Desktop", user1.get());
     fs->set_desktop_dir_ptr(user1_desktop.get());
-    user1_desktop->files.push_back(std::make_unique<FileSystem::Directory::File>("README", "md", about_me_md_data()));
+    auto resume_shortcut = std::make_shared<FileSystem::Directory::File>("Resume", "shortcut");
+    resume_shortcut->is_shortcut = true;
+    resume_shortcut->shortcut_target = resume_ptr;
+    auto resume_ptr2 = std::make_shared<FileSystem::Directory::File>("Resume", "md", resume_md_data());
+    user1_desktop->files.push_back(resume_shortcut);
+    user1_desktop->files.push_back(resume_ptr2);
     user1->directories.push_back(std::move(user1_desktop));
 
     auto user1_pictures = std::make_unique<FileSystem::Directory>("Pictures", user1.get());

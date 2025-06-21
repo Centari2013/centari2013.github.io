@@ -46,6 +46,9 @@ public:
             std::string extension_abbr; /** File extension abbreviation. */
             std::string content; /** File content. */
 
+            bool is_shortcut = false;
+            std::weak_ptr<File> shortcut_target;
+
             /**
              * @brief Construct a new File object with the specified name.
              * 
@@ -57,6 +60,11 @@ public:
             std::string get_name() const { return name; }
             std::string get_extension_abbr() const { return extension_abbr; };
             std::string get_content() const { return content; };
+            bool get_is_shortcut() const { return is_shortcut; };
+            std::shared_ptr<File> get_shortcut_target() const {
+                return is_shortcut ? shortcut_target.lock() : nullptr;
+            }
+
         };
 
         std::string name; /** Name of the directory. */
@@ -67,7 +75,7 @@ public:
          * file's object for proper memory management.
          * 
          */
-        std::vector<std::unique_ptr<File>> files;
+        std::vector<std::shared_ptr<File>> files;
 
         /**
          * @brief A vector of directory of directories with in the directory.

@@ -66,7 +66,7 @@ import { ref, onMounted, toRaw } from "vue";
 import Icon from "@/components/Icon.vue";
 import { useAppsStore } from "@/components/stores/apps";
 import makeDirectoryItems from "@/components/utilities/makeDirectoryItems";
-import makeFileItems from "@/components/utilities/makeFileItems";
+import {makeFileItems} from "@/components/utilities/makeFileItems";
 export default {
   components: { Icon },
 setup() {

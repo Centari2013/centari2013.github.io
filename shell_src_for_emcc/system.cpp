@@ -89,10 +89,13 @@ EMSCRIPTEN_BINDINGS(file_manager) {
         ;
     
     emscripten::class_<FileSystem::Directory::File>("File")
+        .smart_ptr<std::shared_ptr<FileSystem::Directory::File>>("shared_ptr<File>")
         .property("name", &FileSystem::Directory::File::get_name)
         .property("extension_abbr", &FileSystem::Directory::File::get_extension_abbr)
         .property("content", &FileSystem::Directory::File::get_content)
-        ;
+        .property("is_shortcut", &FileSystem::Directory::File::get_is_shortcut) 
+        .function("get_target", &FileSystem::Directory::File::get_shortcut_target);
+
     
     emscripten::register_vector<FileSystem::Directory*>("DirectoryVec");
     emscripten::register_vector<FileSystem::Directory::File*>("FileVec");

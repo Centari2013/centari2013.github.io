@@ -28,7 +28,8 @@
             @dblclick="item.type === 'd' ? opendir(toRaw(item.object)) : openFile(item)"
           >
             <Icon v-if="item.type === 'd'" :image="'directory'" class="d"/>
-            <Icon v-else-if="item.type === 'f'" :image="'file'" class="d" />
+            <Icon v-else-if="item.type === 'f' && !item.is_shortcut" :image="'file'" class="d" />
+            <Icon v-else-if="item.type === 'f' && item.is_shortcut" :image="'shortcut'" class="d" />
             <div class="file-info">
               <span class="file-name">{{ item.name }}</span>
             </div>
@@ -49,7 +50,7 @@ import FileWindow from '@/components/FileWindow.vue';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import makeDirectoryItems from '@/components/utilities/makeDirectoryItems';
-import makeFileItems from '@/components/utilities/makeFileItems';
+import { makeFileItems, makeFileItem } from '@/components/utilities/makeFileItems';
 
 export default {
   components: { Icon, Taskbar, ContentWindow, FileWindow },
@@ -89,12 +90,21 @@ export default {
     };
 
     const openFile = (item) => {
-      //item is ptr
-      // push item to appStore openFiles[] as id
       const appsStore = useAppsStore();
-      appsStore.openFile(item);
-      
+
+      if (item.is_shortcut) {
+        const target = item.object.get_target();
+        console.log(target)
+        if (target) {
+          appsStore.openFile(makeFileItem(target));
+        } else {
+          alert("Shortcut target is missing or broken.");
+        }
+      } else {
+        appsStore.openFile(item);
+      }
     };
+
 
     return { openApps, getRandomPosition, openFiles, opendir, desktopContents, getDesktopContents, openFile };
   },
