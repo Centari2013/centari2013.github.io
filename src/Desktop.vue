@@ -99,10 +99,11 @@ export default {
     return { openApps, getRandomPosition, openFiles, opendir, desktopContents, getDesktopContents, openFile };
   },
   mounted() {
+    // initialize file system
     SystemModule.onRuntimeInitialized = () => {
             console.log("SystemModule is fully initialized.");
-            this.desktopContents.value = this.getDesktopContents(); // Call your logic here
-        };
+            this.desktopContents.value = this.getDesktopContents(); 
+    };
   
   }
 

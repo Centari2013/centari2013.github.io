@@ -71,15 +71,21 @@ export const useAppsStore = defineStore('apps', {
     isFileMaximized(item) {
       return this.openFiles.find(file => file.item === item).maximized;
     },
+    isFileMinimized(item) {
+      return this.openFiles.find(file => file.item === item).minimized;
+    },
     openFile(item) {
       if (!this.openFiles.find(file => toRaw(file.item.object) === toRaw(item.object))) {
 
-        this.openFiles.push({ item, zIndex: ++this.zIndexCounter, maximized: false});
+        this.openFiles.push({ item, zIndex: ++this.zIndexCounter, maximized: false, minimized: false});
       }
       
     },
     setFileMaximize(item, bool) {
       this.openFiles.find(file => file.item === item).maximized = bool; 
+    },
+    setFileMinimize(item, bool) {
+      this.openFiles.find(file => file.item === item).minimized = bool; 
     },
     bringFileToFront(item) {
       const file = this.openFiles.find(file => file.item === item);

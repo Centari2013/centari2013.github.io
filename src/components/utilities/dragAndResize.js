@@ -1,16 +1,17 @@
 export function startResize (obj, event, direction){
-      obj.$el.classList.add("resizing");
-      obj.isResizing = true;
-      obj.resizeDirection = direction;
-      obj.startDimensions = {
-        width: obj.current_dimensions.size.width,
-        height: obj.current_dimensions.size.height,
-        top: obj.current_dimensions.position.top,
-        left: obj.current_dimensions.position.left,
+      const {el, state} = obj;
+      el.classList.add("resizing");
+      state.isResizing = true;
+      state.resizeDirection = direction;
+      state.startDimensions = {
+        width: state.currentDimensions.size.width,
+        height: state.currentDimensions.size.height,
+        top: state.currentDimensions.position.top,
+        left: state.currentDimensions.position.left,
       };
 
       const eventXY = normalizeEvent(event);
-      obj.startMousePosition = {
+      state.startMousePosition = {
         x: eventXY.clientX,
         y: eventXY.clientY,
       };
@@ -27,64 +28,65 @@ export function startResize (obj, event, direction){
 }
 
 function resize(obj, event){
-  obj.$el.classList.remove("resizing");
-      if (!obj.isResizing) return;
+  const {el, state} = obj;
+  el.classList.remove("resizing");
+      if (!state.isResizing) return;
 
       const eventXY = normalizeEvent(event);
-      const dx = eventXY.clientX - obj.startMousePosition.x;
-      const dy = eventXY.clientY - obj.startMousePosition.y;
-      let newDimensions = { ...obj.startDimensions };
+      const dx = eventXY.clientX - state.startMousePosition.x;
+      const dy = eventXY.clientY - state.startMousePosition.y;
+      let newDimensions = { ...state.startDimensions };
 
-      switch (obj.resizeDirection) {
+      switch (state.resizeDirection) {
         case "n":
-          newDimensions.height = Math.max(obj.startDimensions.height - dy, obj.minSize.height);
-          newDimensions.top = obj.startDimensions.top + dy;
+          newDimensions.height = Math.max(state.startDimensions.height - dy, state.minSize.height);
+          newDimensions.top = state.startDimensions.top + dy;
           break;
         case "s":
-          newDimensions.height = Math.max(obj.startDimensions.height + dy, obj.minSize.height);
+          newDimensions.height = Math.max(state.startDimensions.height + dy, state.minSize.height);
           break;
         case "e":
-          newDimensions.width = Math.max(obj.startDimensions.width + dx, obj.minSize.width);
+          newDimensions.width = Math.max(state.startDimensions.width + dx, state.minSize.width);
           break;
         case "w":
-          newDimensions.width = Math.max(obj.startDimensions.width - dx, obj.minSize.width);
-          newDimensions.left = obj.startDimensions.left + dx;
+          newDimensions.width = Math.max(state.startDimensions.width - dx, state.minSize.width);
+          newDimensions.left = state.startDimensions.left + dx;
           break;
         case "ne":
-          newDimensions.height = Math.max(obj.startDimensions.height - dy, obj.minSize.height);
-          newDimensions.top = obj.startDimensions.top + dy;
-          newDimensions.width = Math.max(obj.startDimensions.width + dx, obj.minSize.width);
+          newDimensions.height = Math.max(state.startDimensions.height - dy, state.minSize.height);
+          newDimensions.top = state.startDimensions.top + dy;
+          newDimensions.width = Math.max(state.startDimensions.width + dx, state.minSize.width);
           break;
         case "nw":
-          newDimensions.height = Math.max(obj.startDimensions.height - dy, obj.minSize.height);
-          newDimensions.top = obj.startDimensions.top + dy;
-          newDimensions.width = Math.max(obj.startDimensions.width - dx, obj.minSize.width);
-          newDimensions.left = obj.startDimensions.left + dx;
+          newDimensions.height = Math.max(state.startDimensions.height - dy, state.minSize.height);
+          newDimensions.top = state.startDimensions.top + dy;
+          newDimensions.width = Math.max(state.startDimensions.width - dx, state.minSize.width);
+          newDimensions.left = state.startDimensions.left + dx;
           break;
         case "se":
-          newDimensions.height = Math.max(obj.startDimensions.height + dy, obj.minSize.height);
-          newDimensions.width = Math.max(obj.startDimensions.width + dx, obj.minSize.width);
+          newDimensions.height = Math.max(state.startDimensions.height + dy, state.minSize.height);
+          newDimensions.width = Math.max(state.startDimensions.width + dx, state.minSize.width);
           break;
         case "sw":
-          newDimensions.height = Math.max(obj.startDimensions.height + dy, obj.minSize.height);
-          newDimensions.width = Math.max(obj.startDimensions.width - dx, obj.minSize.width);
-          newDimensions.left = obj.startDimensions.left + dx;
+          newDimensions.height = Math.max(state.startDimensions.height + dy, state.minSize.height);
+          newDimensions.width = Math.max(state.startDimensions.width - dx, state.minSize.width);
+          newDimensions.left = state.startDimensions.left + dx;
           break;
       }
 
-      obj.current_dimensions.size = {
+      state.currentDimensions.size = {
         width: newDimensions.width,
         height: newDimensions.height,
       };
 
-      obj.current_dimensions.position = {
+      state.currentDimensions.position = {
         top: newDimensions.top,
         left: newDimensions.left,
       };
 }
 
 function stopResize(obj, _event) {
-  obj.isResizing = false;
+  obj.state.isResizing = false;
 
   // Remove listeners using the stored references
   window.removeEventListener("mousemove", obj._resizeListener);
@@ -99,14 +101,15 @@ function stopResize(obj, _event) {
 
 
 export function startDrag(obj, event) {
-  if (obj.disableMovement) return;
-  obj.isDragging = true;
+  const {state} = obj
+  if (state.disableMovement) return;
+  state.isDragging = true;
 
   const eventXY = normalizeEvent(event);
 
-  obj.dragStart = {
-    x: eventXY.clientX - obj.current_dimensions.position.left,
-    y: eventXY.clientY - obj.current_dimensions.position.top,
+  state.dragStart = {
+    x: eventXY.clientX - state.currentDimensions.position.left,
+    y: eventXY.clientY - state.currentDimensions.position.top,
   };
 
   const handleDrag = (e) => drag(obj, e);
@@ -122,15 +125,16 @@ export function startDrag(obj, event) {
 }
 
 function drag(obj, event) {
-  if (obj.isDragging) {
+  const {state} = obj;
+  if (state.isDragging) {
     const eventXY = normalizeEvent(event);
-    obj.current_dimensions.position.top = eventXY.clientY - obj.dragStart.y;
-    obj.current_dimensions.position.left = eventXY.clientX - obj.dragStart.x;
+    state.currentDimensions.position.top = eventXY.clientY - state.dragStart.y;
+    state.currentDimensions.position.left = eventXY.clientX - state.dragStart.x;
   }
 }
 
 function stopDrag(obj, _event) {
-  obj.isDragging = false;
+  obj.state.isDragging = false;
   window.removeEventListener("mousemove", obj._dragListener);
   window.removeEventListener("touchmove", obj._dragListener);
   window.removeEventListener("mouseup", obj._stopDragListener);

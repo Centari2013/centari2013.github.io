@@ -15,9 +15,4 @@ const pinia = createPinia();
 app.use(pinia); // Register Pinia
 app.mount('#app'); // Mount the app
 
-// initialize file system
-if (!SystemModule) {
-  SystemModule.onRuntimeInitialized = () => {
-      console.log("SystemModule initialized!");
-  };
-}
+

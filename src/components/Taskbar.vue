@@ -1,5 +1,5 @@
 <template>
-  <div class="taskbar" data-augmented-ui="tl-clip bl-scoop-x tr-clip br-scoop-x"
+  <div id="taskbar" data-augmented-ui="tl-clip bl-scoop-x tr-clip br-scoop-x"
   :style="{zIndex: taskbarZIndex}">
     <Icon class="taskbar-icon"
       v-for="app in taskbarApps"
@@ -25,7 +25,6 @@ export default {
     const taskbarZIndex = computed(() => appsStore.zIndexCounter + 1);
     
 
-
     return { taskbarApps, taskbarZIndex };
   },
   methods: {
@@ -33,10 +32,11 @@ export default {
     openOrToggleApp(id) {
       const appsStore = useAppsStore();
       if (appsStore.isAppOpen(id)){
-        const matching_app = this.$parent.$refs.window.find(app => app.id === id);
-        if (appsStore.isAppMaximized(id) && !appsStore.isAppMinimized(id)) matching_app.minimizeApp();
-        else if (appsStore.isAppMinimized(id)) matching_app.maximizeApp();
-        else {matching_app.minimizeApp()}
+        const matching_app = this.$parent.$refs.window.find(app => app.$props.id === id);
+        const window = matching_app.$refs.baseWindow;
+        if (appsStore.isAppMaximized(id) && !appsStore.isAppMinimized(id)) window.minimizeWindow();
+        else if (appsStore.isAppMinimized(id)) window.maximizeWindow();
+        else {window.minimizeWindow()}
       }else{
         appsStore.openApp(id);
       }
@@ -63,7 +63,7 @@ export default {
   filter: drop-shadow(0 0 5px #0098db) drop-shadow(0 0 10px #0098db);
 }
 
-.taskbar {
+#taskbar {
   @apply bg-primary-shadow/50;
   @apply flex items-center justify-center space-x-5;
   width: 90%;
