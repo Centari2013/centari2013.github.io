@@ -57,6 +57,16 @@ export default {
   @apply fill-accent-yellow-shadow stroke-accent-yellow-shadow;
 }
 
+.icon-svg :deep(path),
+.icon-svg :deep(circle),
+.icon-svg :deep(ellipse),
+.icon-svg :deep(rect),
+.icon-svg :deep(line),
+.icon-svg :deep(polygon),
+.icon-svg :deep(polyline) {
+  @apply stroke-accent-yellow-shadow;
+}
+
 
 /* Use currentColor to inherit fill color dynamically */
 .icon-svg:hover {

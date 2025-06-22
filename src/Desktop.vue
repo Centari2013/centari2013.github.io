@@ -29,9 +29,9 @@
             @dblclick="handleFileOpen(item)"
           >
             <Icon v-if="item.type === 'd'" :image="'directory'" class="d"/>
-            <Icon v-else-if="item.type === 'f' && !item.is_shortcut" :image="'file'" class="d" />
+            <Icon v-else-if="item.type === 'f' && !item.is_shortcut && !item.is_link" :image="'file'" class="d" />
             <Icon v-else-if="item.type === 'f' && item.is_shortcut" :image="'shortcut'" class="d" />
-            <Icon v-else-if="item.type === 'f' && item.is_link" :image="'shortcut'" class="d" />
+            <Icon v-else-if="item.type === 'f' && item.is_link" :image="'browserLink'" class="d" />
             <div class="file-info">
               <span class="file-name">{{ item.name }}</span>
             </div>
@@ -134,7 +134,13 @@ export default {
   pointer-events: auto; /* let clicks through to files */
 }
 
-.d :deep(path) {
+.d :deep(path),
+.d :deep(circle),
+.d :deep(ellipse),
+.d :deep(rect),
+.d :deep(line),
+.d :deep(polygon),
+.d :deep(polyline) {
   @apply stroke-accent-yellow-shadow;
 }
 

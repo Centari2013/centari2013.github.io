@@ -5,13 +5,23 @@
   xmlns="http://www.w3.org/2000/svg"
   fill="none"
 >
-  <title>SpicyOS Browser Icon (22.5° Rotated)</title>
+  <title>SpicyOS Browser Link Icon</title>
 
-  <!-- Outer circle -->
+  <!-- Dotted outer circle -->
   <circle
     cx="16"
     cy="16"
     r="15"
+    stroke="#00CFFF"
+    stroke-width="1"
+    stroke-dasharray="24"
+  />
+
+  <!-- Solid inner circle -->
+  <circle
+    cx="16"
+    cy="16"
+    r="10"
     stroke="#00CFFF"
     stroke-width="1"
   />
@@ -21,29 +31,29 @@
     <ellipse
       cx="16"
       cy="16"
-      rx="14.5"
-      ry="4"
+      rx="9.5"
+      ry="3"
       transform="rotate(22.5 16 16)"
     />
     <ellipse
       cx="16"
       cy="16"
-      rx="14.5"
-      ry="4"
+      rx="9.5"
+      ry="3"
       transform="rotate(67.5 16 16)"
     />
     <ellipse
       cx="16"
       cy="16"
-      rx="14.5"
-      ry="4"
+      rx="9.5"
+      ry="3"
       transform="rotate(112.5 16 16)"
     />
     <ellipse
       cx="16"
       cy="16"
-      rx="14.5"
-      ry="4"
+      rx="9.5"
+      ry="3"
       transform="rotate(157.5 16 16)"
     />
   </g>
