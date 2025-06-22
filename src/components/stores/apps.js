@@ -1,7 +1,6 @@
 // apps.js (Pinia store)
 
 import { defineStore } from 'pinia';
-import { toRaw } from 'vue';
 
 export const useAppsStore = defineStore('apps', {
   state: () => ({
