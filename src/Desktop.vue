@@ -50,6 +50,7 @@ import FileWindow from '@/components/FileWindow.vue';
 import { storeToRefs } from 'pinia';
 import makeDirectoryItems from '@/components/utilities/makeDirectoryItems';
 import { makeFileItems, makeFileItem } from '@/components/utilities/makeFileItems';
+import { openFile } from '@/components/utilities/openFile'
 
 export default {
   components: { Icon, Taskbar, ContentWindow, FileWindow },
@@ -87,22 +88,6 @@ export default {
       }
       return randomPositions.get(id);
     };
-
-    const openFile = (item) => {
-      const appsStore = useAppsStore();
-
-      if (item.is_shortcut) {
-        const target = SystemModule.resolve_shortcut(toRaw(item.object));
-        if (target) {
-          appsStore.openFile(makeFileItem(target));
-        } else {
-          alert("Shortcut target is missing or broken.");
-        }
-      } else {
-        appsStore.openFile(item);
-      }
-    };
-
 
     return { openApps, getRandomPosition, openFiles, opendir, desktopContents, getDesktopContents, openFile };
   },

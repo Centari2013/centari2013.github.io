@@ -67,6 +67,8 @@ import Icon from "@/components/Icon.vue";
 import { useAppsStore } from "@/components/stores/apps";
 import makeDirectoryItems from "@/components/utilities/makeDirectoryItems";
 import {makeFileItems} from "@/components/utilities/makeFileItems";
+import { openFile } from '@/components/utilities/openFile'
+
 export default {
   components: { Icon },
 setup() {
@@ -108,14 +110,6 @@ setup() {
       SystemModule.cd_forward();
       contents.value = getDirContents();
       syncButtonState();
-    };
-
-    const openFile = (item) => {
-      //item is ptr
-      // push item to appStore openFiles[] as id
-      const appsStore = useAppsStore();
-      appsStore.openFile(item);
-      
     };
 
     // Sync button states

@@ -65,7 +65,7 @@ export const useAppsStore = defineStore('apps', {
       return this.openFiles.find(file => file.item === item).zIndex;
     },
     isFileOpen(item) {
-      return this.openFiles.some(file => file.item === item);
+      return this.openFiles.some(file => file.item.object.$$.ptr === item.object.$$.ptr);
     },
     
     isFileMaximized(item) {
@@ -75,8 +75,8 @@ export const useAppsStore = defineStore('apps', {
       return this.openFiles.find(file => file.item === item).minimized;
     },
     openFile(item) {
-      if (!this.openFiles.find(file => toRaw(file.item.object) === toRaw(item.object))) {
-
+      console.log(this.isFileOpen(item))
+      if (!this.isFileOpen(item)) {
         this.openFiles.push({ item, zIndex: ++this.zIndexCounter, maximized: false, minimized: false});
       }
       
