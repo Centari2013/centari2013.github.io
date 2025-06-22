@@ -1,6 +1,11 @@
 <template>
-  <div id="taskbar" data-augmented-ui="tl-clip bl-scoop-x tr-clip br-scoop-x"
-  :style="{zIndex: taskbarZIndex}">
+  <div class="w-full h-1/15 bottom-0 absolute" 
+  @mouseover="showTaskbar"></div>
+  
+  <div id="taskbar" ref="taskbar" data-augmented-ui="tl-clip bl-scoop-x tr-clip br-scoop-x"
+  :style="{zIndex: taskbarZIndex}"
+  @mouseenter="isHoveringTaskbar = true"
+  @mouseleave="isHoveringTaskbar = false">
     <Icon class="taskbar-icon"
       v-for="app in taskbarApps"
       :id="`${app.id + 'Icon'}`"
@@ -11,39 +16,75 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import Icon from '@/components/Icon.vue';
 import { useAppsStore } from '@/components/stores/apps';
-import { computed } from 'vue';
+import { computed, useTemplateRef, onMounted, ref, watch } from 'vue';
+import { gsap } from 'gsap';
 
-export default {
-  components: { Icon },
-  setup() {
-    const appsStore = useAppsStore();
 
-    const taskbarApps = appsStore.taskbarApps; // Get desktop-specific apps (shared + unique)
-    const taskbarZIndex = computed(() => appsStore.zIndexCounter + 1);
+const taskbar = useTemplateRef('taskbar')
+const isHoveringTaskbar = ref(false);
+let taskbarHoverTimeoutId = null;
+let taskbarTween = null;
+const appsStore = useAppsStore();
+
+const taskbarApps = appsStore.taskbarApps; // Get desktop-specific apps (shared + unique)
+const taskbarZIndex = computed(() => appsStore.zIndexCounter + 1);
     
+const moveTaskbarVertically = (yPos, duration=1.5) => {
+  const el = taskbar.value
 
-    return { taskbarApps, taskbarZIndex };
-  },
-  methods: {
-    
-    openOrToggleApp(id) {
-      const appsStore = useAppsStore();
-      if (appsStore.isAppOpen(id)){
-        const matching_app = this.$parent.$refs.window.find(app => app.$props.id === id);
-        const window = matching_app.$refs.baseWindow;
-        if (appsStore.isAppMaximized(id) && !appsStore.isAppMinimized(id)) window.minimizeWindow();
-        else if (appsStore.isAppMinimized(id)) window.maximizeWindow();
-        else {window.minimizeWindow()}
-      }else{
-        appsStore.openApp(id);
-      }
-      
-    }
+  // kill existing animation before starting a new one
+  if (taskbarTween) {
+    taskbarTween.kill();
   }
-};
+  if(!isMobile() && !el.matches(":hover")){
+    taskbarTween = gsap
+      .to(el, {
+       y: yPos,
+       ease: "power2.inOut",
+       duration
+      })
+  }
+}
+
+const showTaskbar = () => {
+  moveTaskbarVertically(0, 0.5);
+}
+
+const hideTaskbar = () => {
+  taskbarHoverTimeoutId = setTimeout(() => {
+    moveTaskbarVertically(window.innerHeight);
+  }, 2000);
+}
+
+watch(isHoveringTaskbar, (newBool, _oldBool) => {
+  if (!newBool) { // if not hovering over taskbar
+    hideTaskbar()
+  } else { // if hovering interrupt animation
+    clearTimeout(taskbarHoverTimeoutId)
+  }
+})
+
+onMounted(() => {
+  hideTaskbar();
+})
+
+const openOrToggleApp = (id) => {
+  const appsStore = useAppsStore();
+  if (appsStore.isAppOpen(id)){
+    const matching_app = this.$parent.$refs.window.find(app => app.$props.id === id);
+    const window = matching_app.$refs.baseWindow;
+    if (appsStore.isAppMaximized(id) && !appsStore.isAppMinimized(id)) window.minimizeWindow();
+    else if (appsStore.isAppMinimized(id)) window.maximizeWindow();
+    else {window.minimizeWindow()}
+  }else{
+    appsStore.openApp(id);
+  }
+  
+}
+
 </script>
 
 <style scoped>
