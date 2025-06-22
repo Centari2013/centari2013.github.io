@@ -5,7 +5,7 @@
    
     <template v-for="app in openApps" :key="app.id">
         <ContentWindow
-          :ref="el => windowRefs[app.id] = el"
+          :ref="assignWindowRef(app.id)"
           :id="app.id"
           :initialPosition="getRandomPosition(app.id)"
           :minWidth="app.minWidth"
@@ -15,7 +15,7 @@
 
     <template v-for="file in openFiles" :key="file.item">
         <FileWindow
-          :ref="windowRefs"
+          :ref="assignWindowRef(file.item)"
           :item="file.item"
           :title="file.item.name"
           :initialPosition="getRandomPosition(file.item)"
@@ -62,6 +62,10 @@ const appsStore = useAppsStore();
 const { openApps, openFiles, isAppOpen } = storeToRefs(appsStore);
 const fmId = 'file_manager'
 const browserId = 'browser'
+
+const assignWindowRef = (id) => (el) => {
+  if (el) windowRefs[id] = el;
+};
 
 const opendir = (item) => {
   //TODO: FIX
