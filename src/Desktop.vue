@@ -5,7 +5,7 @@
    
     <template v-for="app in openApps" :key="app.id">
         <ContentWindow
-          ref="window"
+          :ref="el => windowRefs[app.id] = el"
           :id="app.id"
           :initialPosition="getRandomPosition(app.id)"
           :minWidth="app.minWidth"
@@ -15,7 +15,7 @@
 
     <template v-for="file in openFiles" :key="file.item">
         <FileWindow
-          ref="window"
+          :ref="windowRefs"
           :item="file.item"
           :title="file.item.name"
           :initialPosition="getRandomPosition(file.item)"
@@ -41,82 +41,80 @@
     <Taskbar ref="taskbar"/>
   </div>
 </template>
-<script>
+<script setup>
 import Icon from '@/components/Icon.vue';
 import { useAppsStore } from '@/components/stores/apps';
 import Taskbar from '@/components/Taskbar.vue';
-import { ref, toRaw, defineAsyncComponent } from 'vue';
+import { ref, toRaw, defineAsyncComponent, reactive, provide, onMounted, useTemplateRef } from 'vue';
 
 const ContentWindow = defineAsyncComponent(() => import("@/components/ContentWindow.vue"));
 import FileWindow from '@/components/FileWindow.vue';
 import { storeToRefs } from 'pinia';
 import makeDirectoryItems from '@/components/utilities/makeDirectoryItems';
-import { makeFileItems, makeFileItem } from '@/components/utilities/makeFileItems';
+import { makeFileItems } from '@/components/utilities/makeFileItems';
 import { openFile } from '@/components/utilities/openFile'
 
-export default {
-  components: { Icon, Taskbar, ContentWindow, FileWindow },
-  setup() {
-    const desktopContents = ref([]);
-    const appsStore = useAppsStore();
-    const { openApps, openFiles, isAppOpen } = storeToRefs(appsStore);
-    const fmId = 'file_manager'
-    const browserId = 'browser'
 
-    const opendir = (item) => {
-      //TODO: FIX
-      
-      if (!isAppOpen(fmId)){
-        openApp(fmId);
-      }
-      const fm = this.$refs.window.find(app => app.id === fmId);
-      fm.chdir(item);
-    }
-    const getDesktopContents = () => {
-      const desktop_ptr = SystemModule.get_desktop_dir_ptr();
-      const files = SystemModule.list_files(desktop_ptr);
-      const directories = SystemModule.list_directories(desktop_ptr);
+const windowRefs = reactive({});
+provide('windowRefs', windowRefs);
+const desktopContents = ref([]);
+const appsStore = useAppsStore();
+const { openApps, openFiles, isAppOpen } = storeToRefs(appsStore);
+const fmId = 'file_manager'
+const browserId = 'browser'
 
-      const contentsList = makeDirectoryItems(directories).concat(makeFileItems(files));
-
-      contentsList.sort((a, b) => a.name.localeCompare(b.name));
-      return contentsList;
-    };
-    
-    const randomPositions = new Map();
-
-    const getRandomPosition = (id) => {
-      if (!randomPositions.has(id)) {
-        const x = Math.floor(Math.random() * (window.innerWidth - (2 / 3 * window.innerWidth))); // Adjust to avoid overflow
-        const y = Math.floor(Math.random() * (window.innerHeight - (3 / 4 * window.innerHeight)));
-        randomPositions.set(id, { top: y, left: x });
-      }
-      return randomPositions.get(id);
-    };
-
-    const handleFileOpen = (item) => {
-      if (item.type === 'd') {
-        opendir(toRaw(item.object))
-      } else if (item.type === 'f' && item.is_link) {
-        appsStore.openApp(browserId, { url: item.content })
-      }else {
-        openFile(item)
-      }
-
-    }
-
-    return { openApps, getRandomPosition, openFiles, handleFileOpen, desktopContents, getDesktopContents };
-  },
-  mounted() {
-    // initialize file system
-    SystemModule.onRuntimeInitialized = () => {
-            console.log("SystemModule is fully initialized.");
-            this.desktopContents.value = this.getDesktopContents(); 
-    };
+const opendir = (item) => {
+  //TODO: FIX
   
+  if (!isAppOpen(fmId)){
+    openApp(fmId);
+  }
+  const fm = windowRefs.find(app => app.id === fmId);
+  fm.chdir(item);
+}
+const getDesktopContents = () => {
+  const desktop_ptr = SystemModule.get_desktop_dir_ptr();
+  const files = SystemModule.list_files(desktop_ptr);
+  const directories = SystemModule.list_directories(desktop_ptr);
+
+  const contentsList = makeDirectoryItems(directories).concat(makeFileItems(files));
+
+  contentsList.sort((a, b) => a.name.localeCompare(b.name));
+  return contentsList;
+};
+
+const randomPositions = new Map();
+
+const getRandomPosition = (id) => {
+  if (!randomPositions.has(id)) {
+    const x = Math.floor(Math.random() * (window.innerWidth - (2 / 3 * window.innerWidth))); // Adjust to avoid overflow
+    const y = Math.floor(Math.random() * (window.innerHeight - (3 / 4 * window.innerHeight)));
+    randomPositions.set(id, { top: y, left: x });
+  }
+  return randomPositions.get(id);
+};
+
+const handleFileOpen = (item) => {
+  if (item.type === 'd') {
+    opendir(toRaw(item.object))
+  } else if (item.type === 'f' && item.is_link) {
+    appsStore.openApp(browserId, { url: item.content })
+  }else {
+    openFile(item)
   }
 
-};
+}
+
+onMounted(() => {
+  // initialize file system
+  SystemModule.onRuntimeInitialized = () => {
+          console.log("SystemModule is fully initialized.");
+          desktopContents.value = getDesktopContents(); 
+  };
+
+})
+
+
 </script>
 
 

@@ -28,7 +28,7 @@
 <script setup>
 import Icon from '@/components/Icon.vue';
 import { useAppsStore } from '@/components/stores/apps';
-import { computed, useTemplateRef, onMounted, ref, watch } from 'vue';
+import { computed, useTemplateRef, onMounted, ref, watch, inject } from 'vue';
 import { gsap } from 'gsap';
 
 import LockTaskbarIcon from '@/assets/icons/lock.svg'
@@ -84,19 +84,28 @@ onMounted(() => {
   hideTaskbar();
 })
 
+const windowRefs = inject('windowRefs');
+
 const openOrToggleApp = (id) => {
-  const appsStore = useAppsStore();
-  if (appsStore.isAppOpen(id)){
-    const matching_app = this.$parent.$refs.window.find(app => app.$props.id === id);
-    const window = matching_app.$refs.baseWindow;
-    if (appsStore.isAppMaximized(id) && !appsStore.isAppMinimized(id)) window.minimizeWindow();
-    else if (appsStore.isAppMinimized(id)) window.maximizeWindow();
-    else {window.minimizeWindow()}
-  }else{
+  const app = windowRefs[id];
+  if (!app) return appsStore.openApp(id);
+
+  const window = app.$refs.baseWindow;
+  if (!window) return;
+
+  if (appsStore.isAppOpen(id)) {
+    if (appsStore.isAppMaximized(id) && !appsStore.isAppMinimized(id)) {
+      window.minimizeWindow();
+    } else if (appsStore.isAppMinimized(id)) {
+      window.maximizeWindow();
+    } else {
+      window.minimizeWindow();
+    }
+  } else {
     appsStore.openApp(id);
   }
-  
-}
+};
+
 
 </script>
 
