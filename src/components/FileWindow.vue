@@ -1,9 +1,10 @@
 <template>
-  <BaseWindow v-bind="baseWindowProps">
+  <BaseWindow v-bind="baseWindowProps" @export="downloadFile">
     <FileViewerView 
       :content="item.content"
       :file_ext="item.exten"
       :name="item.name"
+      :id="fileId"
     />
   </BaseWindow>
 </template>
@@ -12,6 +13,10 @@
 import BaseWindow from "@/components/BaseWindow.vue"
 import FileViewerView from "@/components/views/FileViewerView.vue"
 import { useAppsStore } from "@/components/stores/apps"
+import { useExportFile } from '@/components/utilities/useExportFile'
+import { v4 as uuidv4 } from 'uuid';
+
+const { exportFile } = useExportFile()
 
 const props = defineProps({
   item: {type: Object},
@@ -22,7 +27,7 @@ const props = defineProps({
 })
 
 const appsStore = useAppsStore()
-
+const fileId = uuidv4()
 const getzIndex = () => {
   appsStore.bringFileToFront(props.item)
   return appsStore.getFilezIndex(props.item)
@@ -42,7 +47,14 @@ const handleMinimize = (bool) => {
 
 const getMaximized = () => appsStore.isFileMaximized(props.item)
 const getMinimized = () => appsStore.isFileMinimized(props.item)
-
+const downloadFile = async () => {
+  await exportFile({
+    id: fileId,
+    content: props.item.content,
+    exten: props.item.exten,
+    name: props.item.name
+  })
+};
 
 const baseWindowProps = {
   initialPosition: props.initialPosition,
@@ -55,6 +67,7 @@ const baseWindowProps = {
   handleMinimize,
   getMaximized,
   getMinimized,
-  showMinimizeButton: false
+  showMinimizeButton: false,
+  showExportButton: true
 }
 </script>

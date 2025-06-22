@@ -10,7 +10,7 @@
     <audio v-else-if="isAudioFile" :src="content" controls class="audio-preview"></audio>
 
     <div v-else-if="isMarkdown" class="page-content-container">
-      <div  class="page-content" v-html="renderMarkdown()"></div>
+      <div :id="id" class="page-content" v-html="renderMarkdown()"></div>
     </div>
     <div v-else class="unsupported">
       Unsupported file type: {{ file_ext }}
@@ -26,6 +26,10 @@ import { extractAndDecodeBase64 } from '@/components/utilities/decode'
 
 export default {
   props: {
+    id: {
+      type: String,
+      required: true
+    },
     content: {
       type: String, // Base64 data URI for binary files or raw text
       required: true,
@@ -126,7 +130,7 @@ export default {
 }
 
 .page-content {
-  @apply relative text-primary-dark-base p-3 h-full overflow-auto; /* Styling for text content */
+  @apply relative text-primary-dark-base p-8 h-full overflow-auto; /* Styling for text content */
   filter: brightness(0.5); /* Neutralize brightness for text */
   line-height: 1.8rem;
   
@@ -160,6 +164,24 @@ export default {
 .page-content li {
   @apply mb-1;
 }
+
+.page-content h1 {
+  @apply mb-5;
+}
+
+.page-content h2 {
+  @apply text-xl font-bold text-primary-base mt-6 mb-2;
+}
+
+.page-content h3 {
+  @apply text-lg font-semibold text-primary-base mt-4 mb-1;
+}
+
+.page-content p {
+  @apply pb-3;
+}
+
+
 
 
 @media (max-width: 768px) {

@@ -37,14 +37,21 @@
         <button class="titlebar-button" @click="maximizeWindow">
           <MaximizeIcon class="task-icon" width="100%" height="100%"/>
         </button>
-        <button class="titlebar-button">
-          <EyeClose @click="opaque = !opaque" class=" rotate-90 task-icon" v-if="opaque"/>
-          <EyeOpen @click="opaque = !opaque" class="rotate-90 task-icon" v-else/>
+        <button @click="$emit('export')" class="titlebar-button" v-if="showExportButton">
+          <ExportIcon class="task-icon export -rotate-90"/>
         </button>
-        <!-- Title -->
-        <span class="title-spacer"></span>
-        <div class="title">{{ title }}</div>
+
+        <button @click="opaque = !opaque" class="titlebar-button">
+          <EyeClose  class=" rotate-90 task-icon" v-if="opaque"/>
+          <EyeOpen class="rotate-90 task-icon" v-else/>
+        </button>
+        
+        
       </div>
+      <!-- Title -->
+      <span class="h-1/3"></span>
+      <div class="title">{{ title }}</div>
+      <span class="h-1/2"></span>
     </div>
 
     <!-- Content -->
@@ -60,13 +67,14 @@
 import CloseIcon from "@/assets/icons/close.svg";
 import MinimizeIcon from "@/assets/icons/minimize.svg";
 import MaximizeIcon from "@/assets/icons/maximize.svg";
+import ExportIcon from "@/assets/icons/export.svg"
 import EyeClose from "@/assets/icons/eyeClose.svg"
 import EyeOpen from "@/assets/icons/eyeOpen.svg"
 
 import { ref, reactive, onMounted, useTemplateRef, onBeforeUnmount } from "vue";
 import { gsap } from "gsap";
 import { startResize, startDrag } from '@/components/utilities/dragAndResize.js'
-import BrowserView from "@/components/views/BrowserView.vue";
+
 
 const opaque = ref(false)
 
@@ -82,10 +90,12 @@ const props = defineProps([
   'getMiniPos',
   'handleClose',
   'handleMinimize',
-  'handleMaximize'
+  'handleMaximize',
+  'showExportButton'
 ])
 
 const zIndex = ref(0);
+defineEmits(['export']);
 
 let previousDimensions = {
   position: { ...props.initialPosition },
@@ -363,7 +373,7 @@ defineExpose({
 }
 
 .button-container {
-  @apply flex flex-col gap-6;
+  @apply flex flex-col gap-5;
 }
 
 .titlebar-button {
@@ -372,10 +382,6 @@ defineExpose({
 
 .titlebar-button:hover {
   @apply border-none;
-}
-
-.title-spacer {
-  @apply h-8;
 }
 
 .title {
@@ -416,6 +422,11 @@ defineExpose({
 .task-icon:hover polygon,
 .task-icon:hover path {
   @apply stroke-alerts-base;
+}
+
+.export path,
+.export:hover path {
+  @apply fill-none;
 }
 
 .resize {
