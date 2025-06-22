@@ -99,7 +99,7 @@ EMSCRIPTEN_BINDINGS(file_manager) {
         .property("extension_abbr", &FileSystem::Directory::File::get_extension_abbr)
         .property("content", &FileSystem::Directory::File::get_content)
         .property("is_shortcut", &FileSystem::Directory::File::get_is_shortcut) 
-        .function("get_target", &FileSystem::Directory::File::get_shortcut_target);
+        .property("is_link", &FileSystem::Directory::File::get_is_link);
 
     
     emscripten::register_vector<FileSystem::Directory*>("DirectoryVec");

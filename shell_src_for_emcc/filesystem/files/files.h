@@ -2,6 +2,7 @@
 #define FILES_H
 #include <string>
 
+std::string sound_room_link_txt_data();
 std::string cache_txt_data();
 std::string tmp_txt_data();
 std::string mel_cosplay_makeup_jpeg_data();

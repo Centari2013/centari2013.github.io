@@ -8,7 +8,8 @@ export function makeFileItems (files) {
             name: f.name, 
             exten: f.extension_abbr, 
             content: f.content, 
-            is_shortcut: f.is_shortcut
+            is_shortcut: f.is_shortcut,
+            is_link: f.is_link
         });
 
     }
@@ -24,7 +25,8 @@ export function makeFileItem (f) {
         name: f.name, 
         exten: f.extension_abbr, 
         content: f.content, 
-        is_shortcut: f.is_shortcut
+        is_shortcut: f.is_shortcut,
+        is_link: f.is_link
     };
 
     return file_object;

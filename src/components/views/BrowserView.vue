@@ -12,17 +12,25 @@
   
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      currentUrl: "https://centari2013.github.io/SoundRoom",
-    }
-  },
-  methods: {
-    openInNewTab(){
-      window.open(this.currentUrl, "_blank");
-    }
+<script setup>
+import { ref } from 'vue';
+import { extractAndDecodeBase64 } from '@/components/utilities/decode'
+
+const props = defineProps({
+  args: {
+    type: Object,
+    default: null
   }
+})
+
+const currentUrl = ref("https://centari2013.github.io/");
+
+if (props.args) {
+  const propLink = extractAndDecodeBase64(props.args.url)
+  currentUrl.value = propLink;
+}
+
+const openInNewTab = () =>{
+  window.open(currentUrl.value, "_blank");
 }
 </script>

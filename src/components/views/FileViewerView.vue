@@ -22,6 +22,8 @@
 import { marked } from 'marked';
 import { markedEmoji } from 'marked-emoji';
 
+import { extractAndDecodeBase64 } from '@/components/utilities/decode'
+
 export default {
   props: {
     content: {
@@ -56,61 +58,53 @@ export default {
   },
   methods: {
     renderDecodedContent() {
-    const decodedText = atob(this.base64Data(this.content));
+    const decodedText = extractAndDecodeBase64(this.content);
     return decodedText.replace(/\n/g, "<br>");
     },
-    atob(data){
-      return atob(data)
-    },
-    // Extract Base64-encoded content
-    base64Data() {
-      const match = this.content.match(/^data:.*;base64,(.*)$/);
-      return match ? match[1] : null;
-    },
     renderMarkdown() {
-  // Ensure links open in a new tab
-  const renderer = new marked.Renderer();
-  renderer.link = function (href, title, text) {
-    var link = marked.Renderer.prototype.link.call(this, href, title, text);
-    return link.replace("<a","<a target='_blank' ");
-  }
+      // Ensure links open in a new tab
+        const renderer = new marked.Renderer();
+        renderer.link = function (href, title, text) {
+          var link = marked.Renderer.prototype.link.call(this, href, title, text);
+          return link.replace("<a","<a target='_blank' ");
+        }
 
-  // Emoji options for marked
-  const emojiOptions = {
-  emojis: {
-    "star": "🌟",
-    "chili": "🌶️",
-    "laptop": "💻",
-    "rainbow": "🌈",
-    "briefcase": "💼",
-    "woman_technologist": "👩🏽‍💻",
-    "heart": "❤️",
-    "tada": "🎉",
-    // add new ones from README
-    "arrow_right": "➡️",
-    "computer": "🖥️",
-    "mag": "🔍",
-    "handshake": "🤝"
-  },
-  renderer: (token) => token.emoji,
-};
+        // Emoji options for marked
+        const emojiOptions = {
+        emojis: {
+          "star": "🌟",
+          "chili": "🌶️",
+          "laptop": "💻",
+          "rainbow": "🌈",
+          "briefcase": "💼",
+          "woman_technologist": "👩🏽‍💻",
+          "heart": "❤️",
+          "tada": "🎉",
+          // add new ones from README
+          "arrow_right": "➡️",
+          "computer": "🖥️",
+          "mag": "🔍",
+          "handshake": "🤝"
+        },
+        renderer: (token) => token.emoji,
+      };
 
 
-  // Apply emoji options (only once)
-  if (!marked.extensions?.emojiApplied) {
-    marked.use(markedEmoji(emojiOptions));
-    marked.extensions = { ...marked.extensions, emojiApplied: true };
-  }
+      // Apply emoji options (only once)
+      if (!marked.extensions?.emojiApplied) {
+        marked.use(markedEmoji(emojiOptions));
+        marked.extensions = { ...marked.extensions, emojiApplied: true };
+      }
 
-  // Decode Base64 content and parse Markdown
-  try {
-    const decodedContent = atob(this.base64Data(this.content));
-    return marked.parse(decodedContent, { renderer });
-  } catch (error) {
-    console.error("Error decoding Base64 content:", error);
-    return "<p>Invalid content provided.</p>";
-  }
-}
+      // Decode Base64 content and parse Markdown
+      try {
+        const decodedContent = extractAndDecodeBase64(this.content);
+        return marked.parse(decodedContent, { renderer });
+      } catch (error) {
+        console.error("Error decoding Base64 content:", error);
+        return "<p>Invalid content provided.</p>";
+      }
+    }
 
   }
 };

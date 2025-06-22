@@ -9,6 +9,7 @@
           :id="app.id"
           :initialPosition="getRandomPosition(app.id)"
           :minWidth="app.minWidth"
+          :args="app.args"
         />
     </template>
 
@@ -25,11 +26,12 @@
             v-for="item in desktopContents.value" 
             :key="item.name" 
             class="file-item"
-            @dblclick="item.type === 'd' ? opendir(toRaw(item.object)) : openFile(item)"
+            @dblclick="handleFileOpen(item)"
           >
             <Icon v-if="item.type === 'd'" :image="'directory'" class="d"/>
             <Icon v-else-if="item.type === 'f' && !item.is_shortcut" :image="'file'" class="d" />
             <Icon v-else-if="item.type === 'f' && item.is_shortcut" :image="'shortcut'" class="d" />
+            <Icon v-else-if="item.type === 'f' && item.is_link" :image="'shortcut'" class="d" />
             <div class="file-info">
               <span class="file-name">{{ item.name }}</span>
             </div>
@@ -57,10 +59,13 @@ export default {
   setup() {
     const desktopContents = ref([]);
     const appsStore = useAppsStore();
-    const { openApps, openFiles, isAppOpen, openApp } = storeToRefs(appsStore);
+    const { openApps, openFiles, isAppOpen } = storeToRefs(appsStore);
+    const fmId = 'file_manager'
+    const browserId = 'browser'
 
     const opendir = (item) => {
-      const fmId = 'file_manager'
+      //TODO: FIX
+      
       if (!isAppOpen(fmId)){
         openApp(fmId);
       }
@@ -89,7 +94,18 @@ export default {
       return randomPositions.get(id);
     };
 
-    return { openApps, getRandomPosition, openFiles, opendir, desktopContents, getDesktopContents, openFile };
+    const handleFileOpen = (item) => {
+      if (item.type === 'd') {
+        opendir(toRaw(item.object))
+      } else if (item.type === 'f' && item.is_link) {
+        appsStore.openApp(browserId, { url: item.content })
+      }else {
+        openFile(item)
+      }
+
+    }
+
+    return { openApps, getRandomPosition, openFiles, handleFileOpen, desktopContents, getDesktopContents };
   },
   mounted() {
     // initialize file system

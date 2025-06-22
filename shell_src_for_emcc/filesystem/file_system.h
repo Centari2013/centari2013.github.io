@@ -47,6 +47,7 @@ public:
             std::string content; /** File content. */
 
             bool is_shortcut = false;
+            bool is_link = false;
             std::weak_ptr<File> shortcut_target;
 
             /**
@@ -61,10 +62,7 @@ public:
             std::string get_extension_abbr() const { return extension_abbr; };
             std::string get_content() const { return content; };
             bool get_is_shortcut() const { return is_shortcut; };
-            std::shared_ptr<File> get_shortcut_target() const {
-                return is_shortcut ? shortcut_target.lock() : nullptr;
-            }
-
+            bool get_is_link() const { return is_link; };
         };
 
         std::string name; /** Name of the directory. */

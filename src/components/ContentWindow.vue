@@ -1,6 +1,6 @@
 <template>
   <BaseWindow v-bind="baseWindowProps" ref="baseWindow">
-    <component :is="contentComponent" :title="title" :contentType="id" />
+    <component :is="contentComponent" :title="title" :contentType="id" v-bind="{args}" />
   </BaseWindow>
 </template>
 
@@ -31,6 +31,10 @@ const props = defineProps({
     type: Number,
     default: window.innerHeight * 0.4,
   },
+  args: {
+    type: Object,
+    default: null
+  }
 })
 
 const title = ref('unamed_window')
