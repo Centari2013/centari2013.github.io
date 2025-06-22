@@ -23,7 +23,7 @@
     </template>
     <div id="filespace">
       <div 
-            v-for="item in desktopContents.value" 
+            v-for="item in desktopContents" 
             :key="item.name" 
             class="file-item"
             @dblclick="handleFileOpen(item)"
