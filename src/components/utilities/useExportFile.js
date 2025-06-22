@@ -1,4 +1,10 @@
-import { jsPDF } from 'jspdf';
+
+const importJsPdf = async () => {
+  const { jsPDF } = await import('jspdf');
+  return jsPDF;
+}
+
+let jsPDF = null;
 
 const emojiToImg = (emoji) => {
   const canvas = document.createElement("canvas");
@@ -114,8 +120,8 @@ export function useExportFile() {
   };
 
   const exportFile = async ({ id, content, exten, name }) => {
+    jsPDF = await importJsPdf();
     const ext = exten.toLowerCase();
-
     if (ext === 'md') {
       await exportMarkdownAsPDF(id, name);
     } else if (['txt', 'json', 'html', 'css', 'js', 'cpp', 'h'].includes(ext)) {
