@@ -125,7 +125,7 @@ export default {
 
 .desktop {
   @apply flex flex-col items-center pb-5 justify-end align-middle;
-  @apply w-full h-full relative;
+  @apply w-full h-dvh relative;
 }
 
 #filespace {
