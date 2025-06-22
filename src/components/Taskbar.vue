@@ -1,6 +1,7 @@
 <template>
   <div class="w-full h-1/15 bottom-0 absolute" 
-  @mouseover="showTaskbar"></div>
+  @mouseover="showTaskbar"
+  :style="{zIndex: taskbarZIndex}"></div>
   
   <div id="taskbar" ref="taskbar" data-augmented-ui="tl-clip bl-scoop-x tr-clip br-scoop-x"
   :style="{zIndex: taskbarZIndex}"
