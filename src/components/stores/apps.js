@@ -75,7 +75,6 @@ export const useAppsStore = defineStore('apps', {
       return this.openFiles.find(file => file.item === item).minimized;
     },
     openFile(item) {
-      console.log(this.isFileOpen(item))
       if (!this.isFileOpen(item)) {
         this.openFiles.push({ item, zIndex: ++this.zIndexCounter, maximized: false, minimized: false});
       }
