@@ -131,6 +131,7 @@ export default {
 #filespace {
   @apply absolute inset-0 z-0 grid gap-4 p-3;
   grid-template-columns: repeat(auto-fit, minmax(150px, max-content));
+  grid-auto-rows: 150px;
   pointer-events: auto; /* let clicks through to files */
 }
 
