@@ -2,6 +2,7 @@
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from '@xterm/addon-fit';
 import "@xterm/xterm/css/xterm.css";
+import { useIsMobile } from "@/components/utilities/useIsMobile";
 
 // Function to initialize the terminal
 export function initializeTerminal(terminalContainer, parentWindow) {
@@ -33,7 +34,8 @@ Type 'help' to get started.      \r\n
 
 function terminalSetup(terminalContainer, parentWindow) {
     let fontSize = 16;
-    if (isMobile()) fontSize = 12;
+    const {isMobile} = useIsMobile();
+    if (isMobile.value) fontSize = 12;
     const term = new Terminal({
         cursorBlink: true,
         fontSize: fontSize,

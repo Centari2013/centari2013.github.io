@@ -1,12 +1,19 @@
 // apps.js (Pinia store)
 
 import { defineStore } from 'pinia';
+import { useIsMobile } from '@/components/utilities/useIsMobile';
+
+function getIsMobile() {
+  const { isMobile } = useIsMobile();
+  return isMobile;
+}
 
 export const useAppsStore = defineStore('apps', {
   state: () => ({
+    
     // All apps (shared and unique)
     allApps: [
-      { id: 'terminal', name: 'Terminal', image: 'terminal', shared: true, minWidth: isMobile() ? 400 : 495},
+      { id: 'terminal', name: 'Terminal', image: 'terminal', shared: true, minWidth: getIsMobile().value ? 400 : 495},
       { id: 'file_manager', name: 'File Manager', image: 'directory', shared: true},
       { id: 'browser', name: 'Browser', image: 'browser', shared: true},
     ],

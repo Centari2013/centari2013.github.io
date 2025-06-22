@@ -13,7 +13,15 @@
       :image="app.image"
       @click="openOrToggleApp(app.id)"
     />
+    <div class="absolute h-6 w-6 m-3 right-0 top-0 flex justify-center" v-if="!isMobile">
+      <button @click="isTaskbarLocked = !isTaskbarLocked" class="taskbar-lock-button">
+        <LockTaskbarIcon class="locks" v-if="isTaskbarLocked" />
+        <UnlockTaskbarIcon class="locks" v-else />
+      </button>
+    </div>
+
   </div>
+    
 </template>
 
 <script setup>
@@ -22,46 +30,53 @@ import { useAppsStore } from '@/components/stores/apps';
 import { computed, useTemplateRef, onMounted, ref, watch } from 'vue';
 import { gsap } from 'gsap';
 
+import LockTaskbarIcon from '@/assets/icons/lock.svg'
+import UnlockTaskbarIcon from '@/assets/icons/unlock.svg'
+import { useIsMobile } from '@/components/utilities/useIsMobile';
+
+const { isMobile } = useIsMobile();
+console.log(isMobile)
+
+console.log(window.innerWidth)
 
 const taskbar = useTemplateRef('taskbar')
 const isHoveringTaskbar = ref(false);
 let taskbarHoverTimeoutId = null;
 let taskbarTween = null;
+const isTaskbarLocked = ref(true);
 const appsStore = useAppsStore();
 
 const taskbarApps = appsStore.taskbarApps; // Get desktop-specific apps (shared + unique)
 const taskbarZIndex = computed(() => appsStore.zIndexCounter + 1);
     
 const moveTaskbarVertically = (yPos, duration=1.5) => {
+  if (isTaskbarLocked.value) return;
   const el = taskbar.value
 
-  // kill existing animation before starting a new one
-  if (taskbarTween) {
+  if (taskbarTween) { // kill existing animation before starting a new one
     taskbarTween.kill();
   }
-  if(!isMobile() && !el.matches(":hover")){
-    taskbarTween = gsap
-      .to(el, {
-       y: yPos,
-       ease: "power2.inOut",
-       duration
-      })
-  }
+  taskbarTween = gsap
+    .to(el, {
+      y: yPos,
+      ease: "power2.inOut",
+      duration
+    })
 }
 
 const showTaskbar = () => {
   moveTaskbarVertically(0, 0.5);
 }
 
-const hideTaskbar = () => {
+const hideTaskbar = (duration=2000) => {
   taskbarHoverTimeoutId = setTimeout(() => {
     moveTaskbarVertically(window.innerHeight);
-  }, 2000);
+  }, duration);
 }
 
 watch(isHoveringTaskbar, (newBool, _oldBool) => {
   if (!newBool) { // if not hovering over taskbar
-    hideTaskbar()
+    hideTaskbar(1000)
   } else { // if hovering interrupt animation
     clearTimeout(taskbarHoverTimeoutId)
   }
@@ -90,6 +105,14 @@ const openOrToggleApp = (id) => {
 <style scoped>
 @reference '../style.css';
 
+.locks {
+  @apply h-full;
+}
+
+.locks :deep(path) {
+  @apply fill-alerts-base;
+}
+
 .icon-svg {
   @apply justify-center cursor-pointer h-4/5 aspect-square; 
 }
@@ -115,11 +138,15 @@ const openOrToggleApp = (id) => {
 }
 
 #taskbar {
-  @apply bg-primary-shadow/50;
+  @apply bg-primary-shadow/50 relative;
   @apply flex items-center justify-center space-x-5;
   width: 90%;
   height: 12%;
   
+}
+
+.taskbar-lock-button {
+  @apply w-full p-0 aspect-square bg-transparent flex items-center justify-center rounded-none border-none;
 }
 
 
