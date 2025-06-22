@@ -35,9 +35,6 @@ import UnlockTaskbarIcon from '@/assets/icons/unlock.svg'
 import { useIsMobile } from '@/components/utilities/useIsMobile';
 
 const { isMobile } = useIsMobile();
-console.log(isMobile)
-
-console.log(window.innerWidth)
 
 const taskbar = useTemplateRef('taskbar')
 const isHoveringTaskbar = ref(false);
