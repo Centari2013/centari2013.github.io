@@ -1,8 +1,13 @@
 <template>
-  <div
-    class="desktop"
-  >
-   
+  <div class="desktop">
+    <div 
+    v-if="!isMobile"
+    :style="{zIndex: windowBarZIndex}"
+    class="absolute bg-accent-yellow-base/25 h-full w-20 left-0 flex items-center justify-center">
+      <div class="h-2/3 w-full bg-alerts-shadow/50">
+
+      </div>
+    </div>
     <template v-for="app in openApps" :key="app.id">
         <ContentWindow
           :ref="assignWindowRef(app.id)"
@@ -45,23 +50,26 @@
 import Icon from '@/components/Icon.vue';
 import { useAppsStore } from '@/components/stores/apps';
 import Taskbar from '@/components/Taskbar.vue';
-import { ref, toRaw, defineAsyncComponent, reactive, provide, onMounted, useTemplateRef } from 'vue';
+import { ref, toRaw, defineAsyncComponent, reactive, provide, onMounted } from 'vue';
 
 const ContentWindow = defineAsyncComponent(() => import("@/components/ContentWindow.vue"));
 import FileWindow from '@/components/FileWindow.vue';
 import { storeToRefs } from 'pinia';
 import makeDirectoryItems from '@/components/utilities/makeDirectoryItems';
 import { makeFileItems } from '@/components/utilities/makeFileItems';
-import { openFile } from '@/components/utilities/openFile'
-
+import { openFile } from '@/components/utilities/openFile';
+import { computed } from 'vue';
+import { useIsMobile } from '@/components/utilities/useIsMobile';
 
 const windowRefs = reactive({});
+const { isMobile } = useIsMobile();
 provide('windowRefs', windowRefs);
 const desktopContents = ref([]);
 const appsStore = useAppsStore();
 const { openApps, openFiles, isAppOpen } = storeToRefs(appsStore);
 const fmId = 'file_manager'
 const browserId = 'browser'
+const windowBarZIndex = computed(() => appsStore.zIndexCounter + 1);
 
 const assignWindowRef = (id) => (el) => {
   if (el) windowRefs[id] = el;

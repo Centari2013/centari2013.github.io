@@ -31,7 +31,7 @@
         <button class="titlebar-button" @click="closeWindow">
           <CloseIcon class="task-icon" width="100%" height="100%"/>
         </button>
-        <button class="titlebar-button" @click="minimizeWindow" v-if="showMinimizeButton">
+        <button class="titlebar-button" @click="minimizeWindow" v-if="showMinimizeButton && !isMobile">
           <MinimizeIcon class="task-icon rotate-90" width="100%" height="100%"/>
         </button>
         <button class="titlebar-button" @click="maximizeWindow">
@@ -75,6 +75,9 @@ import { ref, reactive, onMounted, useTemplateRef, onBeforeUnmount } from "vue";
 import { gsap } from "gsap";
 import { startResize, startDrag } from '@/components/utilities/dragAndResize.js'
 
+import { useIsMobile } from "@/components/utilities/useIsMobile";
+
+const isMobile = useIsMobile();
 
 const opaque = ref(false)
 

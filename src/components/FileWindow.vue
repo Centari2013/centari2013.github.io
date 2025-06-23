@@ -56,6 +56,7 @@ const downloadFile = async () => {
   })
 };
 
+
 const baseWindowProps = {
   initialPosition: props.initialPosition,
   minWidth: props.minWidth,
