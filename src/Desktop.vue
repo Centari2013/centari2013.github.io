@@ -64,8 +64,13 @@ const fmId = 'file_manager'
 const browserId = 'browser'
 
 const assignWindowRef = (id) => (el) => {
-  if (el) windowRefs[id] = el;
+  if (el) {
+    windowRefs[id] = el;
+  } else {
+    delete windowRefs[id];
+  }
 };
+
 
 const opendir = (item) => {
   //TODO: FIX
