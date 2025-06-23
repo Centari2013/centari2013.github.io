@@ -108,9 +108,9 @@ const scale = 0.2
 const resizableWindow = useTemplateRef('resizableWindow');
 
 function maximizeWindow() {
+  
   if (props.getMinimized()) {
-    animateRestore();
-    props.handleMinimize(false);
+    animateRestore().then(() => props.handleMinimize(false));
   } else if (props.getMaximized()) {
     animateRestore(true);
     props.handleMaximize(false);
@@ -159,8 +159,7 @@ function handleClick() {
   if (props.getMinimized()) {
     maximizeWindow()
   }
-  zIndex.value = props.getzIndex();
-
+  //zIndex.value = props.getzIndex();
 };
 
 function closeWindow() {
@@ -240,7 +239,7 @@ function minimizeWindow() {
 function animateRestore(reverse = false) {
   const el = resizableWindow.value;
   if (reverse) {
-    gsap
+    return gsap
       .to(el, {
         width: `${previousDimensions.size.width}px`,
         height: `${previousDimensions.size.height}px`,
@@ -260,9 +259,9 @@ function animateRestore(reverse = false) {
           },
         });
       });
-    return;
+    
   }
-  gsap
+  return gsap
     .to(el, {
       left: `${previousDimensions.position.left}px`,
       top: `${previousDimensions.position.top}px`,
@@ -317,7 +316,8 @@ onBeforeUnmount(() => {
 
 defineExpose({
   minimizeWindow,
-  maximizeWindow
+  maximizeWindow,
+  resizableWindow,
 })
 
 </script>
