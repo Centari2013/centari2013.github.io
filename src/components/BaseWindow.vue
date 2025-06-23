@@ -159,7 +159,7 @@ function handleClick() {
   if (props.getMinimized()) {
     maximizeWindow()
   }
-  //zIndex.value = props.getzIndex();
+  zIndex.value = props.getzIndex();
 };
 
 function closeWindow() {
