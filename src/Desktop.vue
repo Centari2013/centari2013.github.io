@@ -72,8 +72,13 @@ const browserId = 'browser'
 const windowBarZIndex = computed(() => appsStore.zIndexCounter + 1);
 
 const assignWindowRef = (id) => (el) => {
-  if (el) windowRefs[id] = el;
+  if (el) {
+    windowRefs[id] = el;
+  } else {
+    delete windowRefs[id];
+  }
 };
+
 
 const opendir = (item) => {
   //TODO: FIX
