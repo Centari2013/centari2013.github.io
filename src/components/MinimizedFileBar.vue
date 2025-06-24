@@ -5,20 +5,22 @@
   <div 
     ref="filebar"
     id="filebar"
-    @mouseenter="isHoveringFilebar = true"
-    @mouseleave="isHoveringFilebar = false"
+    @mouseover="isHoveringFilebar = true"
+    @mouseout="isHoveringFilebar = false"
     :style="{zIndex: windowBarZIndex}"
     v-show="!isMobile"
-    class="absolute bg-accent-yellow-base/25 top-1/2 -translate-y-1/2 transform h-2/3 w-20 left-0 flex items-center justify-center">
+    class="absolute bg-alerts-shadow/50 top-[16vh] bottom-[16vh] h-[66.666vh] w-20 left-0 flex flex-col items-center justify-center">
 
-      <div class="h-2/3 w-full bg-alerts-shadow/50 flex flex-col items-center justify-center">
-        <div 
-          v-for="file in minimizedFiles"
-          :id="`filewin-${file.item.object.$$.ptr}`"
-          class="w-full h-16 relative"
-          ref="minimizedIcon"
-        ></div>
+      
+      <div 
+        v-for="file in minimizedFiles"
+        :id="`filewin-${file.item.object.$$.ptr}`"
+        class="w-full h-16 relative bg-white/10 border-b border-white/20"
+        ref="minimizedIcon"
+      >
+        <span class="text-xs text-center w-full block">{{ file.item.object.$$.ptr }}</span>
       </div>
+      
   </div>
 </template>
 

@@ -1,5 +1,6 @@
 <template>
-  <div
+  <div @mouseover="forwardMouseOver" @mouseout="forwardMouseOut">
+    <div
   v-if="isMini"
   ref="restoreOverlay"
     @mousedown="restore"
@@ -77,6 +78,8 @@
       </div>
     </div>
   </div>
+  </div>
+  
 </template>
 
 <script setup>
@@ -105,6 +108,32 @@ const windowZ = computed(() =>
     ? appsStore.zIndexCounter + 1
     : zIndex.value
 );
+
+function forwardMouseEvent(type, originalEvent) {
+  const targetEl = document.getElementById('filebar');
+  if (!targetEl) return;
+
+  const simulatedEvent = new MouseEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+    clientX: originalEvent.clientX,
+    clientY: originalEvent.clientY,
+    relatedTarget: originalEvent.relatedTarget,
+  });
+
+  targetEl.dispatchEvent(simulatedEvent);
+}
+
+
+function forwardMouseOver(e) {
+  forwardMouseEvent("mouseover", e);
+}
+
+function forwardMouseOut(e) {
+  forwardMouseEvent("mouseout", e);
+}
+
 
 // the overlay’s z-index must be 1 higher
 const overlayZ = computed(() => windowZ.value + 1);
