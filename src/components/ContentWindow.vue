@@ -1,5 +1,6 @@
 <template>
-  <BaseWindow v-bind="baseWindowProps" ref="baseWindow">
+  <BaseWindow v-bind="baseWindowProps" ref="baseWindow"
+  :class="{'cursor-pointer': isMini}">
     <component :is="contentComponent" :title="title" :contentType="id" v-bind="{args}" />
   </BaseWindow>
 </template>
@@ -67,7 +68,9 @@ const handleMaximize = (bool) => {
   appsStore.setAppMaximize(props.id, bool)
 }
 
+const isMini = ref(false)
 const handleMinimize = (bool) => {
+  isMini.value = bool;
   appsStore.setAppMinimize(props.id, bool)
 }
 

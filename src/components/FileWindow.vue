@@ -1,5 +1,6 @@
 <template>
-  <BaseWindow v-bind="baseWindowProps" @export="downloadFile">
+  <BaseWindow v-bind="baseWindowProps" @export="downloadFile"
+  :class="{'cursor-pointer': isMini}">
     <FileViewerView 
       :content="item.content"
       :file_ext="item.exten"
@@ -15,6 +16,7 @@ import FileViewerView from "@/components/views/FileViewerView.vue"
 import { useAppsStore } from "@/components/stores/apps"
 import { useExportFile } from '@/components/utilities/useExportFile'
 import { v4 as uuidv4 } from 'uuid';
+import { ref } from "vue";
 
 const { exportFile } = useExportFile()
 
@@ -41,7 +43,9 @@ const handleMaximize = (bool) => {
   appsStore.setFileMaximize(props.item, bool)
 }
 
+const isMini = ref(false)
 const handleMinimize = (bool) => {
+  isMini.value = bool;
   appsStore.setFileMinimize(props.item, bool)
 }
 
@@ -57,6 +61,20 @@ const downloadFile = async () => {
 };
 
 
+const getMiniPos = () => {
+  const filebarWinContainer = document.getElementById(`filewin-${props.item.object.$$.ptr}`);
+
+  if (!filebarWinContainer) return { x: 0, y: 0 };
+
+  const rect = filebarWinContainer.getBoundingClientRect();
+
+  return {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+  };
+};
+
+
 const baseWindowProps = {
   initialPosition: props.initialPosition,
   minWidth: props.minWidth,
@@ -68,7 +86,9 @@ const baseWindowProps = {
   handleMinimize,
   getMaximized,
   getMinimized,
-  showMinimizeButton: false,
-  showExportButton: true
+  getMiniPos,
+  showMinimizeButton: true,
+  showExportButton: true,
+  isFileWin: true
 }
 </script>

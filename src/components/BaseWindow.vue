@@ -1,11 +1,26 @@
 <template>
   <div
+  v-if="isMini"
+    @mousedown="restore"
+    class="bg-green-500/50 fixed"
+    :style="{
+      zIndex: `${overlayZ}`,
+      top: `${state.currentDimensions.position.top}px`,
+      left: `${state.currentDimensions.position.left}px`,
+      width: `${state.currentDimensions.size.width}px`,
+      height: `${state.currentDimensions.size.height}px`,
+      minWidth: `${state.minSize.width}px`,
+      minHeight: `${state.minSize.height}px`,
+    }"
+  ></div>
+  <div
+    v-bind="$attrs"
     @mousedown="handleClick"
     data-augmented-ui="tl-clip tr-clip bl-scoop-x both"
     class="base-window"
     :class="{'opacity-75': opaque}"
     :style="{
-      zIndex: `${zIndex}`,
+      zIndex: `${windowZ}`,
       top: `${state.currentDimensions.position.top}px`,
       left: `${state.currentDimensions.position.left}px`,
       width: `${state.currentDimensions.size.width}px`,
@@ -29,21 +44,21 @@
       <!-- Buttons Container -->
       <div class="button-container">
         <button class="titlebar-button" @click="closeWindow">
-          <CloseIcon class="task-icon" width="100%" height="100%"/>
+          <CloseIcon class="title-icon" width="100%" height="100%"/>
         </button>
         <button class="titlebar-button" @click="minimizeWindow" v-if="showMinimizeButton && !isMobile">
-          <MinimizeIcon class="task-icon rotate-90" width="100%" height="100%"/>
+          <MinimizeIcon class="title-icon rotate-90" width="100%" height="100%"/>
         </button>
         <button class="titlebar-button" @click="maximizeWindow">
-          <MaximizeIcon class="task-icon" width="100%" height="100%"/>
+          <MaximizeIcon class="title-icon" width="100%" height="100%"/>
         </button>
         <button @click="$emit('export')" class="titlebar-button" v-if="showExportButton">
-          <ExportIcon class="task-icon export -rotate-90"/>
+          <ExportIcon class="title-icon export -rotate-90"/>
         </button>
 
         <button @click="opaque = !opaque" class="titlebar-button">
-          <EyeClose  class=" rotate-90 task-icon" v-if="opaque"/>
-          <EyeOpen class="rotate-90 task-icon" v-else/>
+          <EyeClose  class=" rotate-90 title-icon" v-if="opaque"/>
+          <EyeOpen class="rotate-90 title-icon" v-else/>
         </button>
         
         
@@ -71,15 +86,83 @@ import ExportIcon from "@/assets/icons/export.svg"
 import EyeClose from "@/assets/icons/eyeClose.svg"
 import EyeOpen from "@/assets/icons/eyeOpen.svg"
 
-import { ref, reactive, onMounted, useTemplateRef, onBeforeUnmount } from "vue";
+import { ref, reactive, onMounted, useTemplateRef, onBeforeUnmount, nextTick, watch, computed } from "vue";
 import { gsap } from "gsap";
 import { startResize, startDrag } from '@/components/utilities/dragAndResize.js'
 
 import { useIsMobile } from "@/components/utilities/useIsMobile";
+import { useAppsStore } from '@/components/stores/apps';
+import { storeToRefs } from "pinia";
 
-const isMobile = useIsMobile();
+defineOptions({ inheritAttrs: false });
+const appsStore = useAppsStore()
+const { minimizedFiles } = storeToRefs(appsStore);
 
-const opaque = ref(false)
+// the window’s z-index
+const windowZ = computed(() =>
+  props.isFileWin && isMini.value
+    ? appsStore.zIndexCounter + 1
+    : zIndex.value
+);
+
+// the overlay’s z-index must be 1 higher
+const overlayZ = computed(() => windowZ.value + 1);
+
+
+function watchPosition(el, callback) {
+  let lastRect = el.getBoundingClientRect();
+
+  function check() {
+    const newRect = el.getBoundingClientRect();
+    if (
+      newRect.top !== lastRect.top ||
+      newRect.left !== lastRect.left
+    ) {
+      callback(newRect, lastRect);
+      lastRect = newRect;
+    }
+    requestAnimationFrame(check);
+  }
+
+  requestAnimationFrame(check);
+}
+const snapToMin = () => {
+  if (props.getMinimized() && !isRestoring.value) {
+    animateSnapToMinimized("center", 0.1);
+  }
+}
+
+watch(minimizedFiles, (_new, _old) => {
+  // Only animate if we're already minimized
+  if (props.getMinimized()) {
+    moveMinimizedWindow(); // light movement only
+  }
+});
+
+const isRestoring = ref(false);
+let windowTween = null
+
+function moveMinimizedWindow() {
+  if (isRestoring.value) return;
+  killWindowTween()
+
+  const el = resizableWindow.value;
+  const min_size = state.minSize;
+  const offset_x = min_size.width / 2;
+  const offset_y = min_size.height / 2;
+
+  const mini_pos = props.getMiniPos?.() ?? { x: 0, y: 0 };
+
+  windowTween = gsap.to(el, {
+    left: `${mini_pos.x - offset_x}px`,
+    top: `${mini_pos.y - offset_y}px`,
+    duration: 0.5,
+    ease: "power1.out",
+  });
+}
+
+
+const filebar = document.getElementById("filebar");
 
 const props = defineProps([
   'initialPosition',
@@ -94,8 +177,18 @@ const props = defineProps([
   'handleClose',
   'handleMinimize',
   'handleMaximize',
-  'showExportButton'
+  'showExportButton',
+  'isFileWin'
 ])
+
+if (props.isFileWin) watchPosition(filebar, snapToMin);
+
+
+const {isMobile} = useIsMobile();
+
+const opaque = ref(false)
+
+const isMini = ref(false)
 
 const zIndex = ref(0);
 defineEmits(['export']);
@@ -106,23 +199,46 @@ let previousDimensions = {
 }
 
 
-//let dragStart = { x: 0, y: 0 };
 const scale = 0.2
 const resizableWindow = useTemplateRef('resizableWindow');
 
+function minimizeWindow() {
+  if (state.disableMovement) return;
+  new Promise((resolve) => {
+    props.handleMinimize(true);
+  })//.then(() => isMini.value = true)
+  isMini.value = true
+
+  state.disableMovement = true;
+  previousDimensions = JSON.parse(JSON.stringify(state.currentDimensions));
+  animateSnapToMinimized();
+};
+
 function maximizeWindow() {
-  
-  if (props.getMinimized()) {
-    animateRestore().then(() => props.handleMinimize(false));
-  } else if (props.getMaximized()) {
-    animateRestore(true);
-    props.handleMaximize(false);
-  } else if (!props.getMaximized()) {
-    previousDimensions = JSON.parse(JSON.stringify(state.currentDimensions));
-    animateMaximize();
-    props.handleMaximize(true);
-  }
+  return new Promise((resolve) => {
+    if (props.getMinimized()) {
+      animateRestore().then(() => {
+        new Promise((resolve) => {
+          props.handleMinimize(false);
+        })//.then(() => isMini.value = false)
+        //props.handleMinimize(false);
+        isMini.value =false
+        resolve();
+      });
+    } else if (props.getMaximized()) {
+      animateRestore(true).then(() => {
+        props.handleMaximize(false);
+        resolve();
+      });
+    } else {
+      previousDimensions = JSON.parse(JSON.stringify(state.currentDimensions));
+      animateMaximize(); // if this is not async, we resolve immediately
+      props.handleMaximize(true);
+      resolve();
+    }
+  });
 }
+
 
 const state = reactive({
   isDragging: false,
@@ -157,13 +273,32 @@ function handleStartResize(event, direction) {
   startResize(getDragResizeContext(), event, direction);
 }
 
+function killWindowTween() {
+  if (windowTween) {
+      windowTween.kill();
+      windowTween = null;
+  }
+}
+
+watch(isRestoring, (newValue, _old) => {
+  if(newValue){
+    killWindowTween()
+  }
+});
+
+function restore() {
+  isRestoring.value = true;
+    killWindowTween()
+    maximizeWindow().then(() => {
+      zIndex.value = props.getzIndex();
+      isRestoring.value = false;
+    });
+}
 
 function handleClick() {
-  if (props.getMinimized()) {
-    maximizeWindow()
-  }
   zIndex.value = props.getzIndex();
 };
+
 
 function closeWindow() {
   if (state.disableMovement) return;
@@ -205,13 +340,17 @@ function animateMaximize() {
 };
 
 function animateSnapToMinimized(origin = "center", duration = 0.5) {
-  const mini_pos = props.getMiniPos();
+  let mini_pos = null;
+  nextTick(() => {
+    mini_pos = props.getMiniPos();
+  })
+  
   const min_size = state.minSize;
   const offset_x = min_size.width / 2;
   const offset_y = min_size.height / 2;
   const el = resizableWindow.value;
 
-  gsap
+  return gsap
     .to(el, {
       width: `${min_size.width}px`,
       height: `${min_size.height}px`,
@@ -231,15 +370,11 @@ function animateSnapToMinimized(origin = "center", duration = 0.5) {
     });
 };
 
-function minimizeWindow() {
-  if (state.disableMovement) return;
-  state.disableMovement = true;
-  previousDimensions = JSON.parse(JSON.stringify(state.currentDimensions));
-  animateSnapToMinimized();
-  props.handleMinimize(true);
-};
+
 
 function animateRestore(reverse = false) {
+  killWindowTween()
+
   const el = resizableWindow.value;
   if (reverse) {
     return gsap
@@ -371,7 +506,7 @@ defineExpose({
 }
 
 .titlebar {
-  @apply flex flex-col pl-4 pr-3 pt-5 text-sm font-bold cursor-move select-none h-full w-20;
+  @apply flex flex-col pl-4 pr-3 pt-5 text-sm font-bold cursor-move select-none h-full w-15;
   @apply bg-primary-dark-base;
 }
 
@@ -380,7 +515,7 @@ defineExpose({
 }
 
 .titlebar-button {
-  @apply w-1/5 p-0 aspect-square bg-transparent flex items-center justify-center rounded-none rotate-90 border-none;
+  @apply w-1/3 p-0 aspect-square bg-transparent flex items-center justify-center rounded-none rotate-90 border-none;
 }
 
 .titlebar-button:hover {
@@ -392,38 +527,38 @@ defineExpose({
   white-space: nowrap;
 }
 
-.task-icon path,
-.task-icon circle,
-.task-icon line,
-.task-icon polyline,
-.task-icon polygon {
+.title-icon path,
+.title-icon circle,
+.title-icon line,
+.title-icon polyline,
+.title-icon polygon {
   @apply stroke-primary-accent-light;
 }
 
-.task-icon path {
+.title-icon path {
   @apply fill-primary-accent-light;
 }
 
-.task-icon {
+.title-icon {
   filter: drop-shadow(0 0 1px #ff0546) drop-shadow(0 0 5px #ff0546);
 }
 
 
-.task-icon:hover {
+.title-icon:hover {
   filter: drop-shadow(0 0 5px #0098db) drop-shadow(0 0 10px #0098db);
 }
-.task-icon:hover circle,
-.task-icon:hover line,
-.task-icon:hover polyline,
-.task-icon:hover polygon,
-.task-icon:hover path {
+.title-icon:hover circle,
+.title-icon:hover line,
+.title-icon:hover polyline,
+.title-icon:hover polygon,
+.title-icon:hover path {
   @apply fill-alerts-base;
 }
-.task-icon:hover circle,
-.task-icon:hover line,
-.task-icon:hover polyline,
-.task-icon:hover polygon,
-.task-icon:hover path {
+.title-icon:hover circle,
+.title-icon:hover line,
+.title-icon:hover polyline,
+.title-icon:hover polygon,
+.title-icon:hover path {
   @apply stroke-alerts-base;
 }
 

@@ -31,6 +31,8 @@ export const useAppsStore = defineStore('apps', {
 
     // Get apps unique to the taskbar (shared apps + apps with specific ids for the taskbar)
     taskbarApps: (state) => state.allApps.filter(app => app.shared || app.id === 'browser'), // Example logic for taskbar apps
+    
+    minimizedFiles: (state) => state.openFiles.filter(f => f.minimized),
   },
   actions: {
     getAppzIndex(id) {
