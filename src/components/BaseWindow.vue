@@ -1,8 +1,9 @@
 <template>
   <div
   v-if="isMini"
+  ref="restoreOverlay"
     @mousedown="restore"
-    class="bg-green-500/50 fixed"
+    class="cursor-pointer fixed"
     :style="{
       zIndex: `${overlayZ}`,
       top: `${state.currentDimensions.position.top}px`,
@@ -110,9 +111,11 @@ const overlayZ = computed(() => windowZ.value + 1);
 
 
 function watchPosition(el, callback) {
+  let isCancelled = false;
   let lastRect = el.getBoundingClientRect();
 
   function check() {
+    if (isCancelled) return;
     const newRect = el.getBoundingClientRect();
     if (
       newRect.top !== lastRect.top ||
@@ -125,10 +128,16 @@ function watchPosition(el, callback) {
   }
 
   requestAnimationFrame(check);
+
+  // return cleanup function
+  return () => {
+    isCancelled = true;
+  };
 }
-const snapToMin = () => {
+
+const snapToMin = async () => {
   if (props.getMinimized() && !isRestoring.value) {
-    animateSnapToMinimized("center", 0.1);
+    await animateSnapToMinimized("center", 0.1);
   }
 }
 
@@ -153,7 +162,7 @@ function moveMinimizedWindow() {
 
   const mini_pos = props.getMiniPos?.() ?? { x: 0, y: 0 };
 
-  windowTween = gsap.to(el, {
+  windowTween = gsap.to(state.currentDimensions.position, {
     left: `${mini_pos.x - offset_x}px`,
     top: `${mini_pos.y - offset_y}px`,
     duration: 0.5,
@@ -181,7 +190,18 @@ const props = defineProps([
   'isFileWin'
 ])
 
-if (props.isFileWin) watchPosition(filebar, snapToMin);
+let cancelWatchPosition = null;
+
+onMounted(() => {
+  if (props.isFileWin) {
+    cancelWatchPosition = watchPosition(filebar, snapToMin);
+  }
+});
+
+onBeforeUnmount(() => {
+  if (cancelWatchPosition) cancelWatchPosition();
+});
+
 
 
 const {isMobile} = useIsMobile();
@@ -201,8 +221,9 @@ let previousDimensions = {
 
 const scale = 0.2
 const resizableWindow = useTemplateRef('resizableWindow');
+const restoreOverlay = useTemplateRef('restoreOverlay');
 
-function minimizeWindow() {
+async function minimizeWindow() {
   if (state.disableMovement) return;
   new Promise((resolve) => {
     props.handleMinimize(true);
@@ -211,7 +232,7 @@ function minimizeWindow() {
 
   state.disableMovement = true;
   previousDimensions = JSON.parse(JSON.stringify(state.currentDimensions));
-  animateSnapToMinimized();
+  await animateSnapToMinimized();
 };
 
 function maximizeWindow() {
@@ -303,7 +324,8 @@ function handleClick() {
 function closeWindow() {
   if (state.disableMovement) return;
   const el = resizableWindow.value;
-  gsap.to(el, {
+  const el2 = restoreOverlay.value;
+  gsap.to([el, el2], {
       scale: 0.1,
       duration: 0.1,
       ease: "power1.out",
@@ -317,9 +339,9 @@ function closeWindow() {
 function animateMaximize() {
   const el = resizableWindow.value
   gsap
-    .to(el, {
-      left: "0px",
-      top: "0px",
+    .to(state.currentDimensions.position, {
+      left: "0",
+      top: "0",
       duration: 0.5,
       ease: "power1.out",
       onComplete: () => {
@@ -327,7 +349,7 @@ function animateMaximize() {
       },
     })
     .then(() => {
-      gsap.to(el, {
+      gsap.to(state.currentDimensions.size, {
         height: window.innerHeight,
         width: window.innerWidth,
         duration: 0.1,
@@ -339,7 +361,8 @@ function animateMaximize() {
     });
 };
 
-function animateSnapToMinimized(origin = "center", duration = 0.5) {
+async function animateSnapToMinimized(origin = "center", duration = 0.5) {
+  await nextTick()
   let mini_pos = null;
   nextTick(() => {
     mini_pos = props.getMiniPos();
@@ -349,23 +372,22 @@ function animateSnapToMinimized(origin = "center", duration = 0.5) {
   const offset_x = min_size.width / 2;
   const offset_y = min_size.height / 2;
   const el = resizableWindow.value;
+  const el2 = restoreOverlay.value;
 
-  return gsap
-    .to(el, {
-      width: `${min_size.width}px`,
-      height: `${min_size.height}px`,
+   gsap.to([el, el2], {
+      width: `${min_size.width}`,
+      height: `${min_size.height}`,
       transformOrigin: origin,
       duration: 0.1,
       ease: "power1.out",
-    })
-    .then(() => {
-      gsap.to(el, {
-        left: `${mini_pos.x - offset_x}px`,
-        top: `${mini_pos.y - offset_y}px`,
-        scale,
-        transformOrigin: origin,
+    }).then(() => {
+      gsap.to([el, el2], {
+        left: `${mini_pos.x - offset_x}`,
+        top: `${mini_pos.y - offset_y}`,
         duration,
         ease: "power1.out",
+        scale,
+        transformOrigin: origin,
       });
     });
 };
@@ -376,18 +398,18 @@ function animateRestore(reverse = false) {
   killWindowTween()
 
   const el = resizableWindow.value;
+  const el2 = restoreOverlay.value;
   if (reverse) {
-    return gsap
-      .to(el, {
-        width: `${previousDimensions.size.width}px`,
-        height: `${previousDimensions.size.height}px`,
+    return gsap.to([el, el2], {
+        width: `${previousDimensions.size.width}`,
+        height: `${previousDimensions.size.height}`,
         duration: 0.1,
         ease: "power1.out",
       })
       .then(() => {
-        gsap.to(el, {
-          left: `${previousDimensions.position.left}px`,
-          top: `${previousDimensions.position.top}px`,
+        gsap.to([el, el2], {
+          left: `${previousDimensions.position.left}`,
+          top: `${previousDimensions.position.top}`,
           scale: 1,
           duration: 0.5,
           ease: "power1.out",
@@ -400,17 +422,17 @@ function animateRestore(reverse = false) {
     
   }
   return gsap
-    .to(el, {
-      left: `${previousDimensions.position.left}px`,
-      top: `${previousDimensions.position.top}px`,
+    .to([el, el2], {
+      left: `${previousDimensions.position.left}`,
+      top: `${previousDimensions.position.top}`,
       scale: 1,
       duration: 0.5,
       ease: "power1.out",
     })
     .then(() => {
-      gsap.to(el, {
-        width: `${previousDimensions.size.width}px`,
-        height: `${previousDimensions.size.height}px`,
+      gsap.to([el, el2], {
+        width: `${previousDimensions.size.width}`,
+        height: `${previousDimensions.size.height}`,
         duration: 0.1,
         ease: "power1.out",
         onComplete: () => {
@@ -420,12 +442,12 @@ function animateRestore(reverse = false) {
       });
     });
 };
-function handleViewportResize() {
+async function handleViewportResize() {
   if (props.getMaximized()) {
     state.currentDimensions.size.width = window.innerWidth;
     state.currentDimensions.size.height = window.innerHeight;
   } else if (props.getMinimized()) {
-    animateSnapToMinimized("center", 0.1);
+    await animateSnapToMinimized("center", 0.1);
   }
 }
 
