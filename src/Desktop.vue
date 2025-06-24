@@ -23,7 +23,8 @@
       <div 
             v-for="item in desktopContents" 
             :key="item.name" 
-            class="file-item"
+            class="file-item "
+            :class="{'h-35 w-35': isMobile, 'h-40 w-40': !isMobile}"
             @dblclick="handleFileOpen(item)"
           >
             <Icon v-if="item.type === 'd'" :image="'directory'" class="d"/>
@@ -54,8 +55,9 @@ import { storeToRefs } from 'pinia';
 import makeDirectoryItems from '@/components/utilities/makeDirectoryItems';
 import { makeFileItems } from '@/components/utilities/makeFileItems';
 import { openFile } from '@/components/utilities/openFile';
+import { useIsMobile } from "@/components/utilities/useIsMobile";
 
-
+const {isMobile} = useIsMobile()
 const windowRefs = reactive({});
 
 provide('windowRefs', windowRefs);
@@ -161,8 +163,7 @@ onMounted(() => {
 
 .file-item {
   @apply p-4 cursor-pointer relative; /* Make it relative for pseudo-element positioning */
-  height: 150px; /* Fixed height */
-  width: 150px; /* Fixed width */
+   /* Fixed width */
   display: flex; /* Center content */
   flex-direction: column;
   justify-content: center;
