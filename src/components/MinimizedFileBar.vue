@@ -9,7 +9,8 @@
     @mouseout="isHoveringFilebar = false"
     :style="{zIndex: windowBarZIndex}"
     v-show="!isMobile"
-    class="absolute bg-alerts-shadow/50 top-[16vh] bottom-[16vh] h-[66.666vh] w-20 left-0 flex flex-col items-center justify-center">
+    class="absolute bg-alerts-shadow/50 top-[16vh] bottom-[16vh] h-[66.666vh] 
+    w-20 left-0 flex flex-col items-center justify-center">
 
       
       <div 
@@ -75,7 +76,9 @@ watch(isHoveringFilebar, (newBool, _oldBool) => {
 })
 
 onMounted(() => {
-  hideFilebar();
+  gsap.set(filebar.value, {
+    x: -filebar.value.offsetWidth,
+  });
 })
 
 </script>
