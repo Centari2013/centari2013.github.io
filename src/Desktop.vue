@@ -45,10 +45,13 @@ import Icon from '@/components/Icon.vue';
 import { useAppsStore } from '@/components/stores/apps';
 import Taskbar from '@/components/Taskbar.vue';
 import MinimizedFileBar from '@/components/MinimizedFileBar.vue';
+
+import { createLoader } from '@/components/utilities/simulateLoading';
+
 import { ref, toRaw, defineAsyncComponent, reactive, provide, onMounted } from 'vue';
 
 const ContentWindow = defineAsyncComponent(() => import("@/components/ContentWindow.vue"));
-
+const emit = defineEmits(['initialized', 'progress'])
 
 import FileWindow from '@/components/FileWindow.vue';
 import { storeToRefs } from 'pinia';
@@ -66,6 +69,8 @@ const appsStore = useAppsStore();
 const { openApps, openFiles, isAppOpen } = storeToRefs(appsStore);
 const fmId = 'file_manager'
 const browserId = 'browser'
+
+const loader = createLoader(2, p => emit('progress', p))
 
 const assignWindowRef = (id) => (el) => {
   if (el) {
@@ -121,10 +126,14 @@ const handleFileOpen = (item) => {
 onMounted(() => {
   // initialize file system
   SystemModule.onRuntimeInitialized = () => {
-          console.log("SystemModule is fully initialized.");
-          desktopContents.value = getDesktopContents(); 
+    loader.checkpoint()
+    console.log("SystemModule is fully initialized.");
+    desktopContents.value = getDesktopContents(); 
+    loader.checkpoint()
   };
 
+  loader.done.then(() => emit('initialized'))
+  
 })
 
 

@@ -29,13 +29,13 @@
     </div>
 
     <!-- Webpage -->
-    <iframe :src="currentUrl" class="flex-grow w-full border-none"></iframe>
+    <iframe ref="iframe" :src="currentUrl" class="flex-grow w-full border-none"></iframe>
   </div>
 </template>
 
 
 <script setup>
-import { ref } from 'vue';
+import { ref, useTemplateRef } from 'vue';
 import { extractAndDecodeBase64 } from '@/components/utilities/decode'
 import BrowserBackIcon from '@/assets/icons/browserBack.svg'
 import BrowserNewTabIcon from '@/assets/icons/browserNewTab.svg'
@@ -49,6 +49,7 @@ const props = defineProps({
 })
 
 const currentUrl = ref("https://centari2013.github.io/SoundRoom");
+const iframe = useTemplateRef('iframe')
 
 if (props.args) {
   const propLink = extractAndDecodeBase64(props.args.url)
@@ -57,6 +58,10 @@ if (props.args) {
 
 const openInNewTab = () =>{
   window.open(currentUrl.value, "_blank");
+}
+
+const reloadPage = () => {
+  iframe.value.src = iframe.value.src;
 }
 </script>
 

@@ -3,10 +3,10 @@ import { createPinia } from 'pinia';
 import '../node_modules/augmented-ui/augmented-ui.min.css'
 import './style.css'
 import '@/assets/js/terminal/system';
-import Desktop from './Desktop.vue';
+import App from '@/App.vue';
 
 
-const app = createApp(Desktop);
+const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia); // Register Pinia

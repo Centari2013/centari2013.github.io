@@ -48,7 +48,7 @@
         <button class="titlebar-button" @click="closeWindow">
           <CloseIcon class="title-icon" width="100%" height="100%"/>
         </button>
-        <button class="titlebar-button" @click="minimizeWindow" v-if="showMinimizeButton && !isFileWin">
+        <button class="titlebar-button" @click="minimizeWindow" v-if="(showMinimizeButton && isMobile && !isFileWin) || (!isMobile && showMinimizeButton)">
           <MinimizeIcon class="title-icon rotate-90" width="100%" height="100%"/>
         </button>
         <button class="titlebar-button" @click="maximizeWindow">
