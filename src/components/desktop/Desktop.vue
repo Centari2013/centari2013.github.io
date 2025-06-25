@@ -41,19 +41,19 @@
   </div>
 </template>
 <script setup>
-import Icon from '@/components/Icon.vue';
+import Icon from '@/components/desktop/Icon.vue';
 import { useAppsStore } from '@/components/stores/apps';
-import Taskbar from '@/components/Taskbar.vue';
-import MinimizedFileBar from '@/components/MinimizedFileBar.vue';
+import Taskbar from '@/components/desktop/Taskbar.vue';
+import MinimizedFileBar from '@/components/desktop/MinimizedFileBar.vue';
 
 import { createLoader } from '@/components/utilities/simulateLoading';
 
 import { ref, toRaw, defineAsyncComponent, reactive, provide, onMounted } from 'vue';
 
-const ContentWindow = defineAsyncComponent(() => import("@/components/ContentWindow.vue"));
+const ContentWindow = defineAsyncComponent(() => import("@/components/windows/ContentWindow.vue"));
 const emit = defineEmits(['initialized', 'progress'])
 
-import FileWindow from '@/components/FileWindow.vue';
+import FileWindow from '@/components/windows/FileWindow.vue';
 import { storeToRefs } from 'pinia';
 import makeDirectoryItems from '@/components/utilities/makeDirectoryItems';
 import { makeFileItems } from '@/components/utilities/makeFileItems';
@@ -141,7 +141,7 @@ onMounted(() => {
 
 
 <style scoped>
-@reference './style.css';
+@reference '../../style.css';
 
 .desktop {
   @apply flex flex-col items-center pb-5 justify-end align-middle;

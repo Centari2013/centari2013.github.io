@@ -17,8 +17,8 @@
 
 <script setup>
 import { ref } from 'vue'
-import LoadingScreen from '@/LoadingScreen.vue'
-import Desktop from '@/Desktop.vue'
+import LoadingScreen from '@/components/desktop/LoadingScreen.vue'
+import Desktop from '@/components/desktop/Desktop.vue'
 
 const loading = ref(true)
 const progress = ref(0)

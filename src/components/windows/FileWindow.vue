@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import BaseWindow from "@/components/BaseWindow.vue"
+import BaseWindow from "@/components/windows/BaseWindow/BaseWindow.vue"
 import FileViewerView from "@/components/views/FileViewerView.vue"
 import { useAppsStore } from "@/components/stores/apps"
 import { useExportFile } from '@/components/utilities/useExportFile'

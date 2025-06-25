@@ -8,7 +8,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 
-import BaseWindow from "@/components/BaseWindow.vue"
+import BaseWindow from "@/components/windows/BaseWindow/BaseWindow.vue"
 import TerminalView from "@/components/views/TerminalView.vue";
 import FileManagerView from "@/components/views/FileManagerView.vue";
 import BrowserView from "@/components/views/BrowserView.vue";

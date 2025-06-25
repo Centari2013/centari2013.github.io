@@ -19,7 +19,7 @@ export default {
     // Fetch the SVG file and inject it
     onMounted(async () => {
   try {
-    const svgModule = await import(`../assets/icons/${props.image}.svg?raw`);
+    const svgModule = await import(`../../assets/icons/${props.image}.svg?raw`);
     iconSvg.value = svgModule.default; // Raw SVG string
   } catch (error) {
     console.error(`Error loading SVG: ${props.image}`, error);

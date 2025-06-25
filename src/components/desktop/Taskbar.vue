@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import Icon from '@/components/Icon.vue';
+import Icon from '@/components/desktop/Icon.vue';
 import { useAppsStore } from '@/components/stores/apps';
 import { computed, useTemplateRef, onMounted, ref, watch, inject } from 'vue';
 import { gsap } from 'gsap';
@@ -110,7 +110,7 @@ const openOrToggleApp = (id) => {
 </script>
 
 <style scoped>
-@reference '../style.css';
+@reference '../../style.css';
 
 .locks {
   @apply h-full;
