@@ -83,31 +83,106 @@
 </template>
 
 <script setup>
+// Icons
 import CloseIcon from "@/assets/icons/close.svg";
 import MinimizeIcon from "@/assets/icons/minimize.svg";
 import MaximizeIcon from "@/assets/icons/maximize.svg";
-import ExportIcon from "@/assets/icons/export.svg"
-import EyeClose from "@/assets/icons/eyeClose.svg"
-import EyeOpen from "@/assets/icons/eyeOpen.svg"
+import ExportIcon from "@/assets/icons/export.svg";
+import EyeClose from "@/assets/icons/eyeClose.svg";
+import EyeOpen from "@/assets/icons/eyeOpen.svg";
 
-import { ref, reactive, onMounted, useTemplateRef, onBeforeUnmount, nextTick, watch, computed } from "vue";
+// Core Vue
+import {
+  ref,
+  reactive,
+  computed,
+  watch,
+  nextTick,
+  onMounted,
+  onBeforeUnmount,
+  useTemplateRef,
+} from "vue";
+
+// GSAP for animations
 import { gsap } from "gsap";
-import { startResize, startDrag } from '@/components/utilities/dragAndResize.js'
 
+// App logic
+import { startResize, startDrag } from "@/components/utilities/dragAndResize.js";
 import { useIsMobile } from "@/components/utilities/useIsMobile";
-import { useAppsStore } from '@/components/stores/apps';
+import { useAppsStore } from "@/components/stores/apps";
 import { storeToRefs } from "pinia";
 
-defineOptions({ inheritAttrs: false });
-const appsStore = useAppsStore()
-const { minimizedFiles } = storeToRefs(appsStore);
 
-// the window’s z-index
+defineOptions({ inheritAttrs: false });
+defineEmits(["export"]);
+
+const props = defineProps([
+  "initialPosition",
+  "minWidth",
+  "minHeight",
+  "showMinimizeButton",
+  "title",
+  "getMaximized",
+  "getMinimized",
+  "getzIndex",
+  "getMiniPos",
+  "handleClose",
+  "handleMinimize",
+  "handleMaximize",
+  "showExportButton",
+  "isFileWin",
+]);
+
+// Refs
+const resizableWindow = useTemplateRef("resizableWindow");
+const restoreOverlay = useTemplateRef("restoreOverlay");
+const resizableWindowObserver = ref(null);
+const isMini = ref(false);
+const isRestoring = ref(false);
+const opaque = ref(false);
+const zIndex = ref(0);
+let windowTween = null;
+
+// External state
+const appsStore = useAppsStore();
+const { minimizedFiles } = storeToRefs(appsStore);
+const { isMobile } = useIsMobile();
+
+// Element references
+const filebar = document.getElementById("filebar");
+
+// Z-index computations
 const windowZ = computed(() =>
   props.isFileWin && isMini.value
     ? appsStore.zIndexCounter + 1
     : zIndex.value
 );
+const overlayZ = computed(() => windowZ.value + 1);
+
+// State tracking
+let cancelWatchPosition = null;
+const scale = 0.2;
+
+let previousDimensions = {
+  position: { ...props.initialPosition },
+  size: { width: 400, height: 300 },
+};
+
+const state = reactive({
+  isDragging: false,
+  isResizing: false,
+  resizeDirection: null,
+  startDimensions: null,
+  currentDimensions: {
+    position: { ...props.initialPosition },
+    size: { width: 400, height: 300 },
+  },
+  minSize: {
+    width: props.minWidth,
+    height: props.minHeight,
+  },
+});
+
 
 function forwardMouseEvent(type, originalEvent) {
   const targetEl = document.getElementById('filebar');
@@ -135,8 +210,7 @@ function forwardMouseOut(e) {
 }
 
 
-// the overlay’s z-index must be 1 higher
-const overlayZ = computed(() => windowZ.value + 1);
+
 
 
 function watchPosition(el, callback) {
@@ -177,8 +251,7 @@ watch(minimizedFiles, (_new, _old) => {
   }
 });
 
-const isRestoring = ref(false);
-let windowTween = null
+
 
 function moveMinimizedWindow() {
   if (isRestoring.value) return;
@@ -200,26 +273,7 @@ function moveMinimizedWindow() {
 }
 
 
-const filebar = document.getElementById("filebar");
 
-const props = defineProps([
-  'initialPosition',
-  'minWidth',
-  'minHeight',
-  'showMinimizeButton',
-  'title',
-  'getMaximized',
-  'getMinimized',
-  'getzIndex',
-  'getMiniPos',
-  'handleClose',
-  'handleMinimize',
-  'handleMaximize',
-  'showExportButton',
-  'isFileWin'
-])
-
-let cancelWatchPosition = null;
 
 onMounted(() => {
   if (props.isFileWin) {
@@ -233,24 +287,6 @@ onBeforeUnmount(() => {
 
 
 
-const {isMobile} = useIsMobile();
-
-const opaque = ref(false)
-
-const isMini = ref(false)
-
-const zIndex = ref(0);
-defineEmits(['export']);
-
-let previousDimensions = {
-  position: { ...props.initialPosition },
-  size: { width: 400, height: 300 },
-}
-
-
-const scale = 0.2
-const resizableWindow = useTemplateRef('resizableWindow');
-const restoreOverlay = useTemplateRef('restoreOverlay');
 
 async function minimizeWindow() {
   new Promise((resolve) => {
@@ -297,20 +333,7 @@ function maximizeWindow() {
 }
 
 
-const state = reactive({
-  isDragging: false,
-  isResizing: false,
-  resizeDirection: null,
-  startDimensions: null,
-  currentDimensions: {
-    position: { ...props.initialPosition },
-    size: { width: 400, height: 300 },
-  },
-  minSize: {
-    width: props.minWidth,
-    height: props.minHeight,
-  }
-});
+
 
 
 function getDragResizeContext() {
@@ -498,7 +521,7 @@ async function handleViewportResize() {
   }
 }
 
-const resizableWindowObserver = ref(null);
+
 
 onMounted(() => {
   zIndex.value = props.getzIndex();
