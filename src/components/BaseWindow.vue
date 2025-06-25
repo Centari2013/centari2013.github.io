@@ -1,6 +1,6 @@
 <template>
-  <div @mouseover="forwardMouseOver" @mouseout="forwardMouseOut">
     <div
+    @mouseover="forwardMouseOver" @mouseout="forwardMouseOut"
   v-if="isMini"
   ref="restoreOverlay"
     @mousedown="restore"
@@ -78,7 +78,7 @@
       </div>
     </div>
   </div>
-  </div>
+ 
   
 </template>
 
@@ -276,6 +276,14 @@ function maximizeWindow() {
         resolve();
       });
     } else if (props.getMaximized()) {
+      previousDimensions = {
+        position: { ...props.initialPosition },
+        size: { width: 400, height: 300 },
+      }
+      previousDimensions.position = clampPositionToViewport(
+        previousDimensions.position,
+        previousDimensions.size
+      );
       animateRestore(true).then(() => {
         props.handleMaximize(false);
         resolve();
