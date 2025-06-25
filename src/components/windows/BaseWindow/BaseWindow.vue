@@ -32,14 +32,7 @@
     }"
     ref="resizableWindow"
   >
-    <div id="n-resize" @mousedown="handleStartResize($event, 'n')" @touchstart="handleStartResize($event, 'n')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="nw-resize" @mousedown="handleStartResize($event, 'nw')" @touchstart="handleStartResize($event, 'nw')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="ne-resize" @mousedown="handleStartResize($event, 'ne')" @touchstart="handleStartResize($event, 'ne')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="sw-resize" @mousedown="handleStartResize($event, 'sw')" @touchstart="handleStartResize($event, 'sw')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="se-resize" @mousedown="handleStartResize($event, 'se')" @touchstart="handleStartResize($event, 'se')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="e-resize" @mousedown="handleStartResize($event, 'e')" @touchstart="handleStartResize($event, 'e')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="w-resize" @mousedown="handleStartResize($event, 'w')" @touchstart="handleStartResize($event, 'w')" :style="{ zIndex: `${zIndex + 1}`}"></div>
-    <div id="s-resize" @mousedown="handleStartResize($event, 's')" @touchstart="handleStartResize($event, 's')" :style="{ zIndex: `${zIndex + 1}`}"></div>
+    <ResizeHandles :zIndex="zIndex" @startResize="handleStartResize"/>
 
     <!-- Vertical Title Bar -->
     <div class="titlebar" @mousedown="handleStartDrag" @touchstart="handleStartDrag">
@@ -83,6 +76,9 @@
 </template>
 
 <script setup>
+// Components
+import ResizeHandles from "@/components/windows/BaseWindow/ResizeHandles.vue";
+
 // Icons
 import CloseIcon from "@/assets/icons/close.svg";
 import MinimizeIcon from "@/assets/icons/minimize.svg";
@@ -544,7 +540,7 @@ defineExpose({
 </script>
 
 <style>
-@reference '../style.css';
+@reference '../../../style.css';
 
 .base-window {
   @apply flex overflow-hidden max-h-full max-w-full fixed;
@@ -556,37 +552,7 @@ defineExpose({
   @apply select-none;
 }
 
-#n-resize {
-  @apply absolute top-0 w-full h-1 cursor-ns-resize;
-}
 
-#nw-resize {
-  @apply absolute top-0 left-0 w-4 aspect-square cursor-nwse-resize;
-}
-
-#ne-resize {
-  @apply absolute top-0 right-0 w-4 aspect-square cursor-nesw-resize;
-}
-
-#sw-resize {
-  @apply absolute bottom-0 left-0 w-12 h-5 aspect-square cursor-nesw-resize;
-}
-
-#se-resize {
-  @apply absolute bottom-0 right-0 w-4 aspect-square cursor-nwse-resize;
-}
-
-#w-resize {
-  @apply absolute left-0 h-full w-1 cursor-ew-resize;
-}
-
-#e-resize {
-  @apply absolute right-0 h-full w-1 cursor-ew-resize;
-}
-
-#s-resize {
-  @apply absolute bottom-0 w-full h-1 cursor-ns-resize;
-}
 
 .titlebar {
   @apply flex flex-col pl-4 pr-3 pt-5 text-sm font-bold cursor-move select-none h-full w-15;
