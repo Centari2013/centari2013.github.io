@@ -184,6 +184,9 @@ const state = reactive({
 });
 
 
+
+
+// Core event forwarding
 function forwardMouseEvent(type, originalEvent) {
   const targetEl = document.getElementById('filebar');
   if (!targetEl) return;
@@ -200,7 +203,6 @@ function forwardMouseEvent(type, originalEvent) {
   targetEl.dispatchEvent(simulatedEvent);
 }
 
-
 function forwardMouseOver(e) {
   forwardMouseEvent("mouseover", e);
 }
@@ -210,9 +212,33 @@ function forwardMouseOut(e) {
 }
 
 
+// Viewport clamp utility
+function clampPositionToViewport(position, size) {
+  const maxX = window.innerWidth - size.width;
+  const maxY = window.innerHeight - size.height;
+  return {
+    top: Math.min(Math.max(position.top, 0), maxY),
+    left: Math.min(Math.max(position.left, 0), maxX),
+  };
+}
 
+// Drag and resize handling
+function getDragResizeContext() {
+  return {
+    el: resizableWindow.value,
+    state
+  };
+}
 
+function handleStartDrag(event) {
+  startDrag(getDragResizeContext(), event);
+}
 
+function handleStartResize(event, direction) {
+  startResize(getDragResizeContext(), event, direction);
+}
+
+// Filebar tracking
 function watchPosition(el, callback) {
   let isCancelled = false;
   let lastRect = el.getBoundingClientRect();
@@ -244,14 +270,16 @@ const snapToMin = async () => {
   }
 }
 
-watch(minimizedFiles, (_new, _old) => {
-  // Only animate if we're already minimized
-  if (props.getMinimized()) {
-    moveMinimizedWindow(); // light movement only
+
+
+
+// GSAP tween control
+function killWindowTween() {
+  if (windowTween) {
+      windowTween.kill();
+      windowTween = null;
   }
-});
-
-
+}
 
 function moveMinimizedWindow() {
   if (isRestoring.value) return;
@@ -273,25 +301,38 @@ function moveMinimizedWindow() {
 }
 
 
-
-
+// Lifecycle
 onMounted(() => {
   if (props.isFileWin) {
     cancelWatchPosition = watchPosition(filebar, snapToMin);
   }
+
+  zIndex.value = props.getzIndex();
+  const observer = new ResizeObserver(() => {
+    state.currentDimensions.size.width = resizableWindow.value.offsetWidth;
+    state.currentDimensions.size.height = resizableWindow.value.offsetHeight;
+  });
+
+  observer.observe(resizableWindow.value);
+  resizableWindowObserver.value = observer;
+  window.addEventListener("resize", handleViewportResize);
 });
 
 onBeforeUnmount(() => {
   if (cancelWatchPosition) cancelWatchPosition();
+  // Disconnect observer if still active
+  if (resizableWindowObserver.value) {
+    resizableWindowObserver.value.disconnect();
+    resizableWindowObserver.value = null;
+  }
+  window.removeEventListener("resize", handleViewportResize);
 });
 
 
 
-
+// Minimize / Maximize / Restore
 async function minimizeWindow() {
-  new Promise((resolve) => {
-    props.handleMinimize(true);
-  })//.then(() => isMini.value = true)
+  props.handleMinimize(true);
   isMini.value = true
 
   
@@ -332,39 +373,6 @@ function maximizeWindow() {
   });
 }
 
-
-
-
-
-function getDragResizeContext() {
-  return {
-    el: resizableWindow.value,
-    state
-  };
-}
-
-
-function handleStartDrag(event) {
-  startDrag(getDragResizeContext(), event);
-}
-
-function handleStartResize(event, direction) {
-  startResize(getDragResizeContext(), event, direction);
-}
-
-function killWindowTween() {
-  if (windowTween) {
-      windowTween.kill();
-      windowTween = null;
-  }
-}
-
-watch(isRestoring, (newValue, _old) => {
-  if(newValue){
-    killWindowTween()
-  }
-});
-
 function restore() {
   isRestoring.value = true;
     killWindowTween()
@@ -374,50 +382,22 @@ function restore() {
     });
 }
 
-function handleClick() {
-  zIndex.value = props.getzIndex();
-};
+// Resize handling
+async function handleViewportResize() {
+  if (props.getMaximized()) {
+    state.currentDimensions.size.width = window.innerWidth;
+    state.currentDimensions.size.height = window.innerHeight;
+  } else if (props.getMinimized()) {
+    // clamp before restore
+    previousDimensions.position = clampPositionToViewport(
+      previousDimensions.position,
+      previousDimensions.size
+    );
+    await animateSnapToMinimized("center", 0.1);
+  }
+}
 
-
-function closeWindow() {
-  const el = resizableWindow.value;
-  const el2 = restoreOverlay.value;
-  gsap.to([el, el2], {
-      scale: 0.1,
-      duration: 0.1,
-      ease: "power1.out",
-      onComplete: () => {
-        props.handleClose();
-      }
-    })
-  
-};
-
-function animateMaximize() {
-  const el = resizableWindow.value
-  gsap
-    .to(state.currentDimensions.position, {
-      left: "0",
-      top: "0",
-      duration: 0.5,
-      ease: "power1.out",
-      onComplete: () => {
-        state.currentDimensions.position = { top: 0, left: 0 };
-      },
-    })
-    .then(() => {
-      gsap.to(state.currentDimensions.size, {
-        height: window.innerHeight,
-        width: window.innerWidth,
-        duration: 0.1,
-        ease: "power1.out",
-        onComplete: () => {
-          state.currentDimensions.size = { width: window.innerWidth, height: window.innerHeight };
-        },
-      });
-    });
-};
-
+// Animation implementations
 async function animateSnapToMinimized(origin = "center", duration = 0.5) {
   await nextTick()
   let mini_pos = null;
@@ -448,8 +428,6 @@ async function animateSnapToMinimized(origin = "center", duration = 0.5) {
       });
     });
 };
-
-
 
 function animateRestore(reverse = false) {
   killWindowTween()
@@ -498,52 +476,66 @@ function animateRestore(reverse = false) {
     });
 };
 
-function clampPositionToViewport(position, size) {
-  const maxX = window.innerWidth - size.width;
-  const maxY = window.innerHeight - size.height;
-  return {
-    top: Math.min(Math.max(position.top, 0), maxY),
-    left: Math.min(Math.max(position.left, 0), maxX),
-  };
-}
+function animateMaximize() {
+  const el = resizableWindow.value
+  gsap
+    .to(state.currentDimensions.position, {
+      left: "0",
+      top: "0",
+      duration: 0.5,
+      ease: "power1.out",
+      onComplete: () => {
+        state.currentDimensions.position = { top: 0, left: 0 };
+      },
+    })
+    .then(() => {
+      gsap.to(state.currentDimensions.size, {
+        height: window.innerHeight,
+        width: window.innerWidth,
+        duration: 0.1,
+        ease: "power1.out",
+        onComplete: () => {
+          state.currentDimensions.size = { width: window.innerWidth, height: window.innerHeight };
+        },
+      });
+    });
+};
 
-async function handleViewportResize() {
-  if (props.getMaximized()) {
-    state.currentDimensions.size.width = window.innerWidth;
-    state.currentDimensions.size.height = window.innerHeight;
-  } else if (props.getMinimized()) {
-    // clamp before restore
-    previousDimensions.position = clampPositionToViewport(
-      previousDimensions.position,
-      previousDimensions.size
-    );
-    await animateSnapToMinimized("center", 0.1);
-  }
-}
-
-
-
-onMounted(() => {
+// Clicks and window close
+function handleClick() {
   zIndex.value = props.getzIndex();
-  const observer = new ResizeObserver(() => {
-    state.currentDimensions.size.width = resizableWindow.value.offsetWidth;
-    state.currentDimensions.size.height = resizableWindow.value.offsetHeight;
-  });
+};
 
-  observer.observe(resizableWindow.value);
-  resizableWindowObserver.value = observer;
-  window.addEventListener("resize", handleViewportResize);
-})
+function closeWindow() {
+  const el = resizableWindow.value;
+  const el2 = restoreOverlay.value;
+  gsap.to([el, el2], {
+      scale: 0.1,
+      duration: 0.1,
+      ease: "power1.out",
+      onComplete: () => {
+        props.handleClose();
+      }
+    })
+  
+};
 
-onBeforeUnmount(() => {
-  // Disconnect observer if still active
-  if (resizableWindowObserver.value) {
-    resizableWindowObserver.value.disconnect();
-    resizableWindowObserver.value = null;
+// Watchers
+watch(isRestoring, (newValue, _old) => {
+  if(newValue){
+    killWindowTween()
   }
-  window.removeEventListener("resize", handleViewportResize);
-})
+});
 
+watch(minimizedFiles, (_new, _old) => {
+  // Only animate if we're already minimized
+  if (props.getMinimized()) {
+    moveMinimizedWindow(); // light movement only
+  }
+});
+
+
+// Expose methods
 defineExpose({
   minimizeWindow,
   maximizeWindow,
