@@ -79,6 +79,7 @@ import {
 // App logic
 import { startResize, startDrag } from "@/components/utilities/dragAndResize.js";
 import { useWindowAnimations } from '@/components/windows/BaseWindow/useWindowAnimations'
+import { clampPositionToViewport } from '@/components/windows/BaseWindow/dragAndResizeContext.js'
 import { useAppsStore } from "@/components/stores/apps";
 import { storeToRefs } from "pinia";
 
@@ -196,17 +197,6 @@ function forwardMouseOut(e) {
   forwardMouseEvent("mouseout", e);
 }
 
-
-// Viewport clamp utility
-function clampPositionToViewport(position, size) {
-  const maxX = window.innerWidth - size.width;
-  const maxY = window.innerHeight - size.height;
-  return {
-    top: Math.min(Math.max(position.top, 0), maxY),
-    left: Math.min(Math.max(position.left, 0), maxX),
-  };
-}
-
 // Drag and resize handling
 function getDragResizeContext() {
   return {
@@ -254,13 +244,6 @@ const snapToMin = async () => {
     await animateSnapToMinimized("center", 0.1);
   }
 }
-
-
-
-
-
-
-
 
 
 // Lifecycle
@@ -358,8 +341,6 @@ async function handleViewportResize() {
     await animateSnapToMinimized("center", 0.1);
   }
 }
-
-// Animation implementations
 
 
 // Clicks and window close
