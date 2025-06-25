@@ -41,13 +41,13 @@ import ExportIcon from "@/assets/icons/export.svg";
 import EyeClose from "@/assets/icons/eyeClose.svg";
 import EyeOpen from "@/assets/icons/eyeOpen.svg";
 
-const props = defineProps({ 
-  showMinimizeButton: Boolean,
-  showExportButton: Boolean,
-  isFileWin: Boolean,
-  title: String,
-  opaque: Object
- })
+const props = defineProps([
+  'showMinimizeButton',
+  'showExportButton',
+  'isFileWin',
+  'title',
+  'opaque'
+])
 
 const emit = defineEmits([
   'close', 
