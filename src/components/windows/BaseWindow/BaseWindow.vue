@@ -1,8 +1,9 @@
 <template>
-    <div
-    @mouseover="forwardMouseOver" @mouseout="forwardMouseOut"
-  v-if="isMini"
-  ref="restoreOverlay"
+  <div
+    @mouseover="forwardMouseOver"
+    @mouseout="forwardMouseOut"
+    v-if="isMini"
+    ref="restoreOverlay"
     @mousedown="restore"
     class="cursor-pointer fixed"
     :style="{
@@ -20,7 +21,7 @@
     @mousedown="handleClick"
     data-augmented-ui="tl-clip tr-clip bl-scoop-x both"
     class="base-window"
-    :class="{'opacity-75': opaque}"
+    :class="{ 'opacity-75': opaque }"
     :style="{
       zIndex: `${windowZ}`,
       top: `${state.currentDimensions.position.top}px`,
@@ -32,7 +33,7 @@
     }"
     ref="resizableWindow"
   >
-    <ResizeHandles :zIndex="zIndex" @startResize="handleStartResize"/>
+    <ResizeHandles :zIndex="zIndex" @startResize="handleStartResize" />
 
     <!-- Vertical Title Bar -->
     <TitleBar
@@ -48,19 +49,16 @@
     <!-- Content -->
     <div class="flex-1 overflow-hidden">
       <div ref="windowContent" class="window-content w-full h-full">
-        <slot/>
+        <slot />
       </div>
     </div>
   </div>
- 
-  
 </template>
 
 <script setup>
 // Components
 import ResizeHandles from "@/components/windows/BaseWindow/ResizeHandles.vue";
 import TitleBar from "@/components/windows/BaseWindow/TitleBar.vue";
-
 
 // Core Vue
 import {
@@ -73,16 +71,12 @@ import {
   useTemplateRef,
 } from "vue";
 
-
-
-
 // App logic
 import { startResize, startDrag } from "@/components/utilities/dragAndResize.js";
 import { useWindowAnimations } from '@/components/windows/BaseWindow/useWindowAnimations'
 import { clampPositionToViewport } from '@/components/windows/BaseWindow/dragAndResizeContext.js'
 import { useAppsStore } from "@/components/stores/apps";
 import { storeToRefs } from "pinia";
-
 
 defineOptions({ inheritAttrs: false });
 defineEmits(["export"]);
@@ -104,8 +98,6 @@ const props = defineProps([
   "isFileWin",
 ]);
 
-
-
 // Refs
 const resizableWindow = useTemplateRef("resizableWindow");
 const restoreOverlay = useTemplateRef("restoreOverlay");
@@ -114,7 +106,7 @@ const isMini = ref(false);
 const opaque = ref(false);
 const zIndex = ref(0);
 
-
+// State
 const state = reactive({
   isRestoring: false,
   resizeDirection: null,
@@ -133,6 +125,7 @@ const state = reactive({
   },
 });
 
+// Window animation utilities
 const {
   animateSnapToMinimized,
   animateRestore,
@@ -142,7 +135,7 @@ const {
   killWindowTween
 } = useWindowAnimations(props.getMiniPos, state, resizableWindow, restoreOverlay)
 
-
+// Title bar props
 const titlebarProps = {
   showMinimizeButton: props.showMinimizeButton,
   showExportButton: props.showExportButton,
@@ -169,10 +162,7 @@ const overlayZ = computed(() => windowZ.value + 1);
 // State tracking
 let cancelWatchPosition = null;
 
-
-
-
-// Core event forwarding
+// Forward mouse events to filebar
 function forwardMouseEvent(type, originalEvent) {
   const targetEl = document.getElementById('filebar');
   if (!targetEl) return;
@@ -213,7 +203,7 @@ function handleStartResize(event, direction) {
   startResize(getDragResizeContext(), event, direction);
 }
 
-// Filebar tracking
+// Watch filebar position for minimized window animation
 function watchPosition(el, callback) {
   let isCancelled = false;
   let lastRect = el.getBoundingClientRect();
@@ -233,26 +223,27 @@ function watchPosition(el, callback) {
 
   requestAnimationFrame(check);
 
-  // return cleanup function
+  // Cleanup function
   return () => {
     isCancelled = true;
   };
 }
 
+// Snap to minimized position if needed
 const snapToMin = async () => {
   if (props.getMinimized() && !state.isRestoring) {
     await animateSnapToMinimized("center", 0.1);
   }
 }
 
-
-// Lifecycle
+// Lifecycle hooks
 onMounted(() => {
   if (props.isFileWin) {
     cancelWatchPosition = watchPosition(filebar, snapToMin);
   }
 
   zIndex.value = props.getzIndex();
+
   const observer = new ResizeObserver(() => {
     state.currentDimensions.size.width = resizableWindow.value.offsetWidth;
     state.currentDimensions.size.height = resizableWindow.value.offsetHeight;
@@ -260,12 +251,12 @@ onMounted(() => {
 
   observer.observe(resizableWindow.value);
   resizableWindowObserver.value = observer;
+
   window.addEventListener("resize", handleViewportResize);
 });
 
 onBeforeUnmount(() => {
   if (cancelWatchPosition) cancelWatchPosition();
-  // Disconnect observer if still active
   if (resizableWindowObserver.value) {
     resizableWindowObserver.value.disconnect();
     resizableWindowObserver.value = null;
@@ -273,27 +264,20 @@ onBeforeUnmount(() => {
   window.removeEventListener("resize", handleViewportResize);
 });
 
-
-
-// Minimize / Maximize / Restore
+// Minimize / Maximize / Restore logic
 async function minimizeWindow() {
   props.handleMinimize(true);
-  isMini.value = true
-
-  
+  isMini.value = true;
   state.previousDimensions = JSON.parse(JSON.stringify(state.currentDimensions));
   await animateSnapToMinimized();
-};
+}
 
 function maximizeWindow() {
   return new Promise((resolve) => {
     if (props.getMinimized()) {
       animateRestore().then(() => {
-        new Promise((resolve) => {
-          props.handleMinimize(false);
-        })//.then(() => isMini.value = false)
-        //props.handleMinimize(false);
-        isMini.value =false
+        props.handleMinimize(false);
+        isMini.value = false;
         resolve();
       });
     } else if (props.getMaximized()) {
@@ -311,7 +295,7 @@ function maximizeWindow() {
       });
     } else {
       state.previousDimensions = JSON.parse(JSON.stringify(state.currentDimensions));
-      animateMaximize(); // if this is not async, we resolve immediately
+      animateMaximize();
       props.handleMaximize(true);
       resolve();
     }
@@ -320,20 +304,19 @@ function maximizeWindow() {
 
 function restore() {
   state.isRestoring = true;
-    killWindowTween()
-    maximizeWindow().then(() => {
-      zIndex.value = props.getzIndex();
-      state.isRestoring = false;
-    });
+  killWindowTween();
+  maximizeWindow().then(() => {
+    zIndex.value = props.getzIndex();
+    state.isRestoring = false;
+  });
 }
 
-// Resize handling
+// Handle viewport resize
 async function handleViewportResize() {
   if (props.getMaximized()) {
     state.currentDimensions.size.width = window.innerWidth;
     state.currentDimensions.size.height = window.innerHeight;
   } else if (props.getMinimized()) {
-    // clamp before restore
     state.previousDimensions.position = clampPositionToViewport(
       state.previousDimensions.position,
       state.previousDimensions.size
@@ -342,38 +325,34 @@ async function handleViewportResize() {
   }
 }
 
-
 // Clicks and window close
 function handleClick() {
   zIndex.value = props.getzIndex();
-};
+}
 
 function closeWindow() {
-  animateClose().then(() => props.handleClose())
-};
+  animateClose().then(() => props.handleClose());
+}
 
 // Watchers
-watch(() => state.isRestoring, (newValue, _old) => {
-  if(newValue){
-    killWindowTween()
+watch(() => state.isRestoring, (newValue) => {
+  if (newValue) {
+    killWindowTween();
   }
 });
 
-watch(minimizedFiles, (_new, _old) => {
-  // Only animate if we're already minimized
+watch(minimizedFiles, () => {
   if (props.getMinimized()) {
-    moveMinimizedWindow(); // light movement only
+    moveMinimizedWindow();
   }
 });
-
 
 // Expose methods
 defineExpose({
   minimizeWindow,
   maximizeWindow,
   resizableWindow,
-})
-
+});
 </script>
 
 <style>
@@ -388,5 +367,4 @@ defineExpose({
 .resizing * {
   @apply select-none;
 }
-
 </style>
