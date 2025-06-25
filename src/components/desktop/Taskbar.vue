@@ -110,7 +110,7 @@ const openOrToggleApp = (id) => {
 </script>
 
 <style scoped>
-@reference '../style.css';
+@reference '../../style.css';
 
 .locks {
   @apply h-full;
