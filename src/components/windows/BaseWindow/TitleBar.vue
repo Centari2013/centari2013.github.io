@@ -1,5 +1,5 @@
 <template>
-  <div class="titlebar" @mousedown="handleStartDrag" @touchstart="handleStartDrag">
+  <div class="titlebar" @mousedown="$emit('startDrag', $event)" @touchstart="$emit('startDrag', $event)">
     <!-- Buttons Container -->
     <div class="button-container">
       <button class="titlebar-button" @click="$emit('close')">
@@ -54,7 +54,8 @@ const emit = defineEmits([
   'minimize', 
   'maximize', 
   'export',
-  'opaque'
+  'opaque',
+  'startDrag'
   ])
 
 const { isMobile } = useIsMobile();
