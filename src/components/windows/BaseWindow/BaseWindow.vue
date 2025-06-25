@@ -42,6 +42,7 @@
       @maximize="maximizeWindow"
       @export="$emit('export')"
       @opaque="opaque = !opaque"
+      @startDrag="handleStartDrag"
     />
 
     <!-- Content -->
@@ -67,17 +68,17 @@ import {
   reactive,
   computed,
   watch,
-  nextTick,
   onMounted,
   onBeforeUnmount,
   useTemplateRef,
 } from "vue";
 
-// GSAP for animations
-import { gsap } from "gsap";
+
+
 
 // App logic
 import { startResize, startDrag } from "@/components/utilities/dragAndResize.js";
+import { useWindowAnimations } from '@/components/windows/BaseWindow/useWindowAnimations'
 import { useAppsStore } from "@/components/stores/apps";
 import { storeToRefs } from "pinia";
 
@@ -109,10 +110,37 @@ const resizableWindow = useTemplateRef("resizableWindow");
 const restoreOverlay = useTemplateRef("restoreOverlay");
 const resizableWindowObserver = ref(null);
 const isMini = ref(false);
-const isRestoring = ref(false);
 const opaque = ref(false);
 const zIndex = ref(0);
-let windowTween = null;
+
+
+const state = reactive({
+  isRestoring: false,
+  resizeDirection: null,
+  startDimensions: null,
+  currentDimensions: {
+    position: { ...props.initialPosition },
+    size: { width: 400, height: 300 },
+  },
+  previousDimensions: {
+    position: { ...props.initialPosition },
+    size: { width: 400, height: 300 },
+  },
+  minSize: {
+    width: props.minWidth,
+    height: props.minHeight,
+  },
+});
+
+const {
+  animateSnapToMinimized,
+  animateRestore,
+  animateMaximize,
+  animateClose,
+  moveMinimizedWindow,
+  killWindowTween
+} = useWindowAnimations(props.getMiniPos, state, resizableWindow, restoreOverlay)
+
 
 const titlebarProps = {
   showMinimizeButton: props.showMinimizeButton,
@@ -139,27 +167,6 @@ const overlayZ = computed(() => windowZ.value + 1);
 
 // State tracking
 let cancelWatchPosition = null;
-const scale = 0.2;
-
-let previousDimensions = {
-  position: { ...props.initialPosition },
-  size: { width: 400, height: 300 },
-};
-
-const state = reactive({
-  isDragging: false,
-  isResizing: false,
-  resizeDirection: null,
-  startDimensions: null,
-  currentDimensions: {
-    position: { ...props.initialPosition },
-    size: { width: 400, height: 300 },
-  },
-  minSize: {
-    width: props.minWidth,
-    height: props.minHeight,
-  },
-});
 
 
 
@@ -243,7 +250,7 @@ function watchPosition(el, callback) {
 }
 
 const snapToMin = async () => {
-  if (props.getMinimized() && !isRestoring.value) {
+  if (props.getMinimized() && !state.isRestoring) {
     await animateSnapToMinimized("center", 0.1);
   }
 }
@@ -251,32 +258,9 @@ const snapToMin = async () => {
 
 
 
-// GSAP tween control
-function killWindowTween() {
-  if (windowTween) {
-      windowTween.kill();
-      windowTween = null;
-  }
-}
 
-function moveMinimizedWindow() {
-  if (isRestoring.value) return;
-  killWindowTween()
 
-  const el = resizableWindow.value;
-  const min_size = state.minSize;
-  const offset_x = min_size.width / 2;
-  const offset_y = min_size.height / 2;
 
-  const mini_pos = props.getMiniPos?.() ?? { x: 0, y: 0 };
-
-  windowTween = gsap.to(state.currentDimensions.position, {
-    left: `${mini_pos.x - offset_x}px`,
-    top: `${mini_pos.y - offset_y}px`,
-    duration: 0.5,
-    ease: "power1.out",
-  });
-}
 
 
 // Lifecycle
@@ -314,7 +298,7 @@ async function minimizeWindow() {
   isMini.value = true
 
   
-  previousDimensions = JSON.parse(JSON.stringify(state.currentDimensions));
+  state.previousDimensions = JSON.parse(JSON.stringify(state.currentDimensions));
   await animateSnapToMinimized();
 };
 
@@ -330,20 +314,20 @@ function maximizeWindow() {
         resolve();
       });
     } else if (props.getMaximized()) {
-      previousDimensions = {
+      state.previousDimensions = {
         position: { ...props.initialPosition },
         size: { width: 400, height: 300 },
       }
-      previousDimensions.position = clampPositionToViewport(
-        previousDimensions.position,
-        previousDimensions.size
+      state.previousDimensions.position = clampPositionToViewport(
+        state.previousDimensions.position,
+        state.previousDimensions.size
       );
       animateRestore(true).then(() => {
         props.handleMaximize(false);
         resolve();
       });
     } else {
-      previousDimensions = JSON.parse(JSON.stringify(state.currentDimensions));
+      state.previousDimensions = JSON.parse(JSON.stringify(state.currentDimensions));
       animateMaximize(); // if this is not async, we resolve immediately
       props.handleMaximize(true);
       resolve();
@@ -352,11 +336,11 @@ function maximizeWindow() {
 }
 
 function restore() {
-  isRestoring.value = true;
+  state.isRestoring = true;
     killWindowTween()
     maximizeWindow().then(() => {
       zIndex.value = props.getzIndex();
-      isRestoring.value = false;
+      state.isRestoring = false;
     });
 }
 
@@ -367,116 +351,16 @@ async function handleViewportResize() {
     state.currentDimensions.size.height = window.innerHeight;
   } else if (props.getMinimized()) {
     // clamp before restore
-    previousDimensions.position = clampPositionToViewport(
-      previousDimensions.position,
-      previousDimensions.size
+    state.previousDimensions.position = clampPositionToViewport(
+      state.previousDimensions.position,
+      state.previousDimensions.size
     );
     await animateSnapToMinimized("center", 0.1);
   }
 }
 
 // Animation implementations
-async function animateSnapToMinimized(origin = "center", duration = 0.5) {
-  let mini_pos = null;
-  await nextTick(() => {
-    mini_pos = props.getMiniPos();
-  })
-  
-  const min_size = state.minSize;
-  const offset_x = min_size.width / 2;
-  const offset_y = min_size.height / 2;
-  const el = resizableWindow.value;
-  const el2 = restoreOverlay.value;
-  
-  gsap.to([el, el2], {
-    width: `${min_size.width}`,
-    height: `${min_size.height}`,
-    transformOrigin: origin,
-    duration: 0.1,
-    ease: "power1.out",
-  }).then(() => {
-    gsap.to([el, el2], {
-      left: `${mini_pos.x - offset_x}`,
-      top: `${mini_pos.y - offset_y}`,
-      duration,
-      ease: "power1.out",
-      scale,
-      transformOrigin: origin,
-    });
-  });
-};
 
-function animateRestore(reverse = false) {
-  killWindowTween()
-
-  const el = resizableWindow.value;
-  const el2 = restoreOverlay.value;
-  if (reverse) {
-    return gsap.to([el, el2], {
-        width: `${previousDimensions.size.width}`,
-        height: `${previousDimensions.size.height}`,
-        duration: 0.1,
-        ease: "power1.out",
-      })
-      .then(() => {
-        gsap.to([el, el2], {
-          left: `${previousDimensions.position.left}`,
-          top: `${previousDimensions.position.top}`,
-          scale: 1,
-          duration: 0.5,
-          ease: "power1.out",
-          onComplete: () => {
-            state.currentDimensions = previousDimensions;
-          },
-        });
-      });
-    
-  }
-  return gsap
-    .to([el, el2], {
-      left: `${previousDimensions.position.left}`,
-      top: `${previousDimensions.position.top}`,
-      scale: 1,
-      duration: 0.5,
-      ease: "power1.out",
-    })
-    .then(() => {
-      gsap.to([el, el2], {
-        width: `${previousDimensions.size.width}`,
-        height: `${previousDimensions.size.height}`,
-        duration: 0.1,
-        ease: "power1.out",
-        onComplete: () => {
-          state.currentDimensions = previousDimensions;
-        },
-      });
-    });
-};
-
-function animateMaximize() {
-  const el = resizableWindow.value
-  gsap
-    .to(state.currentDimensions.position, {
-      left: "0",
-      top: "0",
-      duration: 0.5,
-      ease: "power1.out",
-      onComplete: () => {
-        state.currentDimensions.position = { top: 0, left: 0 };
-      },
-    })
-    .then(() => {
-      gsap.to(state.currentDimensions.size, {
-        height: window.innerHeight,
-        width: window.innerWidth,
-        duration: 0.1,
-        ease: "power1.out",
-        onComplete: () => {
-          state.currentDimensions.size = { width: window.innerWidth, height: window.innerHeight };
-        },
-      });
-    });
-};
 
 // Clicks and window close
 function handleClick() {
@@ -484,21 +368,11 @@ function handleClick() {
 };
 
 function closeWindow() {
-  const el = resizableWindow.value;
-  const el2 = restoreOverlay.value;
-  gsap.to([el, el2], {
-      scale: 0.1,
-      duration: 0.1,
-      ease: "power1.out",
-      onComplete: () => {
-        props.handleClose();
-      }
-    })
-  
+  animateClose().then(() => props.handleClose())
 };
 
 // Watchers
-watch(isRestoring, (newValue, _old) => {
+watch(() => state.isRestoring, (newValue, _old) => {
   if(newValue){
     killWindowTween()
   }
@@ -534,11 +408,4 @@ defineExpose({
   @apply select-none;
 }
 
-
-
-
-
-.resize {
-  animation: enter 0.4s ease-in-out;
-}
 </style>
