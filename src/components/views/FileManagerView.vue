@@ -63,7 +63,7 @@
 <script>
 import "@/assets/js/terminal/system";
 import { ref, onMounted, toRaw } from "vue";
-import Icon from "@/components/Icon.vue";
+import Icon from "@/components/desktop/Icon.vue";
 import { useAppsStore } from "@/components/stores/apps";
 import makeDirectoryItems from "@/components/utilities/makeDirectoryItems";
 import {makeFileItems} from "@/components/utilities/makeFileItems";

@@ -399,9 +399,8 @@ async function handleViewportResize() {
 
 // Animation implementations
 async function animateSnapToMinimized(origin = "center", duration = 0.5) {
-  await nextTick()
   let mini_pos = null;
-  nextTick(() => {
+  await nextTick(() => {
     mini_pos = props.getMiniPos();
   })
   
@@ -410,23 +409,23 @@ async function animateSnapToMinimized(origin = "center", duration = 0.5) {
   const offset_y = min_size.height / 2;
   const el = resizableWindow.value;
   const el2 = restoreOverlay.value;
-
-   gsap.to([el, el2], {
-      width: `${min_size.width}`,
-      height: `${min_size.height}`,
-      transformOrigin: origin,
-      duration: 0.1,
+  
+  gsap.to([el, el2], {
+    width: `${min_size.width}`,
+    height: `${min_size.height}`,
+    transformOrigin: origin,
+    duration: 0.1,
+    ease: "power1.out",
+  }).then(() => {
+    gsap.to([el, el2], {
+      left: `${mini_pos.x - offset_x}`,
+      top: `${mini_pos.y - offset_y}`,
+      duration,
       ease: "power1.out",
-    }).then(() => {
-      gsap.to([el, el2], {
-        left: `${mini_pos.x - offset_x}`,
-        top: `${mini_pos.y - offset_y}`,
-        duration,
-        ease: "power1.out",
-        scale,
-        transformOrigin: origin,
-      });
+      scale,
+      transformOrigin: origin,
     });
+  });
 };
 
 function animateRestore(reverse = false) {
