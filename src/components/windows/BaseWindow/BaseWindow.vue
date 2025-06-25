@@ -108,6 +108,7 @@ const zIndex = ref(0);
 
 // State
 const state = reactive({
+  isMinimizing: false,
   isRestoring: false,
   resizeDirection: null,
   startDimensions: null,
@@ -266,10 +267,12 @@ onBeforeUnmount(() => {
 
 // Minimize / Maximize / Restore logic
 async function minimizeWindow() {
+  state.isMinimizing = true;
   props.handleMinimize(true);
   isMini.value = true;
   state.previousDimensions = JSON.parse(JSON.stringify(state.currentDimensions));
   await animateSnapToMinimized();
+  state.isMinimizing = false;
 }
 
 function maximizeWindow() {
@@ -342,7 +345,7 @@ watch(() => state.isRestoring, (newValue, _oldValue) => {
 });
 
 watch(minimizedFiles, () => {
-  if (props.getMinimized()) {
+  if (!state.isMinimizing && props.getMinimized()) {
     moveMinimizedWindow();
   }
 });
