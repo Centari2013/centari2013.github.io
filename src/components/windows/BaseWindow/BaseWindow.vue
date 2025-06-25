@@ -335,7 +335,7 @@ function closeWindow() {
 }
 
 // Watchers
-watch(() => state.isRestoring, (newValue) => {
+watch(() => state.isRestoring, (newValue, _oldValue) => {
   if (newValue) {
     killWindowTween();
   }
