@@ -141,7 +141,7 @@ onMounted(() => {
 
 
 <style scoped>
-@reference '../../../style.css';
+@reference '../../style.css';
 
 .desktop {
   @apply flex flex-col items-center pb-5 justify-end align-middle;
