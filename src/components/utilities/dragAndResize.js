@@ -102,7 +102,6 @@ function stopResize(obj, _event) {
 
 export function startDrag(obj, event) {
   const {state} = obj
-  if (state.disableMovement) return;
   state.isDragging = true;
 
   const eventXY = normalizeEvent(event);

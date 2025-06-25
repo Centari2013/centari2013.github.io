@@ -253,13 +253,12 @@ const resizableWindow = useTemplateRef('resizableWindow');
 const restoreOverlay = useTemplateRef('restoreOverlay');
 
 async function minimizeWindow() {
-  if (state.disableMovement) return;
   new Promise((resolve) => {
     props.handleMinimize(true);
   })//.then(() => isMini.value = true)
   isMini.value = true
 
-  state.disableMovement = true;
+  
   previousDimensions = JSON.parse(JSON.stringify(state.currentDimensions));
   await animateSnapToMinimized();
 };
@@ -303,7 +302,6 @@ const state = reactive({
   isResizing: false,
   resizeDirection: null,
   startDimensions: null,
-  disableMovement: false,
   currentDimensions: {
     position: { ...props.initialPosition },
     size: { width: 400, height: 300 },
@@ -359,7 +357,6 @@ function handleClick() {
 
 
 function closeWindow() {
-  if (state.disableMovement) return;
   const el = resizableWindow.value;
   const el2 = restoreOverlay.value;
   gsap.to([el, el2], {
@@ -452,7 +449,6 @@ function animateRestore(reverse = false) {
           ease: "power1.out",
           onComplete: () => {
             state.currentDimensions = previousDimensions;
-            state.disableMovement = false;
           },
         });
       });
@@ -474,7 +470,6 @@ function animateRestore(reverse = false) {
         ease: "power1.out",
         onComplete: () => {
           state.currentDimensions = previousDimensions;
-          state.disableMovement = false;
         },
       });
     });
