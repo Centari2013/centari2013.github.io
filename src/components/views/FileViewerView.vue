@@ -42,6 +42,17 @@ export default {
       type: String, // File extension (e.g., 'txt', 'png', 'mp3')
       required: true,
     },
+    contentMode: {
+      type: String,
+      default: 'data', // 'data' = base64 data URI, 'url' = remote URL
+    },
+  },
+  data() {
+    return {
+      remoteTextContent: '',
+      remoteContentError: null,
+      remoteLoading: false,
+    };
   },
   computed: {
     isTextFile() {
@@ -60,8 +71,54 @@ export default {
       return this.file_ext.toLowerCase() == 'md';
     }
   },
+  watch: {
+    content: {
+      handler() {
+        this.prepareRemoteContent();
+      },
+      immediate: true,
+    },
+    contentMode() {
+      this.prepareRemoteContent();
+    },
+  },
   methods: {
+    async prepareRemoteContent() {
+      if (this.contentMode !== 'url' || !(this.isTextFile || this.isMarkdown)) {
+        this.remoteTextContent = '';
+        this.remoteContentError = null;
+        this.remoteLoading = false;
+        return;
+      }
+
+      this.remoteLoading = true;
+      this.remoteContentError = null;
+
+      try {
+        const response = await fetch(this.content, { cache: 'no-cache' });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        this.remoteTextContent = await response.text();
+      } catch (error) {
+        console.error('Unable to load remote content', error);
+        this.remoteContentError = error instanceof Error ? error.message : 'Unknown error';
+        this.remoteTextContent = '';
+      } finally {
+        this.remoteLoading = false;
+      }
+    },
     renderDecodedContent() {
+    if (this.contentMode === 'url') {
+      if (this.remoteContentError) {
+        return `Failed to load file: ${this.remoteContentError}`;
+      }
+      if (this.remoteLoading) {
+        return 'Loading remote file…';
+      }
+      return this.remoteTextContent.replace(/\n/g, "<br>");
+    }
+
     const decodedText = extractAndDecodeBase64(this.content);
     return decodedText.replace(/\n/g, "<br>");
     },
@@ -102,10 +159,19 @@ export default {
 
       // Decode Base64 content and parse Markdown
       try {
+        if (this.contentMode === 'url') {
+          if (this.remoteContentError) {
+            return `<p>Failed to load file: ${this.remoteContentError}</p>`;
+          }
+          if (this.remoteLoading) {
+            return '<p>Loading remote file…</p>';
+          }
+          return marked.parse(this.remoteTextContent, { renderer });
+        }
         const decodedContent = extractAndDecodeBase64(this.content);
         return marked.parse(decodedContent, { renderer });
       } catch (error) {
-        console.error("Error decoding Base64 content:", error);
+        console.error("Error decoding content:", error);
         return "<p>Invalid content provided.</p>";
       }
     }

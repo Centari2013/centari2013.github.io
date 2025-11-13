@@ -1,11 +1,12 @@
 <template>
   <BaseWindow v-bind="baseWindowProps" @export="downloadFile"
   :class="{'cursor-pointer': isMini}">
-    <FileViewerView 
+    <FileViewerView
       :content="item.content"
       :file_ext="item.exten"
       :name="item.name"
       :id="fileId"
+      :content-mode="item.contentMode ?? 'data'"
     />
   </BaseWindow>
 </template>
@@ -16,7 +17,7 @@ import FileViewerView from "@/components/views/FileViewerView.vue"
 import { useAppsStore } from "@/components/stores/apps"
 import { useExportFile } from '@/components/utilities/useExportFile'
 import { v4 as uuidv4 } from 'uuid';
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 const { exportFile } = useExportFile()
 
@@ -61,8 +62,18 @@ const downloadFile = async () => {
 };
 
 
+const minimizedIdentity = computed(() => {
+  if (props.item?.object?.$$?.ptr !== undefined) {
+    return `ptr-${props.item.object.$$.ptr}`;
+  }
+  if (props.item?.id) {
+    return `id-${props.item.id}`;
+  }
+  return `name-${props.item?.name ?? fileId}`;
+});
+
 const getMiniPos = () => {
-  const filebarWinContainer = document.getElementById(`filewin-${props.item.object.$$.ptr}`);
+  const filebarWinContainer = document.getElementById(`filewin-${minimizedIdentity.value}`);
 
   if (!filebarWinContainer) return { x: 0, y: 0 };
 

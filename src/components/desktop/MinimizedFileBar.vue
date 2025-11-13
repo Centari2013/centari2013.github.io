@@ -13,13 +13,14 @@
     w-20 left-0 flex flex-col items-center justify-center">
 
       
-      <div 
+      <div
         v-for="file in minimizedFiles"
-        :id="`filewin-${file.item.object.$$.ptr}`"
+        :key="file.identity"
+        :id="`filewin-${file.identity}`"
         class="w-full h-16 relative bg-white/10 border-b border-white/20"
         ref="minimizedIcon"
       >
-        <span class="text-xs text-center w-full block">{{ file.item.object.$$.ptr }}</span>
+        <span class="text-xs text-center w-full block">{{ file.item.name }}</span>
       </div>
       
   </div>

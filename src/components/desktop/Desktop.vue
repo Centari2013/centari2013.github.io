@@ -20,9 +20,9 @@
         />
     </template>
     <div id="filespace">
-      <div 
-            v-for="item in desktopContents" 
-            :key="item.name" 
+      <div
+            v-for="item in desktopContents"
+            :key="item.id ?? item.name"
             class="file-item "
             :class="{'h-35 w-35': isMobile, 'h-40 w-40': !isMobile}"
             @dblclick="handleFileOpen(item)"
@@ -48,7 +48,7 @@ import MinimizedFileBar from '@/components/desktop/MinimizedFileBar.vue';
 
 import { createLoader } from '@/components/utilities/simulateLoading';
 
-import { ref, toRaw, defineAsyncComponent, reactive, provide, onMounted } from 'vue';
+import { ref, toRaw, defineAsyncComponent, reactive, provide, onMounted, computed } from 'vue';
 
 const ContentWindow = defineAsyncComponent(() => import("@/components/windows/ContentWindow.vue"));
 const emit = defineEmits(['initialized', 'progress'])
@@ -59,16 +59,28 @@ import makeDirectoryItems from '@/components/utilities/makeDirectoryItems';
 import { makeFileItems } from '@/components/utilities/makeFileItems';
 import { openFile } from '@/components/utilities/openFile';
 import { useIsMobile } from "@/components/utilities/useIsMobile";
+import { useFilesStore } from '@/components/stores/files';
 
 const {isMobile} = useIsMobile()
 const windowRefs = reactive({});
 
 provide('windowRefs', windowRefs);
-const desktopContents = ref([]);
+const systemDesktopContents = ref([]);
 const appsStore = useAppsStore();
 const { openApps, openFiles, isAppOpen } = storeToRefs(appsStore);
 const fmId = 'file_manager'
 const browserId = 'browser'
+
+const filesStore = useFilesStore();
+const { desktopManifestItems } = storeToRefs(filesStore);
+
+const desktopContents = computed(() => {
+  const base = systemDesktopContents.value ?? [];
+  if (!desktopManifestItems.value.length) {
+    return base;
+  }
+  return base.concat(desktopManifestItems.value);
+});
 
 const loader = createLoader(2, p => emit('progress', p))
 
@@ -128,12 +140,16 @@ onMounted(() => {
   SystemModule.onRuntimeInitialized = () => {
     loader.checkpoint()
     console.log("SystemModule is fully initialized.");
-    desktopContents.value = getDesktopContents(); 
+    systemDesktopContents.value = getDesktopContents();
     loader.checkpoint()
   };
 
   loader.done.then(() => emit('initialized'))
-  
+
+})
+
+onMounted(() => {
+  filesStore.loadManifest();
 })
 
 

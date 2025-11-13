@@ -51,9 +51,19 @@ const props = defineProps({
 const currentUrl = ref("https://centari2013.github.io/SoundRoom");
 const iframe = useTemplateRef('iframe')
 
-if (props.args) {
-  const propLink = extractAndDecodeBase64(props.args.url)
-  currentUrl.value = propLink;
+const decodeUrl = (value) => {
+  if (!value) {
+    return null;
+  }
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+  const decoded = extractAndDecodeBase64(value);
+  return decoded || value;
+};
+
+if (props.args?.url) {
+  currentUrl.value = decodeUrl(props.args.url) ?? currentUrl.value;
 }
 
 const openInNewTab = () =>{

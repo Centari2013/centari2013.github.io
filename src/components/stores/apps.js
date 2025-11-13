@@ -3,6 +3,19 @@
 import { defineStore } from 'pinia';
 import { useIsMobile } from '@/components/utilities/useIsMobile';
 
+const getItemIdentity = (item) => {
+  if (!item) {
+    return null;
+  }
+  if (item.object?.$$?.ptr !== undefined) {
+    return `ptr-${item.object.$$.ptr}`;
+  }
+  if (item.id) {
+    return `id-${item.id}`;
+  }
+  return `name-${item.name}`;
+};
+
 function getIsMobile() {
   const { isMobile } = useIsMobile();
   return isMobile;
@@ -70,37 +83,50 @@ export const useAppsStore = defineStore('apps', {
 
     // Files
     getFilezIndex(item) {
-      return this.openFiles.find(file => file.item === item).zIndex;
+      const identity = getItemIdentity(item);
+      return this.openFiles.find(file => file.identity === identity)?.zIndex ?? 0;
     },
     isFileOpen(item) {
-      return this.openFiles.some(file => file.item.object.$$.ptr === item.object.$$.ptr);
+      const identity = getItemIdentity(item);
+      return this.openFiles.some(file => file.identity === identity);
     },
-    
+
     isFileMaximized(item) {
-      return this.openFiles.find(file => file.item === item).maximized;
+      const identity = getItemIdentity(item);
+      return this.openFiles.find(file => file.identity === identity)?.maximized ?? false;
     },
     isFileMinimized(item) {
-      return this.openFiles.find(file => file.item === item).minimized;
+      const identity = getItemIdentity(item);
+      return this.openFiles.find(file => file.identity === identity)?.minimized ?? false;
     },
     openFile(item) {
-      if (!this.isFileOpen(item)) {
-        this.openFiles.push({ item, zIndex: ++this.zIndexCounter, maximized: false, minimized: false});
+      const identity = getItemIdentity(item);
+      if (!this.openFiles.some(file => file.identity === identity)) {
+        this.openFiles.push({ identity, item, zIndex: ++this.zIndexCounter, maximized: false, minimized: false});
       }
-      
+
     },
     setFileMaximize(item, bool) {
-      this.openFiles.find(file => file.item === item).maximized = bool; 
+      const identity = getItemIdentity(item);
+      const openFile = this.openFiles.find(file => file.identity === identity);
+      if (openFile) openFile.maximized = bool;
     },
     setFileMinimize(item, bool) {
-      this.openFiles.find(file => file.item === item).minimized = bool; 
+      const identity = getItemIdentity(item);
+      const openFile = this.openFiles.find(file => file.identity === identity);
+      if (openFile) openFile.minimized = bool;
     },
     bringFileToFront(item) {
-      const file = this.openFiles.find(file => file.item === item);
+      const identity = getItemIdentity(item);
+      const file = this.openFiles.find(file => file.identity === identity);
       if (file) file.zIndex = ++this.zIndexCounter;
     },
     closeFile(item) {
-      const fileIndex = this.openFiles.findIndex(file => file.item === item);
-      this.openFiles.splice(fileIndex, 1);
-    }, 
+      const identity = getItemIdentity(item);
+      const fileIndex = this.openFiles.findIndex(file => file.identity === identity);
+      if (fileIndex >= 0) {
+        this.openFiles.splice(fileIndex, 1);
+      }
+    },
   },
 });

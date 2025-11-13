@@ -121,6 +121,58 @@ This will:
 
 ---
 
+## 🗃️ Remote manifest + CMS hooks
+
+The faux filesystem that powers the desktop is still compiled into WebAssembly, but you no longer have to rebuild it whenever you add new portfolio pieces. SpicyOS can now load **runtime data** from a JSON manifest and merge those entries directly into the Desktop and File Manager.
+
+### 1. Point the app at a manifest
+
+- Out of the box, the app looks for `/portfolio-manifest.json` (see `public/portfolio-manifest.json`).
+- Override the location by setting `VITE_MANIFEST_URL` before building/deploying:
+
+```bash
+VITE_MANIFEST_URL="https://raw.githubusercontent.com/<user>/<repo>/main/content/portfolio-manifest.json" npm run build
+```
+
+### 2. Manifest schema
+
+```jsonc
+{
+  "version": 1,
+  "root": { "name": "Remote Files" },
+  "desktop": [
+    { "id": "resume", "name": "Resume", "extension": "PDF", "kind": "link", "content": "https://.../resume.pdf" },
+    { "id": "poster", "name": "Poster.png", "extension": "PNG", "contentMode": "url", "content": "https://cdn.../poster.png" }
+  ],
+  "folders": [
+    {
+      "id": "portfolio",
+      "name": "Portfolio",
+      "entries": [
+        { "id": "case-study", "name": "Case Study", "extension": "MD", "contentMode": "url", "content": "https://.../case-study.md" },
+        { "id": "demo", "name": "Live Demo", "kind": "link", "content": "https://..." }
+      ]
+    }
+  ]
+}
+```
+
+- `desktop` entries appear as icons on the desktop.
+- `folders` populate a new **Remote Files** entry inside the File Manager sidebar (you can nest folders via `entries`).
+- Set `kind: "link"` (or `launch: "browser"`) to open a URL in the in-app browser.
+- Use `contentMode: "url"` whenever the `content` points at an external file; otherwise the viewer assumes a Base64 data URI.
+
+### 3. Hook it up to Tina CMS (or any Git-based CMS)
+
+1. Create a content repository (or a `content/` folder in this repo) that contains `portfolio-manifest.json` plus your uploads.
+2. Configure [Tina](https://tina.io/) to edit that JSON file (a single collection with one document works well) and authorize it against GitHub. Every publish action commits the updated manifest + assets.
+3. Deploy Tina somewhere (Vercel/Netlify). Update `VITE_MANIFEST_URL` to point at the *raw* manifest (`https://raw.githubusercontent.com/.../portfolio-manifest.json`) or at a signed URL from your storage bucket.
+4. Optional: host large binaries (images, PDFs, audio) on object storage (S3, Supabase, Cloudinary). Paste the resulting URLs into the manifest; no rebuild is necessary and the desktop/manager will refresh on reload.
+
+Because the SPA fetches the manifest at runtime, any change pushed through Tina (or another CMS) is immediately reflected in production without recompiling the WebAssembly module.
+
+---
+
 If by some miracle you're interested in contributing, open an issue or reach out. I’ll walk you through it!
 
 

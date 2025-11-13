@@ -8,8 +8,8 @@
           v-for="dir in sidebarDirs"
           :key="dir.name"
           class="sidebar-item"
-          :class="{ 'selected-sidebar-item': activePtr === dir.ptr }"
-          @click="chdir(toRaw(dir.ptr))"
+          :class="{ 'selected-sidebar-item': isActiveSidebar(dir) }"
+          @click="handleSidebarClick(dir)"
         >
           {{ dir.name }}
         </li>
@@ -41,11 +41,11 @@
       <div class="file-grid-container">
         <!-- Responsive Grid that Auto-adjusts -->
         <div class="file-grid">
-          <div 
-            v-for="item in contents" 
-            :key="item.name" 
+          <div
+            v-for="item in contents"
+            :key="item.id ?? item.name"
             class="file-item"
-            @dblclick="item.type === 'd' ? chdir(toRaw(item.object)) : openFile(item)"
+            @dblclick="handleFileDoubleClick(item)"
           >
             <Icon v-if="item.type === 'd'" :image="'directory'" class="d"/>
             <Icon v-else-if="item.type === 'f'" :image="'file'" />
@@ -62,9 +62,11 @@
 
 <script>
 import "@/assets/js/terminal/system";
-import { ref, onMounted, toRaw } from "vue";
+import { computed, ref, onMounted, toRaw, watch } from "vue";
 import Icon from "@/components/desktop/Icon.vue";
 import { useAppsStore } from "@/components/stores/apps";
+import { useFilesStore } from '@/components/stores/files';
+import { storeToRefs } from 'pinia';
 import makeDirectoryItems from "@/components/utilities/makeDirectoryItems";
 import {makeFileItems} from "@/components/utilities/makeFileItems";
 import { openFile } from '@/components/utilities/openFile'
@@ -73,56 +75,199 @@ export default {
   components: { Icon },
 setup() {
     // Reactive states
-    const contents = ref([]);
-    const disableBack = ref(true);
-    const disableForward = ref(true);
+    const fsContents = ref([]);
     const directoryTitle = ref("Directory");
     const activePtr = ref(null);
+    const useManifest = ref(false);
+    const manifestHistory = ref([[]]);
+    const manifestHistoryIndex = ref(0);
+    const filesStore = useFilesStore();
+    const { remoteRootFolder, hasManifest, remoteRootName } = storeToRefs(filesStore);
+    const appsStore = useAppsStore();
+    const browserId = 'browser';
 
     // Fetch directory contents
     const getDirContents = () => {
+      if (typeof SystemModule === 'undefined' || !SystemModule.get_cur_fs_dir) {
+        return [];
+      }
       const files = SystemModule.list_files(SystemModule.get_cur_fs_dir());
       const directories = SystemModule.list_directories(SystemModule.get_cur_fs_dir());
       directoryTitle.value = SystemModule.get_cur_fs_dir().name;
 
-      //const contentsList = [];
       const contentsList = makeDirectoryItems(directories).concat(makeFileItems(files));
-      
+
       contentsList.sort((a, b) => a.name.localeCompare(b.name));
       return contentsList;
     };
 
+    const manifestPath = computed(() => manifestHistory.value[manifestHistoryIndex.value] ?? []);
+
+    const resolveManifestNode = (path) => {
+      if (!remoteRootFolder.value) {
+        return null;
+      }
+      let node = remoteRootFolder.value;
+      for (const segment of path) {
+        node = node?.entries?.find(entry => entry.id === segment);
+        if (!node) {
+          return null;
+        }
+      }
+      return node;
+    };
+
+    const manifestContents = computed(() => {
+      if (!remoteRootFolder.value) {
+        return [];
+      }
+      const node = resolveManifestNode(manifestPath.value);
+      if (!node) {
+        return [];
+      }
+      return node.type === 'd' ? node.entries ?? [] : [];
+    });
+
+    const contents = computed(() => useManifest.value ? manifestContents.value : fsContents.value);
+
     // Navigation methods
     const chdir = (item) => {
+      if (typeof SystemModule === 'undefined' || !SystemModule.cd) {
+        return;
+      }
+      useManifest.value = false;
       SystemModule.cd(item);
       activePtr.value = item; // <-- track current ptr
-      contents.value = getDirContents();
-      syncButtonState();
+      fsContents.value = getDirContents();
+    };
+
+    const enterManifestDirectory = (dirId) => {
+      const nextHistory = manifestHistory.value.slice(0, manifestHistoryIndex.value + 1);
+      nextHistory.push([...manifestPath.value, dirId]);
+      manifestHistory.value = nextHistory;
+      manifestHistoryIndex.value = nextHistory.length - 1;
     };
 
     const back = () => {
+      if (useManifest.value) {
+        if (manifestHistoryIndex.value > 0) {
+          manifestHistoryIndex.value -= 1;
+        }
+        return;
+      }
+      if (typeof SystemModule === 'undefined' || !SystemModule.cd_back) {
+        return;
+      }
       SystemModule.cd_back();
-      contents.value = getDirContents();
-      syncButtonState();
+      fsContents.value = getDirContents();
     };
 
     const forward = () => {
+      if (useManifest.value) {
+        if (manifestHistoryIndex.value < manifestHistory.value.length - 1) {
+          manifestHistoryIndex.value += 1;
+        }
+        return;
+      }
+      if (typeof SystemModule === 'undefined' || !SystemModule.cd_forward) {
+        return;
+      }
       SystemModule.cd_forward();
-      contents.value = getDirContents();
-      syncButtonState();
+      fsContents.value = getDirContents();
     };
 
-    // Sync button states
-    const syncButtonState = () => {
-      disableBack.value = SystemModule.back_history_empty();
-      disableForward.value = SystemModule.forward_history_empty();
+    const disableBack = computed(() => {
+      if (useManifest.value) {
+        return manifestHistoryIndex.value === 0;
+      }
+      if (typeof SystemModule === 'undefined' || !SystemModule.back_history_empty) {
+        return true;
+      }
+      return SystemModule.back_history_empty();
+    });
+
+    const disableForward = computed(() => {
+      if (useManifest.value) {
+        return manifestHistoryIndex.value >= manifestHistory.value.length - 1;
+      }
+      if (typeof SystemModule === 'undefined' || !SystemModule.forward_history_empty) {
+        return true;
+      }
+      return SystemModule.forward_history_empty();
+    });
+
+    const updateManifestTitle = () => {
+      if (!remoteRootFolder.value) {
+        directoryTitle.value = 'Remote Files';
+        return;
+      }
+      const parts = [remoteRootFolder.value.name];
+      let node = remoteRootFolder.value;
+      manifestPath.value.forEach((segment) => {
+        const next = node.entries?.find(entry => entry.id === segment);
+        if (next) {
+          parts.push(next.name);
+          if (next.type === 'd') {
+            node = next;
+          }
+        }
+      });
+      directoryTitle.value = parts.join(' / ');
     };
 
-    // On mounted, initialize contents and button states
+    watch([useManifest, manifestPath, remoteRootFolder], () => {
+      if (useManifest.value) {
+        updateManifestTitle();
+      }
+    });
+
+    const handleFileDoubleClick = (item) => {
+      if (item.type === 'd') {
+        if (item.source === 'manifest') {
+          enterManifestDirectory(item.id);
+        } else {
+          chdir(toRaw(item.object));
+        }
+        return;
+      }
+
+      if (item.is_link) {
+        appsStore.openApp(browserId, { url: item.content });
+        return;
+      }
+
+      openFile(item);
+    };
+
+    const handleSidebarClick = (dir) => {
+      if (dir.isManifest) {
+        if (!remoteRootFolder.value) {
+          return;
+        }
+        useManifest.value = true;
+        manifestHistory.value = [[]];
+        manifestHistoryIndex.value = 0;
+        updateManifestTitle();
+      } else {
+        useManifest.value = false;
+        chdir(toRaw(dir.ptr));
+      }
+    };
+
+    const isActiveSidebar = (dir) => {
+      if (dir.isManifest) {
+        return useManifest.value;
+      }
+      return !useManifest.value && activePtr.value === dir.ptr;
+    };
+
+    // On mounted, initialize contents
     onMounted(() => {
-      contents.value = getDirContents();
-      activePtr.value = SystemModule.get_cur_fs_dir(); // Set current dir on load
-      syncButtonState();
+      fsContents.value = getDirContents();
+      if (typeof SystemModule !== 'undefined' && SystemModule.get_cur_fs_dir) {
+        activePtr.value = SystemModule.get_cur_fs_dir();
+      }
+      filesStore.loadManifest();
     });
 
 
@@ -133,14 +278,22 @@ setup() {
     const desktop_ptr = SystemModule.get_desktop_dir_ptr();
     const root_ptr = SystemModule.get_root_dir_ptr();
 
-    const sidebarDirs = ref([
-    { name: "Home", ptr: home_ptr },
-    { name: "Desktop", ptr: desktop_ptr },
-    { name: "Downloads", ptr: downloads_ptr },
-    { name: "Documents", ptr: documents_ptr },
-    { name: "Pictures", ptr: pictures_ptr },
-    { name: "Root", ptr: root_ptr }
-    ]);
+    const baseSidebar = [
+      { name: "Home", ptr: home_ptr },
+      { name: "Desktop", ptr: desktop_ptr },
+      { name: "Downloads", ptr: downloads_ptr },
+      { name: "Documents", ptr: documents_ptr },
+      { name: "Pictures", ptr: pictures_ptr },
+      { name: "Root", ptr: root_ptr }
+    ];
+
+    const sidebarDirs = computed(() => {
+      const dirs = [...baseSidebar];
+      if (remoteRootFolder.value) {
+        dirs.push({ name: remoteRootName.value, isManifest: true });
+      }
+      return dirs;
+    });
 
     return {
       contents,
@@ -150,6 +303,9 @@ setup() {
       back,
       forward,
       openFile,
+      handleFileDoubleClick,
+      handleSidebarClick,
+      isActiveSidebar,
       downloads_ptr,
       home_ptr,
       pictures_ptr,
@@ -159,7 +315,10 @@ setup() {
       directoryTitle,
       toRaw,
       sidebarDirs,
-      activePtr
+      activePtr,
+      hasManifest,
+      remoteRootFolder,
+      useManifest
     };
   },
 };
