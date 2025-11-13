@@ -128,7 +128,7 @@ setup() {
       return node.type === 'd' ? node.entries ?? [] : [];
     });
 
-    const contents = computed(() => useManifest.value ? manifestContents.value : fsContents.value);
+    const contents = computed(() => (useManifest.value ? manifestContents.value : fsContents.value));
 
     // Navigation methods
     const chdir = (item) => {
@@ -268,6 +268,15 @@ setup() {
         activePtr.value = SystemModule.get_cur_fs_dir();
       }
       filesStore.loadManifest();
+    });
+
+    watch(remoteRootFolder, (folder) => {
+      if (folder && !useManifest.value) {
+        useManifest.value = true;
+        manifestHistory.value = [[]];
+        manifestHistoryIndex.value = 0;
+        updateManifestTitle();
+      }
     });
 
 

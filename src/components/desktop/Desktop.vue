@@ -75,11 +75,11 @@ const filesStore = useFilesStore();
 const { desktopManifestItems } = storeToRefs(filesStore);
 
 const desktopContents = computed(() => {
-  const base = systemDesktopContents.value ?? [];
-  if (!desktopManifestItems.value.length) {
-    return base;
+  const manifestItems = desktopManifestItems.value ?? [];
+  if (manifestItems.length) {
+    return manifestItems;
   }
-  return base.concat(desktopManifestItems.value);
+  return systemDesktopContents.value ?? [];
 });
 
 const loader = createLoader(2, p => emit('progress', p))
