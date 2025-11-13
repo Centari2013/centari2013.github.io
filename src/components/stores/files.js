@@ -2,6 +2,97 @@ import { defineStore } from 'pinia';
 
 const defaultManifestUrl = import.meta.env.VITE_MANIFEST_URL ?? '/portfolio-manifest.json';
 
+const sanityConfig = {
+  projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
+  dataset: import.meta.env.VITE_SANITY_DATASET ?? 'production',
+  apiVersion: import.meta.env.VITE_SANITY_API_VERSION ?? '2023-10-06',
+  query:
+    import.meta.env.VITE_SANITY_QUERY ??
+    `*[_type == "portfolioManifest"][0]{
+      root,
+      desktop[]{
+        "id": coalesce(id, _key),
+        name,
+        extension,
+        kind,
+        content,
+        contentMode,
+        launch,
+        viewer,
+        url,
+        fileUrl,
+        href,
+        assetUrl,
+        "asset": asset->{url},
+        tags,
+        meta
+      },
+      folders[]{
+        "id": coalesce(id, _key),
+        name,
+        entries[]{
+          ...,
+          "id": coalesce(id, _key)
+        }
+      }
+    }`,
+  token: import.meta.env.VITE_SANITY_TOKEN,
+  params: import.meta.env.VITE_SANITY_QUERY_PARAMS,
+};
+
+const hasSanityConfig = Boolean(sanityConfig.projectId && sanityConfig.dataset);
+
+const parseSanityParams = () => {
+  if (!sanityConfig.params) {
+    return null;
+  }
+  try {
+    return JSON.parse(sanityConfig.params);
+  } catch (error) {
+    console.warn('[filesStore] Unable to parse VITE_SANITY_QUERY_PARAMS', error);
+    return null;
+  }
+};
+
+const fetchSanityManifest = async () => {
+  const { projectId, dataset, apiVersion, query, token } = sanityConfig;
+  const params = parseSanityParams();
+  const encodedQuery = encodeURIComponent(query.trim());
+  const encodedParams = params ? `&${new URLSearchParams(Object.entries(params)).toString()}` : '';
+  const endpoint = `https://${projectId}.api.sanity.io/${apiVersion}/data/query/${dataset}?query=${encodedQuery}${encodedParams}`;
+
+  const response = await fetch(endpoint, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Sanity query failed (HTTP ${response.status})`);
+  }
+
+  const payload = await response.json();
+  if (payload.error) {
+    throw new Error(payload.error.description ?? 'Sanity query returned an error');
+  }
+
+  if (!payload.result) {
+    throw new Error('Sanity response did not include a result');
+  }
+
+  if (Array.isArray(payload.result)) {
+    return payload.result[0] ?? {};
+  }
+
+  return payload.result;
+};
+
+const fetchManifestFromUrl = async (targetUrl) => {
+  const response = await fetch(targetUrl, { cache: 'no-cache' });
+  if (!response.ok) {
+    throw new Error(`Unable to load manifest (HTTP ${response.status})`);
+  }
+  return response.json();
+};
+
 const randomId = () => {
   if (globalThis.crypto?.randomUUID) {
     return globalThis.crypto.randomUUID();
@@ -19,12 +110,19 @@ const slugify = (value) =>
 const normalizeFileEntry = (entry = {}, parentSegments = []) => {
   const safeName = entry.name ?? entry.label ?? 'Untitled';
   const id = entry.id ?? slugify([...parentSegments, safeName].join('-')) ?? randomId();
-  const contentMode = entry.contentMode ?? entry.content_mode ?? entry.mode ?? (entry.url ? 'url' : 'data');
+  const explicitMode = entry.contentMode ?? entry.content_mode ?? entry.mode;
   const launchMode = entry.launch ?? entry.viewer;
-  const content = entry.content ?? entry.url ?? '';
-  const resolvedContentMode = contentMode === 'data' && /^https?:\/\//i.test(content)
-    ? 'url'
-    : contentMode;
+  const content =
+    entry.content ??
+    entry.url ??
+    entry.fileUrl ??
+    entry.href ??
+    entry.assetUrl ??
+    entry.asset?.url ??
+    '';
+  const resolvedContentMode =
+    explicitMode ??
+    (/^https?:\/\//i.test(content) ? 'url' : 'data');
 
   return {
     id,
@@ -100,11 +198,13 @@ export const useFilesStore = defineStore('files', {
   actions: {
     async loadManifest(url) {
       const targetUrl = url ?? this.manifestUrl ?? defaultManifestUrl;
-      if (this.status === 'loading' && targetUrl === this.manifestUrl) {
+      const sourceKey = hasSanityConfig ? 'sanity' : targetUrl;
+
+      if (this.status === 'loading' && sourceKey === this.manifestUrl) {
         return;
       }
 
-      if (this.status === 'ready' && this.manifest && targetUrl === this.manifestUrl) {
+      if (this.status === 'ready' && this.manifest && sourceKey === this.manifestUrl) {
         return;
       }
 
@@ -112,12 +212,11 @@ export const useFilesStore = defineStore('files', {
       this.error = null;
 
       try {
-        const response = await fetch(targetUrl, { cache: 'no-cache' });
-        if (!response.ok) {
-          throw new Error(`Unable to load manifest (HTTP ${response.status})`);
-        }
-        const payload = await response.json();
-        this.manifestUrl = targetUrl;
+        const payload = hasSanityConfig
+          ? await fetchSanityManifest()
+          : await fetchManifestFromUrl(targetUrl);
+
+        this.manifestUrl = sourceKey;
         this.manifest = normalizeManifest(payload);
         this.status = 'ready';
       } catch (error) {

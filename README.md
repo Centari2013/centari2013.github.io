@@ -171,6 +171,66 @@ VITE_MANIFEST_URL="https://raw.githubusercontent.com/<user>/<repo>/main/content/
 
 Because the SPA fetches the manifest at runtime, any change pushed through Tina (or another CMS) is immediately reflected in production without recompiling the WebAssembly module.
 
+### 4. Pipe the manifest straight from Sanity
+
+If you prefer Sanity over a Git-based CMS, the runtime store can query the Content Lake directly. Set the following environment variables before `npm run dev`/`npm run build`:
+
+```bash
+VITE_SANITY_PROJECT_ID="your-project-id"
+VITE_SANITY_DATASET="production"      # or your dataset name
+VITE_SANITY_API_VERSION="2023-10-06"   # optional; defaults to 2023-10-06
+# Optional advanced knobs
+# VITE_SANITY_QUERY="*[_type == \"portfolioManifest\"][0]{ ... }"
+# VITE_SANITY_QUERY_PARAMS='{"slug": "main"}'
+```
+
+With `VITE_SANITY_PROJECT_ID` and `VITE_SANITY_DATASET` defined, SpicyOS skips the JSON fetch and instead runs a GROQ query. The default query expects a document shaped like the JSON manifest (root metadata, `desktop[]`, `folders[]` w/ nested `entries`). Customize it by overriding `VITE_SANITY_QUERY`. All results run through the same normalizer as the static manifest, so links, shortcuts, and nested folders behave exactly like built-in files.
+
+#### Example schema
+
+Drop these schema snippets into `sanity/schemaTypes` to mirror the manifest:
+
+```ts
+import { defineField, defineType } from 'sanity';
+
+export const portfolioEntry = defineType({
+  name: 'portfolioEntry',
+  type: 'object',
+  fields: [
+    defineField({ name: 'name', type: 'string', validation: (Rule) => Rule.required() }),
+    defineField({ name: 'extension', type: 'string' }),
+    defineField({ name: 'kind', type: 'string', options: { list: ['file', 'link', 'shortcut'] } }),
+    defineField({ name: 'contentMode', type: 'string', options: { list: ['url', 'data'] } }),
+    defineField({ name: 'content', type: 'url' }),
+    defineField({ name: 'asset', type: 'file' }),
+    defineField({ name: 'tags', type: 'array', of: [{ type: 'string' }] }),
+    defineField({ name: 'meta', type: 'object' }),
+  ],
+});
+
+export const remoteFolder = defineType({
+  name: 'remoteFolder',
+  type: 'object',
+  fields: [
+    defineField({ name: 'name', type: 'string', validation: (Rule) => Rule.required() }),
+    defineField({ name: 'entries', type: 'array', of: [{ type: 'portfolioEntry' }, { type: 'remoteFolder' }] }),
+  ],
+});
+
+export default defineType({
+  name: 'portfolioManifest',
+  title: 'Portfolio Manifest',
+  type: 'document',
+  fields: [
+    defineField({ name: 'root', type: 'object', fields: [defineField({ name: 'name', type: 'string' })] }),
+    defineField({ name: 'desktop', type: 'array', of: [{ type: 'portfolioEntry' }] }),
+    defineField({ name: 'folders', type: 'array', of: [{ type: 'remoteFolder' }] }),
+  ],
+});
+```
+
+Publish new entries through Sanity Studio and reload the site—the manifest refreshes instantly without touching the repo or the WebAssembly build.
+
 ---
 
 If by some miracle you're interested in contributing, open an issue or reach out. I’ll walk you through it!
