@@ -178,7 +178,6 @@ If you prefer Sanity over a Git-based CMS, the runtime store can query the Conte
 ```bash
 VITE_SANITY_PROJECT_ID="your-project-id"
 VITE_SANITY_DATASET="production"      # or your dataset name
-VITE_SANITY_API_VERSION="2023-10-06"   # optional; defaults to 2023-10-06
 # Optional advanced knobs
 # VITE_SANITY_QUERY="*[_type == \"portfolioManifest\"][0]{ ... }"
 # VITE_SANITY_QUERY_PARAMS='{"slug": "main"}'

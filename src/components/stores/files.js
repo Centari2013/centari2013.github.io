@@ -5,7 +5,7 @@ const defaultManifestUrl = import.meta.env.VITE_MANIFEST_URL ?? '/portfolio-mani
 const sanityConfig = {
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
   dataset: import.meta.env.VITE_SANITY_DATASET ?? 'production',
-  apiVersion: import.meta.env.VITE_SANITY_API_VERSION ?? '2023-10-06',
+  apiVersion: import.meta.env.VITE_SANITY_API_VERSION ?? 'v2021-10-21',
   query:
     import.meta.env.VITE_SANITY_QUERY ??
     `*[_type == "portfolioManifest"][0]{
