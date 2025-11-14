@@ -234,6 +234,7 @@ export const useFilesStore = defineStore('files', {
     error: null,
     manifest: null,
     manifestUrl: defaultManifestUrl,
+    fsSyncVersion: 0,
   }),
   getters: {
     desktopManifestItems: (state) => state.manifest?.desktop ?? [],
@@ -265,6 +266,7 @@ export const useFilesStore = defineStore('files', {
         this.manifestUrl = sourceKey;
         this.manifest = normalizeManifest(payload);
         await syncManifestToFs(this.manifest);
+        this.fsSyncVersion += 1;
         this.status = 'ready';
       } catch (error) {
         console.error('[filesStore] Failed to load manifest', error);
