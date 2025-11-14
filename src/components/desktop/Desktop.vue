@@ -49,7 +49,7 @@ import MinimizedFileBar from '@/components/desktop/MinimizedFileBar.vue';
 import { createLoader } from '@/components/utilities/simulateLoading';
 import { onSystemModuleReady } from '@/components/utilities/systemModuleReady';
 
-import { ref, toRaw, defineAsyncComponent, reactive, provide, onMounted, computed } from 'vue';
+import { ref, toRaw, defineAsyncComponent, reactive, provide, onMounted, computed, watch } from 'vue';
 
 const ContentWindow = defineAsyncComponent(() => import("@/components/windows/ContentWindow.vue"));
 const emit = defineEmits(['initialized', 'progress'])
@@ -73,15 +73,9 @@ const fmId = 'file_manager'
 const browserId = 'browser'
 
 const filesStore = useFilesStore();
-const { desktopManifestItems } = storeToRefs(filesStore);
+const { fsSyncVersion } = storeToRefs(filesStore);
 
-const desktopContents = computed(() => {
-  const manifestItems = desktopManifestItems.value ?? [];
-  if (manifestItems.length) {
-    return manifestItems;
-  }
-  return systemDesktopContents.value ?? [];
-});
+const desktopContents = computed(() => systemDesktopContents.value ?? []);
 
 const loader = createLoader(2, p => emit('progress', p))
 
@@ -114,6 +108,13 @@ const getDesktopContents = () => {
   return contentsList;
 };
 
+const refreshDesktopContents = () => {
+  if (typeof SystemModule === 'undefined' || !SystemModule.get_desktop_dir_ptr) {
+    return;
+  }
+  systemDesktopContents.value = getDesktopContents();
+};
+
 const randomPositions = new Map();
 
 const getRandomPosition = (id) => {
@@ -140,13 +141,17 @@ onMounted(() => {
   onSystemModuleReady(() => {
     loader.checkpoint()
     console.log("SystemModule is fully initialized.");
-    systemDesktopContents.value = getDesktopContents();
+    refreshDesktopContents();
     loader.checkpoint()
   });
 
   loader.done.then(() => emit('initialized'))
 
 })
+
+watch(fsSyncVersion, () => {
+  refreshDesktopContents();
+});
 
 onMounted(() => {
   filesStore.loadManifest();
