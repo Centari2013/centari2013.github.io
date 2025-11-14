@@ -159,6 +159,7 @@ VITE_MANIFEST_URL="https://raw.githubusercontent.com/<user>/<repo>/main/content/
 
 - `desktop` entries appear as icons on the desktop.
 - `folders` populate a new **Remote Files** entry inside the File Manager sidebar (you can nest folders via `entries`).
+- The manifest root is materialized as a real directory under `~/Desktop/<root.name>`, so the terminal, Desktop, and File Manager all read the exact same files.
 - Set `kind: "link"` (or `launch: "browser"`) to open a URL in the in-app browser.
 - Use `contentMode: "url"` whenever the `content` points at an external file; otherwise the viewer assumes a Base64 data URI.
 

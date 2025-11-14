@@ -78,11 +78,8 @@ setup() {
     const fsContents = ref([]);
     const directoryTitle = ref("Directory");
     const activePtr = ref(null);
-    const useManifest = ref(false);
-    const manifestHistory = ref([[]]);
-    const manifestHistoryIndex = ref(0);
     const filesStore = useFilesStore();
-    const { remoteRootFolder, hasManifest, remoteRootName, fsSyncVersion } = storeToRefs(filesStore);
+    const { remoteRootName, fsSyncVersion, remoteRootDirPtr } = storeToRefs(filesStore);
     const appsStore = useAppsStore();
     const browserId = 'browser';
 
@@ -101,39 +98,9 @@ setup() {
       return contentsList;
     };
 
-    const manifestPath = computed(() => manifestHistory.value[manifestHistoryIndex.value] ?? []);
-
-    const resolveManifestNode = (path) => {
-      if (!remoteRootFolder.value) {
-        return null;
-      }
-      let node = remoteRootFolder.value;
-      for (const segment of path) {
-        node = node?.entries?.find(entry => entry.id === segment);
-        if (!node) {
-          return null;
-        }
-      }
-      return node;
-    };
-
-    const manifestContents = computed(() => {
-      if (!remoteRootFolder.value) {
-        return [];
-      }
-      const node = resolveManifestNode(manifestPath.value);
-      if (!node) {
-        return [];
-      }
-      return node.type === 'd' ? node.entries ?? [] : [];
-    });
-
-    const contents = computed(() => (useManifest.value ? manifestContents.value : fsContents.value));
+    const contents = computed(() => fsContents.value);
 
     const refreshFsContents = () => {
-      if (useManifest.value) {
-        return;
-      }
       fsContents.value = getDirContents();
     };
 
@@ -142,26 +109,12 @@ setup() {
       if (typeof SystemModule === 'undefined' || !SystemModule.cd) {
         return;
       }
-      useManifest.value = false;
       SystemModule.cd(item);
       activePtr.value = item; // <-- track current ptr
       refreshFsContents();
     };
 
-    const enterManifestDirectory = (dirId) => {
-      const nextHistory = manifestHistory.value.slice(0, manifestHistoryIndex.value + 1);
-      nextHistory.push([...manifestPath.value, dirId]);
-      manifestHistory.value = nextHistory;
-      manifestHistoryIndex.value = nextHistory.length - 1;
-    };
-
     const back = () => {
-      if (useManifest.value) {
-        if (manifestHistoryIndex.value > 0) {
-          manifestHistoryIndex.value -= 1;
-        }
-        return;
-      }
       if (typeof SystemModule === 'undefined' || !SystemModule.cd_back) {
         return;
       }
@@ -170,12 +123,6 @@ setup() {
     };
 
     const forward = () => {
-      if (useManifest.value) {
-        if (manifestHistoryIndex.value < manifestHistory.value.length - 1) {
-          manifestHistoryIndex.value += 1;
-        }
-        return;
-      }
       if (typeof SystemModule === 'undefined' || !SystemModule.cd_forward) {
         return;
       }
@@ -184,9 +131,6 @@ setup() {
     };
 
     const disableBack = computed(() => {
-      if (useManifest.value) {
-        return manifestHistoryIndex.value === 0;
-      }
       if (typeof SystemModule === 'undefined' || !SystemModule.back_history_empty) {
         return true;
       }
@@ -194,47 +138,15 @@ setup() {
     });
 
     const disableForward = computed(() => {
-      if (useManifest.value) {
-        return manifestHistoryIndex.value >= manifestHistory.value.length - 1;
-      }
       if (typeof SystemModule === 'undefined' || !SystemModule.forward_history_empty) {
         return true;
       }
       return SystemModule.forward_history_empty();
     });
 
-    const updateManifestTitle = () => {
-      if (!remoteRootFolder.value) {
-        directoryTitle.value = 'Remote Files';
-        return;
-      }
-      const parts = [remoteRootFolder.value.name];
-      let node = remoteRootFolder.value;
-      manifestPath.value.forEach((segment) => {
-        const next = node.entries?.find(entry => entry.id === segment);
-        if (next) {
-          parts.push(next.name);
-          if (next.type === 'd') {
-            node = next;
-          }
-        }
-      });
-      directoryTitle.value = parts.join(' / ');
-    };
-
-    watch([useManifest, manifestPath, remoteRootFolder], () => {
-      if (useManifest.value) {
-        updateManifestTitle();
-      }
-    });
-
     const handleFileDoubleClick = (item) => {
       if (item.type === 'd') {
-        if (item.source === 'manifest') {
-          enterManifestDirectory(item.id);
-        } else {
-          chdir(toRaw(item.object));
-        }
+        chdir(toRaw(item.object));
         return;
       }
 
@@ -247,25 +159,14 @@ setup() {
     };
 
     const handleSidebarClick = (dir) => {
-      if (dir.isManifest) {
-        if (!remoteRootFolder.value) {
-          return;
-        }
-        useManifest.value = true;
-        manifestHistory.value = [[]];
-        manifestHistoryIndex.value = 0;
-        updateManifestTitle();
-      } else {
-        useManifest.value = false;
-        chdir(toRaw(dir.ptr));
+      if (!dir?.ptr) {
+        return;
       }
+      chdir(toRaw(dir.ptr));
     };
 
     const isActiveSidebar = (dir) => {
-      if (dir.isManifest) {
-        return useManifest.value;
-      }
-      return !useManifest.value && activePtr.value === dir.ptr;
+      return activePtr.value === dir.ptr;
     };
 
     // On mounted, initialize contents
@@ -277,13 +178,8 @@ setup() {
       filesStore.loadManifest();
     });
 
-    watch(remoteRootFolder, (folder) => {
-      if (folder && !useManifest.value) {
-        useManifest.value = true;
-        manifestHistory.value = [[]];
-        manifestHistoryIndex.value = 0;
-        updateManifestTitle();
-      }
+    watch(fsSyncVersion, () => {
+      refreshFsContents();
     });
 
     watch(fsSyncVersion, () => {
@@ -309,8 +205,8 @@ setup() {
 
     const sidebarDirs = computed(() => {
       const dirs = [...baseSidebar];
-      if (remoteRootFolder.value) {
-        dirs.push({ name: remoteRootName.value, isManifest: true });
+      if (remoteRootDirPtr.value) {
+        dirs.push({ name: remoteRootName.value, ptr: remoteRootDirPtr.value });
       }
       return dirs;
     });
@@ -335,10 +231,7 @@ setup() {
       directoryTitle,
       toRaw,
       sidebarDirs,
-      activePtr,
-      hasManifest,
-      remoteRootFolder,
-      useManifest
+      activePtr
     };
   },
 };

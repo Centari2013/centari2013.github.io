@@ -30,14 +30,16 @@ const createFsEntry = (module, parentPtr, entry) => {
 };
 
 export const syncManifestToFs = async (manifest) => {
+  const result = { remoteRootDir: null };
+
   if (!manifest) {
-    return;
+    return result;
   }
 
   const module = await whenSystemModuleReady();
   if (!ensureFsSupport(module)) {
     console.warn('[syncManifestToFs] SystemModule does not expose filesystem mutators.');
-    return;
+    return result;
   }
 
   const desktopDir = module.get_desktop_dir_ptr?.();
@@ -48,19 +50,23 @@ export const syncManifestToFs = async (manifest) => {
 
   const remoteRootConfig = manifest.remoteRoot;
   if (!remoteRootConfig) {
-    return;
+    return result;
   }
 
-  const homeDir = module.get_home_dir_ptr?.();
-  if (!homeDir) {
-    return;
+  const remoteParent =
+    module.get_desktop_dir_ptr?.() || module.get_home_dir_ptr?.() || module.get_root_dir_ptr?.();
+  if (!remoteParent) {
+    return result;
   }
 
-  const remoteRootDir = module.create_directory(homeDir, remoteRootConfig.name ?? 'Remote Files');
+  const remoteRootDir = module.create_directory(remoteParent, remoteRootConfig.name ?? 'Remote Files');
   if (!remoteRootDir) {
-    return;
+    return result;
   }
 
   module.clear_directory(remoteRootDir);
   (remoteRootConfig.entries ?? []).forEach((entry) => createFsEntry(module, remoteRootDir, entry));
+
+  result.remoteRootDir = remoteRootDir;
+  return result;
 };

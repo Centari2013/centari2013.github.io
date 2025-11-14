@@ -235,12 +235,13 @@ export const useFilesStore = defineStore('files', {
     manifest: null,
     manifestUrl: defaultManifestUrl,
     fsSyncVersion: 0,
+    remoteRootDir: null,
   }),
   getters: {
     desktopManifestItems: (state) => state.manifest?.desktop ?? [],
-    remoteRootFolder: (state) => state.manifest?.remoteRoot ?? null,
     hasManifest: (state) => Boolean(state.manifest),
     remoteRootName: (state) => state.manifest?.remoteRoot?.name ?? 'Remote Files',
+    remoteRootDirPtr: (state) => state.remoteRootDir,
   },
   actions: {
     async loadManifest(url) {
@@ -265,7 +266,8 @@ export const useFilesStore = defineStore('files', {
 
         this.manifestUrl = sourceKey;
         this.manifest = normalizeManifest(payload);
-        await syncManifestToFs(this.manifest);
+        const syncResult = await syncManifestToFs(this.manifest);
+        this.remoteRootDir = syncResult?.remoteRootDir ?? null;
         this.fsSyncVersion += 1;
         this.status = 'ready';
       } catch (error) {
@@ -273,6 +275,7 @@ export const useFilesStore = defineStore('files', {
         this.error = error instanceof Error ? error.message : 'Unknown manifest error';
         this.status = 'error';
         this.manifest = null;
+        this.remoteRootDir = null;
       }
     },
   },
