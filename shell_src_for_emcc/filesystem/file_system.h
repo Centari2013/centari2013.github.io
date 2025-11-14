@@ -186,16 +186,52 @@ public:
 
     /**
      * @brief Lists all current files in the current working directory.
-     * 
+     *
      * @param dir A valid pointer to a directory.
      * @return Returns a vector in alphabetic order.
      */
     std::vector<Directory::File*> list_files(Directory* dir);
-   
+
+
+    /**
+     * @brief Removes every file and sub-directory from the provided directory.
+     *
+     * @param dir Pointer to the directory that should be emptied.
+     */
+    void clear_directory(Directory* dir);
+
+    /**
+     * @brief Creates (or returns) a child directory beneath the provided parent.
+     *
+     * @param parent Pointer to the parent directory.
+     * @param name Name of the directory to create.
+     * @return Pointer to the created/existing directory.
+     */
+    Directory* create_directory(Directory* parent, const std::string& name);
+
+    /**
+     * @brief Creates a file entry inside the provided directory.
+     *
+     * @param parent Pointer to the directory that will own the file.
+     * @param name File name without extension delimiter.
+     * @param extension_abbr File extension/abbreviation.
+     * @param content Optional file payload/content.
+     * @param is_shortcut Indicates whether this file behaves like a shortcut.
+     * @param is_link Indicates whether this file should be treated as a browser link.
+     * @return Pointer to the created file instance.
+     */
+    Directory::File* create_file(
+        Directory* parent,
+        const std::string& name,
+        const std::string& extension_abbr,
+        const std::string& content = "",
+        bool is_shortcut = false,
+        bool is_link = false);
+
 
     /**
      * @brief NOT IMPLEMENTED
-     * 
+     *
      * @param f NOTIMPLEMENTED
      * @return NOT IMPLEMENTED
      */

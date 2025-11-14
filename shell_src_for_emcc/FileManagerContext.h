@@ -38,7 +38,17 @@ public:
     FileSystem::Directory* get_root_dir_ptr() const;
     FileSystem::Directory* get_documents_dir_ptr() const;
     FileSystem::Directory* get_desktop_dir_ptr() const;
-    
+
+    FileSystem::Directory* create_directory(FileSystem::Directory* parent, const std::string& name);
+    FileSystem::Directory::File* create_file(
+        FileSystem::Directory* parent,
+        const std::string& name,
+        const std::string& extension_abbr,
+        const std::string& content = "",
+        bool is_shortcut = false,
+        bool is_link = false);
+    void clear_directory(FileSystem::Directory* dir);
+
 private:
     FileSystem::Directory* cur_dir;
     std::vector<FileSystem::Directory*> back_history;
