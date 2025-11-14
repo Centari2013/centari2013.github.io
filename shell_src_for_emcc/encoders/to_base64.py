@@ -51,5 +51,6 @@ def file_to_base64(directory):
         h_file.write("#endif /* FILES_H */")
 
 if __name__ == "__main__":
-    directory = "/Users/spicykneecaps/Projects/centari2013.github.io/shell_src_for_emcc/filesystem/files"  # Replace with your directory path
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    directory = os.path.join(repo_root, "filesystem", "files")
     file_to_base64(directory)

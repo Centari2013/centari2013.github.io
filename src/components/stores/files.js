@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { syncManifestToFs } from '@/components/utilities/syncManifestToFs';
 
 const defaultManifestUrl = import.meta.env.VITE_MANIFEST_URL ?? '/portfolio-manifest.json';
 
@@ -164,13 +165,25 @@ const normalizeFileEntry = (entry = {}, parentSegments = []) => {
   };
 };
 
+const shouldNormalizeAsFolder = (entry) => {
+  if (!entry) {
+    return false;
+  }
+  if (Array.isArray(entry.entries)) {
+    return true;
+  }
+  const kind = typeof entry.kind === 'string' ? entry.kind.toLowerCase() : null;
+  const type = typeof entry.type === 'string' ? entry.type.toLowerCase() : null;
+  return kind === 'folder' || type === 'd';
+};
+
 const normalizeFolder = (folder = {}, parentSegments = []) => {
   const folderName = folder.name ?? 'Folder';
   const id = folder.id ?? slugify([...parentSegments, folderName].join('-')) ?? randomId();
   const nextSegments = [...parentSegments, folderName];
   const entries = Array.isArray(folder.entries)
     ? folder.entries.map((entry) =>
-        entry.entries || entry.kind === 'folder'
+        shouldNormalizeAsFolder(entry)
           ? normalizeFolder(entry, nextSegments)
           : normalizeFileEntry(entry, nextSegments),
       )
@@ -187,12 +200,20 @@ const normalizeFolder = (folder = {}, parentSegments = []) => {
 
 const normalizeManifest = (payload = {}) => {
   const rootConfig = payload.root ?? {};
+  const remoteSegments = [rootConfig.name ?? 'remote'];
+  const rootEntries = Array.isArray(rootConfig.entries)
+    ? rootConfig.entries.map((entry) =>
+        shouldNormalizeAsFolder(entry)
+          ? normalizeFolder(entry, remoteSegments)
+          : normalizeFileEntry(entry, remoteSegments),
+      )
+    : [];
   const desktopEntries = Array.isArray(payload.desktop)
     ? payload.desktop.map((entry) => normalizeFileEntry(entry, ['desktop']))
     : [];
 
   const remoteFolders = Array.isArray(payload.folders)
-    ? payload.folders.map((folder) => normalizeFolder(folder, [rootConfig.name ?? 'remote']))
+    ? payload.folders.map((folder) => normalizeFolder(folder, remoteSegments))
     : [];
 
   return {
@@ -202,7 +223,7 @@ const normalizeManifest = (payload = {}) => {
       name: rootConfig.name ?? 'Remote Files',
       type: 'd',
       source: 'manifest',
-      entries: remoteFolders,
+      entries: [...rootEntries, ...remoteFolders],
     },
   };
 };
@@ -243,6 +264,7 @@ export const useFilesStore = defineStore('files', {
 
         this.manifestUrl = sourceKey;
         this.manifest = normalizeManifest(payload);
+        await syncManifestToFs(this.manifest);
         this.status = 'ready';
       } catch (error) {
         console.error('[filesStore] Failed to load manifest', error);

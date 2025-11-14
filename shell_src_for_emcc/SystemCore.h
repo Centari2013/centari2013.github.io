@@ -31,6 +31,16 @@ public:
     FileSystem::Directory* get_desktop_dir_ptr() const;
 
     FileSystem::Directory* get_cur_fs_dir();
+
+    FileSystem::Directory* create_directory(FileSystem::Directory* parent, const std::string& name);
+    FileSystem::Directory::File* create_file(
+        FileSystem::Directory* parent,
+        const std::string& name,
+        const std::string& extension_abbr,
+        const std::string& content = "",
+        bool is_shortcut = false,
+        bool is_link = false);
+    void clear_directory(FileSystem::Directory* dir);
 };
 
 #endif // SYSTEMCORE_H

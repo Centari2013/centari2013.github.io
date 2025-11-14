@@ -4,6 +4,7 @@
 
 #include <emscripten/bind.h>
 #include <emscripten.h>
+#include <string>
 
 
 
@@ -79,6 +80,24 @@ FileSystem::Directory::File* resolve_shortcut(FileSystem::Directory::File* f) {
     return (f && f->is_shortcut) ? f->shortcut_target.lock().get() : nullptr;
 }
 
+FileSystem::Directory* create_directory(FileSystem::Directory* parent, const std::string& name) {
+    return s.create_directory(parent, name);
+}
+
+FileSystem::Directory::File* create_file(
+    FileSystem::Directory* parent,
+    const std::string& name,
+    const std::string& extension_abbr,
+    const std::string& content,
+    bool is_shortcut,
+    bool is_link) {
+    return s.create_file(parent, name, extension_abbr, content, is_shortcut, is_link);
+}
+
+void clear_directory(FileSystem::Directory* dir) {
+    s.clear_directory(dir);
+}
+
 
 // Expose the functions to JavaScript
 EMSCRIPTEN_BINDINGS(terminal) {
@@ -123,5 +142,9 @@ EMSCRIPTEN_BINDINGS(file_manager) {
     emscripten::function("get_desktop_dir_ptr", &get_desktop_dir_ptr, emscripten::allow_raw_pointers());
 
     emscripten::function("resolve_shortcut", &resolve_shortcut, emscripten::allow_raw_pointers());
-    
+
+    emscripten::function("create_directory", &create_directory, emscripten::allow_raw_pointers());
+    emscripten::function("create_file", &create_file, emscripten::allow_raw_pointers());
+    emscripten::function("clear_directory", &clear_directory, emscripten::allow_raw_pointers());
+
 }

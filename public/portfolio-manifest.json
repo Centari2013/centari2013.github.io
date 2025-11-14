@@ -2,7 +2,21 @@
   "version": 1,
   "root": {
     "id": "remote-root",
-    "name": "Remote Files"
+    "name": "Remote Files",
+    "entries": [
+      {
+        "id": "remote-desktop",
+        "name": "Desktop",
+        "entries": [
+          {
+            "id": "desktop-note",
+            "name": "test",
+            "extension": "TXT",
+            "content": "Remote Desktop placeholder synced from the manifest."
+          }
+        ]
+      }
+    ]
   },
   "desktop": [
     {

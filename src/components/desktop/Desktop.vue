@@ -47,6 +47,7 @@ import Taskbar from '@/components/desktop/Taskbar.vue';
 import MinimizedFileBar from '@/components/desktop/MinimizedFileBar.vue';
 
 import { createLoader } from '@/components/utilities/simulateLoading';
+import { onSystemModuleReady } from '@/components/utilities/systemModuleReady';
 
 import { ref, toRaw, defineAsyncComponent, reactive, provide, onMounted, computed } from 'vue';
 
@@ -136,13 +137,12 @@ const handleFileOpen = (item) => {
 }
 
 onMounted(() => {
-  // initialize file system
-  SystemModule.onRuntimeInitialized = () => {
+  onSystemModuleReady(() => {
     loader.checkpoint()
     console.log("SystemModule is fully initialized.");
     systemDesktopContents.value = getDesktopContents();
     loader.checkpoint()
-  };
+  });
 
   loader.done.then(() => emit('initialized'))
 
