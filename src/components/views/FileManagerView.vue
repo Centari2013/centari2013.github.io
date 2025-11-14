@@ -82,7 +82,7 @@ setup() {
     const manifestHistory = ref([[]]);
     const manifestHistoryIndex = ref(0);
     const filesStore = useFilesStore();
-    const { remoteRootFolder, hasManifest, remoteRootName } = storeToRefs(filesStore);
+    const { remoteRootFolder, hasManifest, remoteRootName, fsSyncVersion } = storeToRefs(filesStore);
     const appsStore = useAppsStore();
     const browserId = 'browser';
 
@@ -130,6 +130,13 @@ setup() {
 
     const contents = computed(() => (useManifest.value ? manifestContents.value : fsContents.value));
 
+    const refreshFsContents = () => {
+      if (useManifest.value) {
+        return;
+      }
+      fsContents.value = getDirContents();
+    };
+
     // Navigation methods
     const chdir = (item) => {
       if (typeof SystemModule === 'undefined' || !SystemModule.cd) {
@@ -138,7 +145,7 @@ setup() {
       useManifest.value = false;
       SystemModule.cd(item);
       activePtr.value = item; // <-- track current ptr
-      fsContents.value = getDirContents();
+      refreshFsContents();
     };
 
     const enterManifestDirectory = (dirId) => {
@@ -159,7 +166,7 @@ setup() {
         return;
       }
       SystemModule.cd_back();
-      fsContents.value = getDirContents();
+      refreshFsContents();
     };
 
     const forward = () => {
@@ -173,7 +180,7 @@ setup() {
         return;
       }
       SystemModule.cd_forward();
-      fsContents.value = getDirContents();
+      refreshFsContents();
     };
 
     const disableBack = computed(() => {
@@ -277,6 +284,10 @@ setup() {
         manifestHistoryIndex.value = 0;
         updateManifestTitle();
       }
+    });
+
+    watch(fsSyncVersion, () => {
+      refreshFsContents();
     });
 
 
