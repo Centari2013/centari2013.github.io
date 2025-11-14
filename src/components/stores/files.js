@@ -107,19 +107,41 @@ const slugify = (value) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-');
 
+const isNullOrWhitespace = (value) => {
+  if (value == null) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    return value.trim().length === 0;
+  }
+  return false;
+};
+
+const coalesceContentValue = (...values) => {
+  for (const candidate of values) {
+    if (isNullOrWhitespace(candidate)) {
+      continue;
+    }
+    return candidate;
+  }
+  return '';
+};
+
 const normalizeFileEntry = (entry = {}, parentSegments = []) => {
   const safeName = entry.name ?? entry.label ?? 'Untitled';
   const id = entry.id ?? slugify([...parentSegments, safeName].join('-')) ?? randomId();
-  const explicitMode = entry.contentMode ?? entry.content_mode ?? entry.mode;
+  const explicitModeRaw = entry.contentMode ?? entry.content_mode ?? entry.mode;
+  const explicitMode =
+    typeof explicitModeRaw === 'string' && explicitModeRaw.trim().length > 0 ? explicitModeRaw.trim() : null;
   const launchMode = entry.launch ?? entry.viewer;
-  const content =
-    entry.content ??
-    entry.url ??
-    entry.fileUrl ??
-    entry.href ??
-    entry.assetUrl ??
-    entry.asset?.url ??
-    '';
+  const content = coalesceContentValue(
+    entry.content,
+    entry.url,
+    entry.fileUrl,
+    entry.href,
+    entry.assetUrl,
+    entry.asset?.url,
+  );
   const resolvedContentMode =
     explicitMode ??
     (/^https?:\/\//i.test(content) ? 'url' : 'data');
