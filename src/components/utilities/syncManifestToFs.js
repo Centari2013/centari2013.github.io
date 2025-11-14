@@ -54,7 +54,7 @@ export const syncManifestToFs = async (manifest) => {
   }
 
   const remoteParent =
-    module.get_desktop_dir_ptr?.() || module.get_home_dir_ptr?.() || module.get_root_dir_ptr?.();
+    module.get_root_dir_ptr?.() || module.get_home_dir_ptr?.() || module.get_desktop_dir_ptr?.();
   if (!remoteParent) {
     return result;
   }
