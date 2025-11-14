@@ -182,32 +182,46 @@ setup() {
       refreshFsContents();
     });
 
-    watch(fsSyncVersion, () => {
-      refreshFsContents();
+    let hasBootstrappedRemoteRoot = false;
+    watch(remoteRootDirPtr, (ptr) => {
+      if (!ptr) {
+        hasBootstrappedRemoteRoot = false;
+        return;
+      }
+      if (hasBootstrappedRemoteRoot) {
+        return;
+      }
+      hasBootstrappedRemoteRoot = true;
+      chdir(toRaw(ptr));
     });
 
 
-    const downloads_ptr = SystemModule.get_downloads_dir_ptr();
-    const home_ptr = SystemModule.get_home_dir_ptr();
-    const documents_ptr = SystemModule.get_documents_dir_ptr();
-    const pictures_ptr = SystemModule.get_pictures_dir_ptr();
-    const desktop_ptr = SystemModule.get_desktop_dir_ptr();
-    const root_ptr = SystemModule.get_root_dir_ptr();
-
-    const baseSidebar = [
-      { name: "Home", ptr: home_ptr },
-      { name: "Desktop", ptr: desktop_ptr },
-      { name: "Downloads", ptr: downloads_ptr },
-      { name: "Documents", ptr: documents_ptr },
-      { name: "Pictures", ptr: pictures_ptr },
-      { name: "Root", ptr: root_ptr }
-    ];
-
     const sidebarDirs = computed(() => {
-      const dirs = [...baseSidebar];
-      if (remoteRootDirPtr.value) {
-        dirs.push({ name: remoteRootName.value, ptr: remoteRootDirPtr.value });
+      fsSyncVersion.value;
+      if (typeof SystemModule === 'undefined') {
+        return [];
       }
+      const seenPtrs = new Set();
+      const dirs = [];
+      const pushDir = (name, ptr) => {
+        if (!ptr || seenPtrs.has(ptr)) {
+          return;
+        }
+        seenPtrs.add(ptr);
+        dirs.push({ name, ptr });
+      };
+
+      pushDir('Home', SystemModule.get_home_dir_ptr?.());
+      pushDir('Desktop', SystemModule.get_desktop_dir_ptr?.());
+      pushDir('Downloads', SystemModule.get_downloads_dir_ptr?.());
+      pushDir('Documents', SystemModule.get_documents_dir_ptr?.());
+      pushDir('Pictures', SystemModule.get_pictures_dir_ptr?.());
+      pushDir('Root', SystemModule.get_root_dir_ptr?.());
+
+      if (remoteRootDirPtr.value) {
+        pushDir(remoteRootName.value, remoteRootDirPtr.value);
+      }
+
       return dirs;
     });
 
@@ -222,12 +236,6 @@ setup() {
       handleFileDoubleClick,
       handleSidebarClick,
       isActiveSidebar,
-      downloads_ptr,
-      home_ptr,
-      pictures_ptr,
-      documents_ptr,
-      root_ptr,
-      desktop_ptr,
       directoryTitle,
       toRaw,
       sidebarDirs,
