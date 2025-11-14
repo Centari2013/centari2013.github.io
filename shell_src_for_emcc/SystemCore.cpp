@@ -63,3 +63,21 @@ FileSystem::Directory* SystemCore::get_documents_dir_ptr() const {
 FileSystem::Directory* SystemCore::get_desktop_dir_ptr() const {
     return this->f.get_desktop_dir_ptr();
 }
+
+FileSystem::Directory* SystemCore::create_directory(FileSystem::Directory* parent, const std::string& name) {
+    return this->f.create_directory(parent, name);
+}
+
+FileSystem::Directory::File* SystemCore::create_file(
+    FileSystem::Directory* parent,
+    const std::string& name,
+    const std::string& extension_abbr,
+    const std::string& content,
+    bool is_shortcut,
+    bool is_link) {
+    return this->f.create_file(parent, name, extension_abbr, content, is_shortcut, is_link);
+}
+
+void SystemCore::clear_directory(FileSystem::Directory* dir) {
+    this->f.clear_directory(dir);
+}

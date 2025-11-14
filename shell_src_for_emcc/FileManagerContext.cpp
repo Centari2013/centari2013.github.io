@@ -82,3 +82,21 @@ FileSystem::Directory* FileManagerContext::get_documents_dir_ptr() const {
 FileSystem::Directory* FileManagerContext::get_desktop_dir_ptr() const {
     return this->fs->get_desktop_dir_ptr();
 }
+
+FileSystem::Directory* FileManagerContext::create_directory(FileSystem::Directory* parent, const std::string& name) {
+    return this->fs->create_directory(parent, name);
+}
+
+FileSystem::Directory::File* FileManagerContext::create_file(
+    FileSystem::Directory* parent,
+    const std::string& name,
+    const std::string& extension_abbr,
+    const std::string& content,
+    bool is_shortcut,
+    bool is_link) {
+    return this->fs->create_file(parent, name, extension_abbr, content, is_shortcut, is_link);
+}
+
+void FileManagerContext::clear_directory(FileSystem::Directory* dir) {
+    this->fs->clear_directory(dir);
+}

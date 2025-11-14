@@ -279,9 +279,53 @@ std::vector<FileSystem::Directory::File*> FileSystem::list_files(FileSystem::Dir
     for (auto &f : dir->files){
         contents.push_back(f.get());
     }
-    
-    
+
+
     return contents;
+}
+
+void FileSystem::clear_directory(FileSystem::Directory* dir){
+    if (!dir){
+        return;
+    }
+    dir->files.clear();
+    dir->directories.clear();
+}
+
+FileSystem::Directory* FileSystem::create_directory(FileSystem::Directory* parent, const std::string& name){
+    if (!parent){
+        return nullptr;
+    }
+
+    auto it = std::find_if(parent->directories.begin(), parent->directories.end(), [&name](const std::unique_ptr<FileSystem::Directory>& dir){
+        return dir->name == name;
+    });
+
+    if (it != parent->directories.end()){
+        return it->get();
+    }
+
+    parent->directories.push_back(std::make_unique<FileSystem::Directory>(name, parent));
+    return parent->directories.back().get();
+}
+
+FileSystem::Directory::File* FileSystem::create_file(
+    FileSystem::Directory* parent,
+    const std::string& name,
+    const std::string& extension_abbr,
+    const std::string& content,
+    bool is_shortcut,
+    bool is_link){
+
+    if (!parent){
+        return nullptr;
+    }
+
+    auto file = std::make_shared<FileSystem::Directory::File>(name, extension_abbr, content);
+    file->is_shortcut = is_shortcut;
+    file->is_link = is_link;
+    parent->files.push_back(file);
+    return file.get();
 }
 
 std::vector<std::string> FileSystem::find(std::string f){
