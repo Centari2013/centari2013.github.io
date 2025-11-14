@@ -182,6 +182,10 @@ setup() {
       refreshFsContents();
     });
 
+    watch(fsSyncVersion, () => {
+      refreshFsContents();
+    });
+
 
     const downloads_ptr = SystemModule.get_downloads_dir_ptr();
     const home_ptr = SystemModule.get_home_dir_ptr();
