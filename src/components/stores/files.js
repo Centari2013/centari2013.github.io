@@ -24,6 +24,7 @@ const sanityConfig = {
         href,
         assetUrl,
         "asset": asset->{url},
+        assetFileUrl: asset.asset->url,
         tags,
         meta
       },
@@ -140,7 +141,9 @@ const normalizeFileEntry = (entry = {}, parentSegments = []) => {
     entry.fileUrl,
     entry.href,
     entry.assetUrl,
+    entry.assetFileUrl,
     entry.asset?.url,
+    entry.asset?.asset?.url,
   );
   const resolvedContentMode =
     explicitMode ??
