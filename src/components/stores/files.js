@@ -24,7 +24,7 @@ const sanityConfig = {
         href,
         assetUrl,
         "asset": asset->{url},
-        assetFileUrl: asset.asset->url,
+        "assetFileUrl": asset.asset->url,
         tags,
         meta
       },
