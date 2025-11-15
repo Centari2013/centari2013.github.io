@@ -1,22 +1,8 @@
 {
   "version": 1,
   "root": {
-    "id": "remote-root",
-    "name": "Remote Files",
-    "entries": [
-      {
-        "id": "remote-desktop",
-        "name": "Desktop",
-        "entries": [
-          {
-            "id": "desktop-note",
-            "name": "test",
-            "extension": "TXT",
-            "content": "Remote Desktop placeholder synced from the manifest."
-          }
-        ]
-      }
-    ]
+    "id": "filesystem-root",
+    "name": "Filesystem"
   },
   "desktop": [
     {
@@ -34,35 +20,85 @@
       "content": "https://raw.githubusercontent.com/example/portfolio-content/main/case-study.md"
     }
   ],
-  "folders": [
+  "filesystem": [
     {
-      "id": "portfolio",
-      "name": "Portfolio",
+      "id": "bin",
+      "name": "bin",
+      "role": "bin",
       "entries": [
         {
-          "id": "poster",
-          "name": "2024 Poster.png",
-          "extension": "PNG",
-          "contentMode": "url",
-          "content": "https://example.com/uploads/poster.png"
-        },
+          "id": "bin-readme",
+          "name": "motd",
+          "extension": "TXT",
+          "content": "Commands published from the manifest land here."
+        }
+      ]
+    },
+    {
+      "id": "etc",
+      "name": "etc",
+      "role": "etc",
+      "entries": []
+    },
+    {
+      "id": "usr",
+      "name": "usr",
+      "role": "usr",
+      "entries": [
         {
-          "id": "demo",
-          "name": "Live Demo",
-          "extension": "URL",
-          "kind": "link",
-          "content": "https://example.com/work/demo"
-        },
+          "id": "usr-bin",
+          "name": "bin",
+          "role": "usr/bin",
+          "entries": []
+        }
+      ]
+    },
+    {
+      "id": "var",
+      "name": "var",
+      "role": "var",
+      "entries": []
+    },
+    {
+      "id": "home",
+      "name": "home",
+      "role": "users",
+      "entries": [
         {
-          "id": "nested-folder",
-          "name": "In Progress",
+          "id": "spicy-user",
+          "name": "spicy",
+          "role": "home",
           "entries": [
             {
-              "id": "draft",
-              "name": "Draft Notes",
-              "extension": "TXT",
-              "contentMode": "url",
-              "content": "https://raw.githubusercontent.com/example/portfolio-content/main/drafts/notes.txt"
+              "id": "desktop-dir",
+              "name": "Desktop",
+              "role": "desktop",
+              "entries": [
+                {
+                  "id": "desktop-note",
+                  "name": "Welcome",
+                  "extension": "TXT",
+                  "content": "Remote Desktop placeholder synced from the manifest."
+                }
+              ]
+            },
+            {
+              "id": "documents-dir",
+              "name": "Documents",
+              "role": "documents",
+              "entries": []
+            },
+            {
+              "id": "downloads-dir",
+              "name": "Downloads",
+              "role": "downloads",
+              "entries": []
+            },
+            {
+              "id": "pictures-dir",
+              "name": "Pictures",
+              "role": "pictures",
+              "entries": []
             }
           ]
         }

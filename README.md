@@ -139,18 +139,26 @@ VITE_MANIFEST_URL="https://raw.githubusercontent.com/<user>/<repo>/main/content/
 ```jsonc
 {
   "version": 1,
-  "root": { "name": "Remote Files" },
+  "root": { "name": "Filesystem" },
   "desktop": [
     { "id": "resume", "name": "Resume", "extension": "PDF", "kind": "link", "content": "https://.../resume.pdf" },
     { "id": "poster", "name": "Poster.png", "extension": "PNG", "contentMode": "url", "content": "https://cdn.../poster.png" }
   ],
-  "folders": [
+  "filesystem": [
+    { "name": "bin", "role": "bin", "entries": [] },
+    { "name": "etc", "role": "etc", "entries": [] },
     {
-      "id": "portfolio",
-      "name": "Portfolio",
+      "name": "home",
+      "role": "users",
       "entries": [
-        { "id": "case-study", "name": "Case Study", "extension": "MD", "contentMode": "url", "content": "https://.../case-study.md" },
-        { "id": "demo", "name": "Live Demo", "kind": "link", "content": "https://..." }
+        {
+          "name": "spicy",
+          "role": "home",
+          "entries": [
+            { "name": "Desktop", "role": "desktop", "entries": [{ "name": "Welcome", "extension": "TXT", "content": "Hello" }] },
+            { "name": "Documents", "role": "documents", "entries": [] }
+          ]
+        }
       ]
     }
   ]
@@ -158,8 +166,8 @@ VITE_MANIFEST_URL="https://raw.githubusercontent.com/<user>/<repo>/main/content/
 ```
 
 - `desktop` entries appear as icons on the desktop.
-- `folders` populate a new **Remote Files** entry inside the File Manager sidebar (you can nest folders via `entries`).
-- The manifest root is materialized as a real directory under `~/Desktop/<root.name>`, so the terminal, Desktop, and File Manager all read the exact same files.
+- `filesystem` describes the entire Unix-like tree mounted at `/`. Assign `role` to map directories to `home`, `desktop`, `documents`, `bin`, etc. and nest via `entries` to add the rest of the hierarchy.
+- The manifest root is materialized as `/`, so the terminal, Desktop, and File Manager all read the exact same files.
 - Set `kind: "link"` (or `launch: "browser"`) to open a URL in the in-app browser.
 - Use `contentMode: "url"` whenever the `content` points at an external file; otherwise the viewer assumes a Base64 data URI.
 
@@ -184,7 +192,7 @@ VITE_SANITY_DATASET="production"      # or your dataset name
 # VITE_SANITY_QUERY_PARAMS='{"slug": "main"}'
 ```
 
-With `VITE_SANITY_PROJECT_ID` and `VITE_SANITY_DATASET` defined, SpicyOS skips the JSON fetch and instead runs a GROQ query. The default query expects a document shaped like the JSON manifest (root metadata, `desktop[]`, `folders[]` w/ nested `entries`). Customize it by overriding `VITE_SANITY_QUERY`. All results run through the same normalizer as the static manifest, so links, shortcuts, and nested folders behave exactly like built-in files.
+With `VITE_SANITY_PROJECT_ID` and `VITE_SANITY_DATASET` defined, SpicyOS skips the JSON fetch and instead runs a GROQ query. The default query expects a document shaped like the JSON manifest (root metadata, `desktop[]`, `filesystem[]` w/ nested `entries`). Customize it by overriding `VITE_SANITY_QUERY`. All results run through the same normalizer as the static manifest, so links, shortcuts, and nested folders behave exactly like built-in files.
 
 #### Example schema
 
@@ -201,7 +209,7 @@ export const portfolioEntry = defineType({
     defineField({ name: 'extension', type: 'string' }),
     defineField({ name: 'kind', type: 'string', options: { list: ['file', 'link', 'shortcut'] } }),
     defineField({ name: 'contentMode', type: 'string', options: { list: ['url', 'data'] } }),
-    defineField({ name: 'content', type: 'url' }),
+    defineField({ name: 'content', type: 'text', rows: 3 }),
     defineField({ name: 'asset', type: 'file' }),
     defineField({ name: 'tags', type: 'array', of: [{ type: 'string' }] }),
     defineField({ name: 'meta', type: 'object' }),
@@ -213,6 +221,12 @@ export const remoteFolder = defineType({
   type: 'object',
   fields: [
     defineField({ name: 'name', type: 'string', validation: (Rule) => Rule.required() }),
+    defineField({
+      name: 'role',
+      title: 'System role',
+      type: 'string',
+      options: { list: ['custom', 'home', 'desktop', 'documents', 'downloads', 'pictures', 'bin', 'etc', 'usr', 'usr/bin', 'usr/sbin', 'var', 'tmp', 'users'] },
+    }),
     defineField({ name: 'entries', type: 'array', of: [{ type: 'portfolioEntry' }, { type: 'remoteFolder' }] }),
   ],
 });
@@ -224,7 +238,12 @@ export default defineType({
   fields: [
     defineField({ name: 'root', type: 'object', fields: [defineField({ name: 'name', type: 'string' })] }),
     defineField({ name: 'desktop', type: 'array', of: [{ type: 'portfolioEntry' }] }),
-    defineField({ name: 'folders', type: 'array', of: [{ type: 'remoteFolder' }] }),
+    defineField({
+      name: 'filesystem',
+      title: 'Filesystem',
+      type: 'array',
+      of: [{ type: 'remoteFolder' }],
+    }),
   ],
 });
 ```

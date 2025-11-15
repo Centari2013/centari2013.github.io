@@ -177,10 +177,46 @@ const shouldNormalizeAsFolder = (entry) => {
   return kind === 'folder' || type === 'd';
 };
 
+const KNOWN_SYSTEM_ROLES = new Set([
+  'bin',
+  'custom',
+  'desktop',
+  'documents',
+  'downloads',
+  'etc',
+  'home',
+  'pictures',
+  'sbin',
+  'tmp',
+  'usr',
+  'usr/bin',
+  'usr/sbin',
+  'users',
+  'var',
+]);
+
+const detectFolderRole = (folder = {}) => {
+  const rawRole = folder.role ?? folder.systemRole;
+  if (typeof rawRole === 'string') {
+    const normalized = rawRole.trim().toLowerCase();
+    if (normalized.length > 0) {
+      return normalized;
+    }
+  }
+
+  const derivedName = typeof folder.name === 'string' ? folder.name.trim().toLowerCase() : '';
+  if (KNOWN_SYSTEM_ROLES.has(derivedName)) {
+    return derivedName;
+  }
+
+  return null;
+};
+
 const normalizeFolder = (folder = {}, parentSegments = []) => {
   const folderName = folder.name ?? 'Folder';
   const id = folder.id ?? slugify([...parentSegments, folderName].join('-')) ?? randomId();
   const nextSegments = [...parentSegments, folderName];
+  const role = detectFolderRole(folder);
   const entries = Array.isArray(folder.entries)
     ? folder.entries.map((entry) =>
         shouldNormalizeAsFolder(entry)
@@ -194,36 +230,30 @@ const normalizeFolder = (folder = {}, parentSegments = []) => {
     type: 'd',
     name: folderName,
     source: 'manifest',
+    role,
     entries,
   };
 };
 
 const normalizeManifest = (payload = {}) => {
   const rootConfig = payload.root ?? {};
-  const remoteSegments = [rootConfig.name ?? 'remote'];
-  const rootEntries = Array.isArray(rootConfig.entries)
-    ? rootConfig.entries.map((entry) =>
-        shouldNormalizeAsFolder(entry)
-          ? normalizeFolder(entry, remoteSegments)
-          : normalizeFileEntry(entry, remoteSegments),
-      )
+  const rootName = rootConfig.name ?? 'Filesystem';
+  const filesystemEntries = Array.isArray(payload.filesystem)
+    ? payload.filesystem.map((folder) => normalizeFolder(folder, [rootName]))
     : [];
   const desktopEntries = Array.isArray(payload.desktop)
     ? payload.desktop.map((entry) => normalizeFileEntry(entry, ['desktop']))
     : [];
 
-  const remoteFolders = Array.isArray(payload.folders)
-    ? payload.folders.map((folder) => normalizeFolder(folder, remoteSegments))
-    : [];
-
   return {
     desktop: desktopEntries,
+    filesystem: filesystemEntries,
     remoteRoot: {
       id: rootConfig.id ?? 'remote-root',
-      name: rootConfig.name ?? 'Remote Files',
+      name: rootName,
       type: 'd',
       source: 'manifest',
-      entries: [...rootEntries, ...remoteFolders],
+      entries: filesystemEntries,
     },
   };
 };
