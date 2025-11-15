@@ -4,6 +4,7 @@
 
 #include <emscripten/bind.h>
 #include <emscripten.h>
+#include <emscripten/val.h>
 #include <string>
 
 
@@ -98,6 +99,10 @@ void clear_directory(FileSystem::Directory* dir) {
     s.clear_directory(dir);
 }
 
+void build_fs_from_manifest(emscripten::val manifest_entries) {
+    build_filesystem_from_manifest(fs, manifest_entries);
+}
+
 
 // Expose the functions to JavaScript
 EMSCRIPTEN_BINDINGS(terminal) {
@@ -146,5 +151,6 @@ EMSCRIPTEN_BINDINGS(file_manager) {
     emscripten::function("create_directory", &create_directory, emscripten::allow_raw_pointers());
     emscripten::function("create_file", &create_file, emscripten::allow_raw_pointers());
     emscripten::function("clear_directory", &clear_directory, emscripten::allow_raw_pointers());
+    emscripten::function("build_fs_from_manifest", &build_fs_from_manifest);
 
 }
