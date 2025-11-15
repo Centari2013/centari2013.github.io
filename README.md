@@ -121,18 +121,24 @@ This will:
 
 ---
 
-## 🗃️ Remote manifest + CMS hooks
+## 🗃️ Remote manifest (Sanity-only)
 
-The faux filesystem that powers the desktop is still compiled into WebAssembly, but you no longer have to rebuild it whenever you add new portfolio pieces. SpicyOS can now load **runtime data** from a JSON manifest and merge those entries directly into the Desktop and File Manager.
+The faux filesystem that powers the desktop is still compiled into WebAssembly, but every folder/file you see at runtime now comes directly from Sanity. On load, the Pinia `files` store executes a GROQ query, normalizes the result into a Unix-style tree, and streams it into the WebAssembly module so the terminal, Desktop, and File Manager stay in sync without rebuilding the bundle.
 
-### 1. Point the app at a manifest
+### 1. Configure Sanity credentials
 
-- Out of the box, the app looks for `/portfolio-manifest.json` (see `public/portfolio-manifest.json`).
-- Override the location by setting `VITE_MANIFEST_URL` before building/deploying:
+Set the required environment variables before `npm run dev` / `npm run build`:
 
 ```bash
-VITE_MANIFEST_URL="https://raw.githubusercontent.com/<user>/<repo>/main/content/portfolio-manifest.json" npm run build
+VITE_SANITY_PROJECT_ID="your-project-id"
+VITE_SANITY_DATASET="production"      # or your dataset name
+# Optional advanced knobs
+# VITE_SANITY_API_VERSION="v2021-10-21"
+# VITE_SANITY_QUERY="*[_type == \"portfolioManifest\"][0]{ ... }"
+# VITE_SANITY_QUERY_PARAMS='{"slug": "main"}'
 ```
+
+Without `VITE_SANITY_PROJECT_ID` **and** `VITE_SANITY_DATASET` the app refuses to boot the manifest—there is no local JSON fallback anymore.
 
 ### 2. Manifest schema
 
@@ -171,28 +177,7 @@ VITE_MANIFEST_URL="https://raw.githubusercontent.com/<user>/<repo>/main/content/
 - Set `kind: "link"` (or `launch: "browser"`) to open a URL in the in-app browser.
 - Use `contentMode: "url"` whenever the `content` points at an external file; otherwise the viewer assumes a Base64 data URI.
 
-### 3. Hook it up to Tina CMS (or any Git-based CMS)
-
-1. Create a content repository (or a `content/` folder in this repo) that contains `portfolio-manifest.json` plus your uploads.
-2. Configure [Tina](https://tina.io/) to edit that JSON file (a single collection with one document works well) and authorize it against GitHub. Every publish action commits the updated manifest + assets.
-3. Deploy Tina somewhere (Vercel/Netlify). Update `VITE_MANIFEST_URL` to point at the *raw* manifest (`https://raw.githubusercontent.com/.../portfolio-manifest.json`) or at a signed URL from your storage bucket.
-4. Optional: host large binaries (images, PDFs, audio) on object storage (S3, Supabase, Cloudinary). Paste the resulting URLs into the manifest; no rebuild is necessary and the desktop/manager will refresh on reload.
-
-Because the SPA fetches the manifest at runtime, any change pushed through Tina (or another CMS) is immediately reflected in production without recompiling the WebAssembly module.
-
-### 4. Pipe the manifest straight from Sanity
-
-If you prefer Sanity over a Git-based CMS, the runtime store can query the Content Lake directly. Set the following environment variables before `npm run dev`/`npm run build`:
-
-```bash
-VITE_SANITY_PROJECT_ID="your-project-id"
-VITE_SANITY_DATASET="production"      # or your dataset name
-# Optional advanced knobs
-# VITE_SANITY_QUERY="*[_type == \"portfolioManifest\"][0]{ ... }"
-# VITE_SANITY_QUERY_PARAMS='{"slug": "main"}'
-```
-
-With `VITE_SANITY_PROJECT_ID` and `VITE_SANITY_DATASET` defined, SpicyOS skips the JSON fetch and instead runs a GROQ query. The default query expects a document shaped like the JSON manifest (root metadata, `desktop[]`, `filesystem[]` w/ nested `entries`). Customize it by overriding `VITE_SANITY_QUERY`. All results run through the same normalizer as the static manifest, so links, shortcuts, and nested folders behave exactly like built-in files.
+Because the SPA fetches the manifest straight from Sanity on every page load, any publish in Studio (or via mutations/scripts) immediately refreshes the filesystem—no JSON files, repos, or WebAssembly rebuilds are required.
 
 #### Example schema
 

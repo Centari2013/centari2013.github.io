@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia';
 import { syncManifestToFs } from '@/components/utilities/syncManifestToFs';
 
-const defaultManifestUrl = import.meta.env.VITE_MANIFEST_URL ?? '/portfolio-manifest.json';
-
 const sanityConfig = {
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
   dataset: import.meta.env.VITE_SANITY_DATASET ?? 'production',
@@ -29,9 +27,9 @@ const sanityConfig = {
         tags,
         meta
       },
-      folders[]{
+      filesystem[]{
+        ...,
         "id": coalesce(id, _key),
-        name,
         entries[]{
           ...,
           "id": coalesce(id, _key)
@@ -43,6 +41,15 @@ const sanityConfig = {
 };
 
 const hasSanityConfig = Boolean(sanityConfig.projectId && sanityConfig.dataset);
+
+const requireSanityConfig = () => {
+  if (hasSanityConfig) {
+    return;
+  }
+  throw new Error(
+    'Sanity credentials are missing. Set VITE_SANITY_PROJECT_ID and VITE_SANITY_DATASET to load the manifest.',
+  );
+};
 
 const parseSanityParams = () => {
   if (!sanityConfig.params) {
@@ -85,14 +92,6 @@ const fetchSanityManifest = async () => {
   }
 
   return payload.result;
-};
-
-const fetchManifestFromUrl = async (targetUrl) => {
-  const response = await fetch(targetUrl, { cache: 'no-cache' });
-  if (!response.ok) {
-    throw new Error(`Unable to load manifest (HTTP ${response.status})`);
-  }
-  return response.json();
 };
 
 const randomId = () => {
@@ -263,7 +262,6 @@ export const useFilesStore = defineStore('files', {
     status: 'idle',
     error: null,
     manifest: null,
-    manifestUrl: defaultManifestUrl,
     fsSyncVersion: 0,
     remoteRootDir: null,
   }),
@@ -274,15 +272,14 @@ export const useFilesStore = defineStore('files', {
     remoteRootDirPtr: (state) => state.remoteRootDir,
   },
   actions: {
-    async loadManifest(url) {
-      const targetUrl = url ?? this.manifestUrl ?? defaultManifestUrl;
-      const sourceKey = hasSanityConfig ? 'sanity' : targetUrl;
+    async loadManifest() {
+      requireSanityConfig();
 
-      if (this.status === 'loading' && sourceKey === this.manifestUrl) {
+      if (this.status === 'loading') {
         return;
       }
 
-      if (this.status === 'ready' && this.manifest && sourceKey === this.manifestUrl) {
+      if (this.status === 'ready' && this.manifest) {
         return;
       }
 
@@ -290,11 +287,7 @@ export const useFilesStore = defineStore('files', {
       this.error = null;
 
       try {
-        const payload = hasSanityConfig
-          ? await fetchSanityManifest()
-          : await fetchManifestFromUrl(targetUrl);
-
-        this.manifestUrl = sourceKey;
+        const payload = await fetchSanityManifest();
         this.manifest = normalizeManifest(payload);
         const syncResult = await syncManifestToFs(this.manifest);
         this.remoteRootDir = syncResult?.remoteRootDir ?? null;
