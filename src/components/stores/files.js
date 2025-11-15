@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { syncManifestToFs } from '@/components/utilities/syncManifestToFs';
+import fallbackManifest from '@/components/data/fallbackManifest';
 
 const sanityConfig = {
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
@@ -42,15 +43,6 @@ const sanityConfig = {
 
 const hasSanityConfig = Boolean(sanityConfig.projectId && sanityConfig.dataset);
 
-const requireSanityConfig = () => {
-  if (hasSanityConfig) {
-    return;
-  }
-  throw new Error(
-    'Sanity credentials are missing. Set VITE_SANITY_PROJECT_ID and VITE_SANITY_DATASET to load the manifest.',
-  );
-};
-
 const parseSanityParams = () => {
   if (!sanityConfig.params) {
     return null;
@@ -92,6 +84,33 @@ const fetchSanityManifest = async () => {
   }
 
   return payload.result;
+};
+
+const cloneManifestPayload = (payload = {}) => JSON.parse(JSON.stringify(payload));
+
+const buildFallbackManifest = (reason) => {
+  if (!fallbackManifest) {
+    throw new Error(reason);
+  }
+  console.warn(`[filesStore] ${reason} Falling back to bundled manifest.`);
+  return cloneManifestPayload(fallbackManifest);
+};
+
+const loadManifestPayload = async () => {
+  if (!hasSanityConfig) {
+    return buildFallbackManifest('Sanity credentials missing.');
+  }
+
+  try {
+    const remoteManifest = await fetchSanityManifest();
+    if (!remoteManifest || Object.keys(remoteManifest).length === 0) {
+      return buildFallbackManifest('Sanity returned an empty manifest.');
+    }
+    return remoteManifest;
+  } catch (error) {
+    console.error('[filesStore] Failed to load manifest from Sanity', error);
+    return buildFallbackManifest('Sanity fetch failed.');
+  }
 };
 
 const randomId = () => {
@@ -273,8 +292,6 @@ export const useFilesStore = defineStore('files', {
   },
   actions: {
     async loadManifest() {
-      requireSanityConfig();
-
       if (this.status === 'loading') {
         return;
       }
@@ -287,7 +304,7 @@ export const useFilesStore = defineStore('files', {
       this.error = null;
 
       try {
-        const payload = await fetchSanityManifest();
+        const payload = await loadManifestPayload();
         this.manifest = normalizeManifest(payload);
         const syncResult = await syncManifestToFs(this.manifest);
         this.remoteRootDir = syncResult?.remoteRootDir ?? null;
