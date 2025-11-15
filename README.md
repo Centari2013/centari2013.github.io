@@ -121,36 +121,50 @@ This will:
 
 ---
 
-## 🗃️ Remote manifest + CMS hooks
+## 🗃️ Remote manifest (Sanity-only)
 
-The faux filesystem that powers the desktop is still compiled into WebAssembly, but you no longer have to rebuild it whenever you add new portfolio pieces. SpicyOS can now load **runtime data** from a JSON manifest and merge those entries directly into the Desktop and File Manager.
+The faux filesystem that powers the desktop is still compiled into WebAssembly, but every folder/file you see at runtime now comes directly from Sanity. On load, the Pinia `files` store executes a GROQ query, normalizes the result into a Unix-style tree, and streams it into the WebAssembly module so the terminal, Desktop, and File Manager stay in sync without rebuilding the bundle.
 
-### 1. Point the app at a manifest
+### 1. Configure Sanity credentials
 
-- Out of the box, the app looks for `/portfolio-manifest.json` (see `public/portfolio-manifest.json`).
-- Override the location by setting `VITE_MANIFEST_URL` before building/deploying:
+Set the required environment variables before `npm run dev` / `npm run build`:
 
 ```bash
-VITE_MANIFEST_URL="https://raw.githubusercontent.com/<user>/<repo>/main/content/portfolio-manifest.json" npm run build
+VITE_SANITY_PROJECT_ID="your-project-id"
+VITE_SANITY_DATASET="production"      # or your dataset name
+# Optional advanced knobs
+# VITE_SANITY_API_VERSION="v2021-10-21"
+# VITE_SANITY_QUERY="*[_type == \"portfolioManifest\"][0]{ ... }"
+# VITE_SANITY_QUERY_PARAMS='{"slug": "main"}'
 ```
+
+Without `VITE_SANITY_PROJECT_ID` **and** `VITE_SANITY_DATASET` the app refuses to boot the manifest—there is no local JSON fallback anymore.
 
 ### 2. Manifest schema
 
 ```jsonc
 {
   "version": 1,
-  "root": { "name": "Remote Files" },
+  "root": { "name": "Filesystem" },
   "desktop": [
     { "id": "resume", "name": "Resume", "extension": "PDF", "kind": "link", "content": "https://.../resume.pdf" },
     { "id": "poster", "name": "Poster.png", "extension": "PNG", "contentMode": "url", "content": "https://cdn.../poster.png" }
   ],
-  "folders": [
+  "filesystem": [
+    { "name": "bin", "role": "bin", "entries": [] },
+    { "name": "etc", "role": "etc", "entries": [] },
     {
-      "id": "portfolio",
-      "name": "Portfolio",
+      "name": "home",
+      "role": "users",
       "entries": [
-        { "id": "case-study", "name": "Case Study", "extension": "MD", "contentMode": "url", "content": "https://.../case-study.md" },
-        { "id": "demo", "name": "Live Demo", "kind": "link", "content": "https://..." }
+        {
+          "name": "spicy",
+          "role": "home",
+          "entries": [
+            { "name": "Desktop", "role": "desktop", "entries": [{ "name": "Welcome", "extension": "TXT", "content": "Hello" }] },
+            { "name": "Documents", "role": "documents", "entries": [] }
+          ]
+        }
       ]
     }
   ]
@@ -158,33 +172,12 @@ VITE_MANIFEST_URL="https://raw.githubusercontent.com/<user>/<repo>/main/content/
 ```
 
 - `desktop` entries appear as icons on the desktop.
-- `folders` populate a new **Remote Files** entry inside the File Manager sidebar (you can nest folders via `entries`).
-- The manifest root is materialized as a real directory under `~/Desktop/<root.name>`, so the terminal, Desktop, and File Manager all read the exact same files.
+- `filesystem` describes the entire Unix-like tree mounted at `/`. Assign `role` to map directories to `home`, `desktop`, `documents`, `bin`, etc. and nest via `entries` to add the rest of the hierarchy.
+- The manifest root is materialized as `/`, so the terminal, Desktop, and File Manager all read the exact same files.
 - Set `kind: "link"` (or `launch: "browser"`) to open a URL in the in-app browser.
 - Use `contentMode: "url"` whenever the `content` points at an external file; otherwise the viewer assumes a Base64 data URI.
 
-### 3. Hook it up to Tina CMS (or any Git-based CMS)
-
-1. Create a content repository (or a `content/` folder in this repo) that contains `portfolio-manifest.json` plus your uploads.
-2. Configure [Tina](https://tina.io/) to edit that JSON file (a single collection with one document works well) and authorize it against GitHub. Every publish action commits the updated manifest + assets.
-3. Deploy Tina somewhere (Vercel/Netlify). Update `VITE_MANIFEST_URL` to point at the *raw* manifest (`https://raw.githubusercontent.com/.../portfolio-manifest.json`) or at a signed URL from your storage bucket.
-4. Optional: host large binaries (images, PDFs, audio) on object storage (S3, Supabase, Cloudinary). Paste the resulting URLs into the manifest; no rebuild is necessary and the desktop/manager will refresh on reload.
-
-Because the SPA fetches the manifest at runtime, any change pushed through Tina (or another CMS) is immediately reflected in production without recompiling the WebAssembly module.
-
-### 4. Pipe the manifest straight from Sanity
-
-If you prefer Sanity over a Git-based CMS, the runtime store can query the Content Lake directly. Set the following environment variables before `npm run dev`/`npm run build`:
-
-```bash
-VITE_SANITY_PROJECT_ID="your-project-id"
-VITE_SANITY_DATASET="production"      # or your dataset name
-# Optional advanced knobs
-# VITE_SANITY_QUERY="*[_type == \"portfolioManifest\"][0]{ ... }"
-# VITE_SANITY_QUERY_PARAMS='{"slug": "main"}'
-```
-
-With `VITE_SANITY_PROJECT_ID` and `VITE_SANITY_DATASET` defined, SpicyOS skips the JSON fetch and instead runs a GROQ query. The default query expects a document shaped like the JSON manifest (root metadata, `desktop[]`, `folders[]` w/ nested `entries`). Customize it by overriding `VITE_SANITY_QUERY`. All results run through the same normalizer as the static manifest, so links, shortcuts, and nested folders behave exactly like built-in files.
+Because the SPA fetches the manifest straight from Sanity on every page load, any publish in Studio (or via mutations/scripts) immediately refreshes the filesystem—no JSON files, repos, or WebAssembly rebuilds are required.
 
 #### Example schema
 
@@ -201,7 +194,7 @@ export const portfolioEntry = defineType({
     defineField({ name: 'extension', type: 'string' }),
     defineField({ name: 'kind', type: 'string', options: { list: ['file', 'link', 'shortcut'] } }),
     defineField({ name: 'contentMode', type: 'string', options: { list: ['url', 'data'] } }),
-    defineField({ name: 'content', type: 'url' }),
+    defineField({ name: 'content', type: 'text', rows: 3 }),
     defineField({ name: 'asset', type: 'file' }),
     defineField({ name: 'tags', type: 'array', of: [{ type: 'string' }] }),
     defineField({ name: 'meta', type: 'object' }),
@@ -213,6 +206,12 @@ export const remoteFolder = defineType({
   type: 'object',
   fields: [
     defineField({ name: 'name', type: 'string', validation: (Rule) => Rule.required() }),
+    defineField({
+      name: 'role',
+      title: 'System role',
+      type: 'string',
+      options: { list: ['custom', 'home', 'desktop', 'documents', 'downloads', 'pictures', 'bin', 'etc', 'usr', 'usr/bin', 'usr/sbin', 'var', 'tmp', 'users'] },
+    }),
     defineField({ name: 'entries', type: 'array', of: [{ type: 'portfolioEntry' }, { type: 'remoteFolder' }] }),
   ],
 });
@@ -224,7 +223,12 @@ export default defineType({
   fields: [
     defineField({ name: 'root', type: 'object', fields: [defineField({ name: 'name', type: 'string' })] }),
     defineField({ name: 'desktop', type: 'array', of: [{ type: 'portfolioEntry' }] }),
-    defineField({ name: 'folders', type: 'array', of: [{ type: 'remoteFolder' }] }),
+    defineField({
+      name: 'filesystem',
+      title: 'Filesystem',
+      type: 'array',
+      of: [{ type: 'remoteFolder' }],
+    }),
   ],
 });
 ```

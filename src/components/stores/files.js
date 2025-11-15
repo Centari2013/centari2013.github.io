@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia';
 import { syncManifestToFs } from '@/components/utilities/syncManifestToFs';
 
-const defaultManifestUrl = import.meta.env.VITE_MANIFEST_URL ?? '/portfolio-manifest.json';
-
 const sanityConfig = {
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
   dataset: import.meta.env.VITE_SANITY_DATASET ?? 'production',
@@ -29,9 +27,9 @@ const sanityConfig = {
         tags,
         meta
       },
-      folders[]{
+      filesystem[]{
+        ...,
         "id": coalesce(id, _key),
-        name,
         entries[]{
           ...,
           "id": coalesce(id, _key)
@@ -43,6 +41,15 @@ const sanityConfig = {
 };
 
 const hasSanityConfig = Boolean(sanityConfig.projectId && sanityConfig.dataset);
+
+const requireSanityConfig = () => {
+  if (hasSanityConfig) {
+    return;
+  }
+  throw new Error(
+    'Sanity credentials are missing. Set VITE_SANITY_PROJECT_ID and VITE_SANITY_DATASET to load the manifest.',
+  );
+};
 
 const parseSanityParams = () => {
   if (!sanityConfig.params) {
@@ -85,14 +92,6 @@ const fetchSanityManifest = async () => {
   }
 
   return payload.result;
-};
-
-const fetchManifestFromUrl = async (targetUrl) => {
-  const response = await fetch(targetUrl, { cache: 'no-cache' });
-  if (!response.ok) {
-    throw new Error(`Unable to load manifest (HTTP ${response.status})`);
-  }
-  return response.json();
 };
 
 const randomId = () => {
@@ -177,10 +176,46 @@ const shouldNormalizeAsFolder = (entry) => {
   return kind === 'folder' || type === 'd';
 };
 
+const KNOWN_SYSTEM_ROLES = new Set([
+  'bin',
+  'custom',
+  'desktop',
+  'documents',
+  'downloads',
+  'etc',
+  'home',
+  'pictures',
+  'sbin',
+  'tmp',
+  'usr',
+  'usr/bin',
+  'usr/sbin',
+  'users',
+  'var',
+]);
+
+const detectFolderRole = (folder = {}) => {
+  const rawRole = folder.role ?? folder.systemRole;
+  if (typeof rawRole === 'string') {
+    const normalized = rawRole.trim().toLowerCase();
+    if (normalized.length > 0) {
+      return normalized;
+    }
+  }
+
+  const derivedName = typeof folder.name === 'string' ? folder.name.trim().toLowerCase() : '';
+  if (KNOWN_SYSTEM_ROLES.has(derivedName)) {
+    return derivedName;
+  }
+
+  return null;
+};
+
 const normalizeFolder = (folder = {}, parentSegments = []) => {
   const folderName = folder.name ?? 'Folder';
   const id = folder.id ?? slugify([...parentSegments, folderName].join('-')) ?? randomId();
   const nextSegments = [...parentSegments, folderName];
+  const role = detectFolderRole(folder);
   const entries = Array.isArray(folder.entries)
     ? folder.entries.map((entry) =>
         shouldNormalizeAsFolder(entry)
@@ -194,36 +229,30 @@ const normalizeFolder = (folder = {}, parentSegments = []) => {
     type: 'd',
     name: folderName,
     source: 'manifest',
+    role,
     entries,
   };
 };
 
 const normalizeManifest = (payload = {}) => {
   const rootConfig = payload.root ?? {};
-  const remoteSegments = [rootConfig.name ?? 'remote'];
-  const rootEntries = Array.isArray(rootConfig.entries)
-    ? rootConfig.entries.map((entry) =>
-        shouldNormalizeAsFolder(entry)
-          ? normalizeFolder(entry, remoteSegments)
-          : normalizeFileEntry(entry, remoteSegments),
-      )
+  const rootName = rootConfig.name ?? 'Filesystem';
+  const filesystemEntries = Array.isArray(payload.filesystem)
+    ? payload.filesystem.map((folder) => normalizeFolder(folder, [rootName]))
     : [];
   const desktopEntries = Array.isArray(payload.desktop)
     ? payload.desktop.map((entry) => normalizeFileEntry(entry, ['desktop']))
     : [];
 
-  const remoteFolders = Array.isArray(payload.folders)
-    ? payload.folders.map((folder) => normalizeFolder(folder, remoteSegments))
-    : [];
-
   return {
     desktop: desktopEntries,
+    filesystem: filesystemEntries,
     remoteRoot: {
       id: rootConfig.id ?? 'remote-root',
-      name: rootConfig.name ?? 'Remote Files',
+      name: rootName,
       type: 'd',
       source: 'manifest',
-      entries: [...rootEntries, ...remoteFolders],
+      entries: filesystemEntries,
     },
   };
 };
@@ -233,7 +262,6 @@ export const useFilesStore = defineStore('files', {
     status: 'idle',
     error: null,
     manifest: null,
-    manifestUrl: defaultManifestUrl,
     fsSyncVersion: 0,
     remoteRootDir: null,
   }),
@@ -244,15 +272,14 @@ export const useFilesStore = defineStore('files', {
     remoteRootDirPtr: (state) => state.remoteRootDir,
   },
   actions: {
-    async loadManifest(url) {
-      const targetUrl = url ?? this.manifestUrl ?? defaultManifestUrl;
-      const sourceKey = hasSanityConfig ? 'sanity' : targetUrl;
+    async loadManifest() {
+      requireSanityConfig();
 
-      if (this.status === 'loading' && sourceKey === this.manifestUrl) {
+      if (this.status === 'loading') {
         return;
       }
 
-      if (this.status === 'ready' && this.manifest && sourceKey === this.manifestUrl) {
+      if (this.status === 'ready' && this.manifest) {
         return;
       }
 
@@ -260,11 +287,7 @@ export const useFilesStore = defineStore('files', {
       this.error = null;
 
       try {
-        const payload = hasSanityConfig
-          ? await fetchSanityManifest()
-          : await fetchManifestFromUrl(targetUrl);
-
-        this.manifestUrl = sourceKey;
+        const payload = await fetchSanityManifest();
         this.manifest = normalizeManifest(payload);
         const syncResult = await syncManifestToFs(this.manifest);
         this.remoteRootDir = syncResult?.remoteRootDir ?? null;
