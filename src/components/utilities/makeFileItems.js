@@ -9,6 +9,7 @@ function extractAssetUrl(file) {
 
 function deriveContentMode(file) {
     const mode = file?.contentMode || file?.content_mode;
+    console.log('Deriving content mode for file:', file, 'Initial mode:', mode);
     if (mode === 'data' || mode === 'url') {
         return mode;
     }
@@ -30,7 +31,9 @@ function deriveContentMode(file) {
 }
 
 function toFileObject(f) {
+    console.log('Processing file:', f);
     const assetUrl = extractAssetUrl(f);
+    console.log('Extracted asset URL:', assetUrl);
     const contentMode = deriveContentMode(f);
     return {
         object: f,
@@ -58,7 +61,6 @@ export function makeFileItems (files) {
 };
 
 export function makeFileItem (f) {
-
     return toFileObject(f);
 };
 
