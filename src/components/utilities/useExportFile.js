@@ -1,10 +1,14 @@
 
-const importJsPdf = async () => {
-  const { jsPDF } = await import('jspdf');
-  return jsPDF;
-}
+let JsPdfConstructor = null;
 
-let jsPDF = null;
+const ensureJsPdf = async () => {
+  if (!JsPdfConstructor) {
+    const { jsPDF } = await import('jspdf');
+    JsPdfConstructor = jsPDF;
+  }
+
+  return JsPdfConstructor;
+}
 
 const emojiToImg = (emoji) => {
   const canvas = document.createElement("canvas");
@@ -50,29 +54,35 @@ const replaceEmojisInNode = (node) => {
 };
 
 export function useExportFile() {
-  const downloadBase64 = (dataUrl, filename) => {
+  const saveBlob = (blob, filename) => {
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = dataUrl;
+    a.href = url;
     a.download = filename;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
-  const exportText = (base64Data, filename) => {
-    const decoded = atob(base64Data.split(',')[1]);
-    const doc = new jsPDF();
-    const lines = decoded.split('\n');
+  const exportPlainText = async (text, filename) => {
+    const JsPdf = await ensureJsPdf();
+    const doc = new JsPdf();
+    const lines = (text || '').split('\n');
     lines.forEach((line, i) => doc.text(line, 10, 10 + i * 7));
     doc.save(filename.replace(/\.\w+$/, '') + '.pdf');
   };
 
   const exportHTMLToPDF = async (elementSelector, filename) => {
-      
-    const el = document.querySelector(`#${CSS.escape(elementSelector)}`).cloneNode(true);
-    
-    if (!el) {
+
+    const JsPdf = await ensureJsPdf();
+
+    const element = document.querySelector(`#${CSS.escape(elementSelector)}`);
+
+    if (!element) {
       console.warn('Element not found for export:', elementSelector);
       return;
     }
+
+    const el = element.cloneNode(true);
 
     // Create an off-screen container to render it for jsPDF
     const container = document.createElement('div');
@@ -86,7 +96,7 @@ export function useExportFile() {
     // Replace inline emoji characters with images
     replaceEmojisInNode(el);
 
-    const doc = new jsPDF({
+    const doc = new JsPdf({
       orientation: 'p',
       unit: 'px',
       format: 'a4',
@@ -114,21 +124,49 @@ export function useExportFile() {
     await exportHTMLToPDF(id, name);
   };
 
+  const createBlobFromRenderable = (renderableFile) => {
+    if (!renderableFile) {
+      throw new Error('Nothing to export yet.');
+    }
 
-  const exportGeneric = (dataUrl, filename) => {
-    downloadBase64(dataUrl, filename);
+    if (renderableFile.rawData instanceof ArrayBuffer) {
+      return new Blob([renderableFile.rawData], { type: renderableFile.mimeType || 'application/octet-stream' });
+    }
+
+    if (renderableFile.rawData instanceof Blob) {
+      return renderableFile.rawData;
+    }
+
+    if (typeof renderableFile.rawData === 'string') {
+      return new Blob([renderableFile.rawData], { type: renderableFile.mimeType || 'text/plain' });
+    }
+
+    throw new Error('Unsupported file format for export.');
   };
 
-  const exportFile = async ({ id, content, exten, name }) => {
-    jsPDF = await importJsPdf();
-    const ext = exten.toLowerCase();
-    if (ext === 'md') {
-      await exportMarkdownAsPDF(id, name);
-    } else if (['txt', 'json', 'html', 'css', 'js', 'cpp', 'h'].includes(ext)) {
-      exportText(content, name);
-    } else {
-      exportGeneric(content, name);
+  const exportBinary = (renderableFile, filename) => {
+    const blob = createBlobFromRenderable(renderableFile);
+    saveBlob(blob, filename);
+  };
+
+  const exportFile = async ({ id, renderableFile, exten, name }) => {
+    if (!renderableFile) {
+      console.warn('Attempted to export before the file finished loading.');
+      return;
     }
+
+    const ext = (exten || '').toLowerCase();
+    if (renderableFile.renderMode === 'markdown' || ext === 'md') {
+      await exportMarkdownAsPDF(id, name);
+      return;
+    }
+
+    if (renderableFile.renderMode === 'text' || ['txt', 'json', 'html', 'css', 'js', 'ts', 'cpp', 'h'].includes(ext)) {
+      await exportPlainText(typeof renderableFile.rawData === 'string' ? renderableFile.rawData : '', name);
+      return;
+    }
+
+    exportBinary(renderableFile, name);
   };
 
   return { exportFile };

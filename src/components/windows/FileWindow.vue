@@ -1,11 +1,10 @@
 <template>
   <BaseWindow v-bind="baseWindowProps" @export="downloadFile"
   :class="{'cursor-pointer': isMini}">
-    <FileViewerView 
-      :content="item.content"
-      :file_ext="item.exten"
-      :name="item.name"
+    <FileViewerView
+      :file="item"
       :id="fileId"
+      @loaded="handleFileLoaded"
     />
   </BaseWindow>
 </template>
@@ -51,10 +50,20 @@ const handleMinimize = (bool) => {
 
 const getMaximized = () => appsStore.isFileMaximized(props.item)
 const getMinimized = () => appsStore.isFileMinimized(props.item)
+const loadedRenderableFile = ref(null)
+const handleFileLoaded = (file) => {
+  loadedRenderableFile.value = file
+}
+
 const downloadFile = async () => {
+  if (!loadedRenderableFile.value) {
+    console.warn('File is still loading, please try exporting again once it is ready.')
+    return
+  }
+
   await exportFile({
     id: fileId,
-    content: props.item.content,
+    renderableFile: loadedRenderableFile.value,
     exten: props.item.exten,
     name: props.item.name
   })

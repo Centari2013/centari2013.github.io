@@ -1,16 +1,56 @@
+function extractAssetUrl(file) {
+    return (
+        file?.assetUrl ||
+        file?.asset_url ||
+        file?.asset?.url ||
+        null
+    );
+}
+
+function deriveContentMode(file) {
+    const mode = file?.contentMode || file?.content_mode;
+    if (mode === 'data' || mode === 'url') {
+        return mode;
+    }
+
+    const content = file?.content || '';
+    if (typeof content === 'string' && content.trim().startsWith('data:')) {
+        return 'data';
+    }
+
+    if (typeof content === 'string' && /^https?:\/\//i.test(content)) {
+        return 'url';
+    }
+
+    if (extractAssetUrl(file)) {
+        return 'url';
+    }
+
+    return 'data';
+}
+
+function toFileObject(f) {
+    const assetUrl = extractAssetUrl(f);
+    const contentMode = deriveContentMode(f);
+    return {
+        object: f,
+        type: "f",
+        name: f.name,
+        exten: f.extension_abbr,
+        content: f.content,
+        contentMode,
+        assetUrl: assetUrl || (contentMode === 'url' ? f.content : null),
+        asset: f.asset,
+        is_shortcut: f.is_shortcut,
+        is_link: f.is_link
+    };
+}
+
 export function makeFileItems (files) {
     const contentsList = [];
     for (let i = 0; i < files.size(); i++) {
         const f = files.get(i);
-        contentsList.push({ 
-            object: f, 
-            type: "f", 
-            name: f.name, 
-            exten: f.extension_abbr, 
-            content: f.content, 
-            is_shortcut: f.is_shortcut,
-            is_link: f.is_link
-        });
+        contentsList.push(toFileObject(f));
 
     }
 
@@ -18,18 +58,8 @@ export function makeFileItems (files) {
 };
 
 export function makeFileItem (f) {
-   
-    const file_object = { 
-        object: f, 
-        type: "f", 
-        name: f.name, 
-        exten: f.extension_abbr, 
-        content: f.content, 
-        is_shortcut: f.is_shortcut,
-        is_link: f.is_link
-    };
 
-    return file_object;
+    return toFileObject(f);
 };
 
 
