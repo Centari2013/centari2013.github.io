@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -10,6 +11,31 @@ namespace {
 
 using Directory = FileSystem::Directory;
 using File = FileSystem::Directory::File;
+
+bool has_file(const Directory *dir, const std::string &name, const std::string &extension) {
+    if (!dir) {
+        return false;
+    }
+
+    return std::any_of(dir->files.begin(), dir->files.end(), [&](const auto &existing) {
+        if (!existing) {
+            return false;
+        }
+        return existing->name == name && existing->extension == extension;
+    });
+}
+
+void append_file_unique(Directory *dir, std::shared_ptr<File> file) {
+    if (!dir || !file) {
+        return;
+    }
+
+    if (has_file(dir, file->name, file->extension)) {
+        return;
+    }
+
+    dir->files.push_back(std::move(file));
+}
 
 bool is_nullish(const emscripten::val &value) {
     return value.isUndefined() || value.isNull();
@@ -138,7 +164,7 @@ void buildEntries(FileSystem &fs, Directory *target, const emscripten::val &entr
         } else if (type == "portfolioEntry") {
             auto file = buildFile(entry);
             if (file) {
-                target->files.push_back(std::move(file));
+                append_file_unique(target, std::move(file));
             }
         }
     }
@@ -221,7 +247,7 @@ void loadFilesystemFromManifest(std::shared_ptr<FileSystem> fs, const emscripten
                 } else if (type == "portfolioEntry") {
                     auto file = buildFile(entry);
                     if (file) {
-                        root->files.push_back(std::move(file));
+                        append_file_unique(root, std::move(file));
                     }
                 }
             }
