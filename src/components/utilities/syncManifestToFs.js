@@ -1,4 +1,33 @@
+import { isProxy, toRaw } from 'vue';
 import { whenSystemModuleReady } from './systemModuleReady';
+
+const unwrapProxies = (value, seen = new WeakMap()) => {
+  if (value === null || typeof value !== 'object') {
+    return value;
+  }
+
+  const source = isProxy(value) ? toRaw(value) : value;
+
+  if (seen.has(source)) {
+    return seen.get(source);
+  }
+
+  if (Array.isArray(source)) {
+    const result = [];
+    seen.set(source, result);
+    for (const entry of source) {
+      result.push(unwrapProxies(entry, seen));
+    }
+    return result;
+  }
+
+  const result = {};
+  seen.set(source, result);
+  for (const [key, entry] of Object.entries(source)) {
+    result[key] = unwrapProxies(entry, seen);
+  }
+  return result;
+};
 
 const ensureFsSupport = (module) => typeof module?.build_fs_from_manifest === 'function';
 
@@ -7,16 +36,18 @@ const cloneManifestEntries = (entries) => {
     return null;
   }
 
+  const plainEntries = unwrapProxies(entries);
+
   if (typeof globalThis.structuredClone === 'function') {
     try {
-      return globalThis.structuredClone(entries);
+      return globalThis.structuredClone(plainEntries);
     } catch (error) {
       console.warn('[syncManifestToFs] structuredClone failed, falling back to JSON copy.', error);
     }
   }
 
   try {
-    return JSON.parse(JSON.stringify(entries));
+    return JSON.parse(JSON.stringify(plainEntries));
   } catch (error) {
     console.error('[syncManifestToFs] Unable to serialize manifest entries for SystemModule.', error);
     return null;
