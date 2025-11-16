@@ -1,3 +1,12 @@
+function extractAssetUrl(file) {
+    return (
+        file?.assetUrl ||
+        file?.asset_url ||
+        file?.asset?.url ||
+        null
+    );
+}
+
 function deriveContentMode(file) {
     const mode = file?.contentMode || file?.content_mode;
     if (mode === 'data' || mode === 'url') {
@@ -9,7 +18,11 @@ function deriveContentMode(file) {
         return 'data';
     }
 
-    if (/^https?:\/\//i.test(content)) {
+    if (typeof content === 'string' && /^https?:\/\//i.test(content)) {
+        return 'url';
+    }
+
+    if (extractAssetUrl(file)) {
         return 'url';
     }
 
@@ -17,6 +30,7 @@ function deriveContentMode(file) {
 }
 
 function toFileObject(f) {
+    const assetUrl = extractAssetUrl(f);
     const contentMode = deriveContentMode(f);
     return {
         object: f,
@@ -25,7 +39,8 @@ function toFileObject(f) {
         exten: f.extension_abbr,
         content: f.content,
         contentMode,
-        assetUrl: contentMode === 'url' ? f.content : null,
+        assetUrl: assetUrl || (contentMode === 'url' ? f.content : null),
+        asset: f.asset,
         is_shortcut: f.is_shortcut,
         is_link: f.is_link
     };
