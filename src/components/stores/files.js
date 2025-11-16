@@ -43,6 +43,14 @@ const sanityConfig = {
 
 const hasSanityConfig = Boolean(sanityConfig.projectId && sanityConfig.dataset);
 
+const logSanityFailure = (message, details) => {
+  if (details) {
+    console.error(`[filesStore] ${message}`, details);
+    return;
+  }
+  console.error(`[filesStore] ${message}`);
+};
+
 const parseSanityParams = () => {
   if (!sanityConfig.params) {
     return null;
@@ -62,20 +70,46 @@ const fetchSanityManifest = async () => {
   const encodedParams = params ? `&${new URLSearchParams(Object.entries(params)).toString()}` : '';
   const endpoint = `https://${projectId}.api.sanity.io/${apiVersion}/data/query/${dataset}?query=${encodedQuery}${encodedParams}`;
 
-  const response = await fetch(endpoint, {
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-  });
+  let response;
+  try {
+    response = await fetch(endpoint, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+  } catch (error) {
+    logSanityFailure('Network error while fetching manifest from Sanity.', { endpoint, error });
+    throw error;
+  }
 
   if (!response.ok) {
+    let body = null;
+    try {
+      body = await response.text();
+    } catch (readError) {
+      body = '<unavailable>';
+    }
+    logSanityFailure('Sanity query failed.', {
+      endpoint,
+      status: response.status,
+      statusText: response.statusText,
+      body,
+    });
     throw new Error(`Sanity query failed (HTTP ${response.status})`);
   }
 
-  const payload = await response.json();
+  let payload;
+  try {
+    payload = await response.json();
+  } catch (error) {
+    logSanityFailure('Unable to parse Sanity response JSON.', error);
+    throw error;
+  }
   if (payload.error) {
+    logSanityFailure('Sanity response returned an error.', payload.error);
     throw new Error(payload.error.description ?? 'Sanity query returned an error');
   }
 
   if (!payload.result) {
+    logSanityFailure('Sanity response was missing a result.', payload);
     throw new Error('Sanity response did not include a result');
   }
 
@@ -93,20 +127,26 @@ const buildFallbackManifest = (reason) => {
     throw new Error(reason);
   }
   console.warn(`[filesStore] ${reason} Falling back to bundled manifest.`);
-  return cloneManifestPayload(fallbackManifest);
+  return {
+    payload: cloneManifestPayload(fallbackManifest),
+    source: 'fallback',
+    fallbackReason: reason,
+  };
 };
 
 const loadManifestPayload = async () => {
   if (!hasSanityConfig) {
+    console.warn('[filesStore] Missing Sanity credentials. Falling back to bundled manifest.');
     return buildFallbackManifest('Sanity credentials missing.');
   }
 
   try {
     const remoteManifest = await fetchSanityManifest();
     if (!remoteManifest || Object.keys(remoteManifest).length === 0) {
+      logSanityFailure('Sanity returned an empty manifest.', remoteManifest);
       return buildFallbackManifest('Sanity returned an empty manifest.');
     }
-    return remoteManifest;
+    return { payload: remoteManifest, source: 'sanity', fallbackReason: null };
   } catch (error) {
     console.error('[filesStore] Failed to load manifest from Sanity', error);
     return buildFallbackManifest('Sanity fetch failed.');
@@ -395,6 +435,44 @@ const injectDesktopEntriesIntoFilesystem = (filesystemEntries, desktopEntries) =
   });
 };
 
+const tallyEntries = (entries = []) => {
+  if (!Array.isArray(entries)) {
+    return { files: 0, folders: 0 };
+  }
+  return entries.reduce(
+    (acc, entry) => {
+      if (!entry) {
+        return acc;
+      }
+      if (entry.type === 'f') {
+        acc.files += 1;
+        return acc;
+      }
+      if (entry.type === 'd') {
+        acc.folders += 1;
+        const nested = tallyEntries(entry.entries);
+        acc.files += nested.files;
+        acc.folders += nested.folders;
+      }
+      return acc;
+    },
+    { files: 0, folders: 0 },
+  );
+};
+
+const summarizeManifest = (manifest = {}) => {
+  const desktopCount = Array.isArray(manifest.desktop) ? manifest.desktop.length : 0;
+  const filesystemFolders = Array.isArray(manifest.filesystem) ? manifest.filesystem.length : 0;
+  const entryTotals = tallyEntries(manifest.filesystem);
+
+  return {
+    desktopCount,
+    filesystemFolders,
+    totalFiles: entryTotals.files,
+    totalFolders: entryTotals.folders,
+  };
+};
+
 const normalizeManifest = (payload = {}) => {
   const rootConfig = payload.root ?? {};
   const rootName = rootConfig.name ?? 'Filesystem';
@@ -425,6 +503,9 @@ export const useFilesStore = defineStore('files', {
     status: 'idle',
     error: null,
     manifest: null,
+    manifestSource: 'unknown',
+    manifestFetchedAt: null,
+    manifestSummary: null,
     fsSyncVersion: 0,
     remoteRootDir: null,
   }),
@@ -448,8 +529,32 @@ export const useFilesStore = defineStore('files', {
       this.error = null;
 
       try {
-        const payload = await loadManifestPayload();
+        const result = await loadManifestPayload();
+        const payload = result.payload ?? {};
         this.manifest = normalizeManifest(payload);
+        this.manifestSource = result.source ?? 'unknown';
+        this.manifestFetchedAt = new Date().toISOString();
+        this.manifestSummary = summarizeManifest(this.manifest);
+        if (this.manifestSource === 'sanity') {
+          console.info(
+            `[filesStore] Manifest loaded from Sanity. Desktop items: ${this.manifestSummary.desktopCount}. Root folders: ${this.manifestSummary.filesystemFolders}.`,
+          );
+        } else {
+          console.warn(
+            `[filesStore] Manifest loaded from fallback bundle. Reason: ${result.fallbackReason ?? 'unknown'}.
+Desktop items: ${this.manifestSummary.desktopCount}. Root folders: ${this.manifestSummary.filesystemFolders}.`,
+          );
+        }
+        if (typeof window !== 'undefined') {
+          window.__SPICY_MANIFEST_DEBUG__ = {
+            fetchedAt: this.manifestFetchedAt,
+            source: this.manifestSource,
+            fallbackReason: result.fallbackReason ?? null,
+            rawPayload: cloneManifestPayload(payload),
+            normalized: this.manifest,
+            summary: this.manifestSummary,
+          };
+        }
         const syncResult = await syncManifestToFs(this.manifest);
         this.remoteRootDir = syncResult?.remoteRootDir ?? null;
         this.fsSyncVersion += 1;
@@ -460,6 +565,12 @@ export const useFilesStore = defineStore('files', {
         this.status = 'error';
         this.manifest = null;
         this.remoteRootDir = null;
+        this.manifestSource = 'unknown';
+        this.manifestFetchedAt = null;
+        this.manifestSummary = null;
+        if (typeof window !== 'undefined' && window.__SPICY_MANIFEST_DEBUG__) {
+          delete window.__SPICY_MANIFEST_DEBUG__;
+        }
       }
     },
   },
