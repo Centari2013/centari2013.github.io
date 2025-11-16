@@ -231,8 +231,9 @@ void loadFilesystemFromManifest(std::shared_ptr<FileSystem> fs, const emscripten
     apply_desktop_manifest(*fs, manifest_json);
 
     Directory *home = fs->get_home_dir_ptr();
-    if (!home) {
-        home = root;
+    if (home) {
+        fs->chdir("~");
+    } else {
+        fs->chdir("/");
     }
-    fs->set_current_dir(home);
 }
