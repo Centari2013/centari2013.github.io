@@ -69,8 +69,11 @@ function hydrateEntries(entries, buildUrl) {
 
     if (entry._type === 'portfolioEntry') {
       const asset = entry.asset;
-      if (asset && asset._ref && !asset.url) {
-        const assetUrl = buildUrl(asset._ref);
+      console.log('Entry asset before hydration:', asset);
+      console.log('Checking entry for asset hydration:', entry);
+      if (asset && asset.asset._ref && !asset.url) {
+        console.log('Hydrating asset:', asset);
+        const assetUrl = buildUrl(asset.asset._ref);
         if (assetUrl) {
           asset.url = assetUrl;
           entry.assetUrl = assetUrl;
