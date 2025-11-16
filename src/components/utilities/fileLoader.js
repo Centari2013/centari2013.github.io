@@ -36,6 +36,52 @@ const TEXT_MIME_TYPES = new Set([
 const textDecoder = new TextDecoder();
 const textEncoder = new TextEncoder();
 
+function normalizeExtension(value) {
+  if (!value || typeof value !== 'string') {
+    return '';
+  }
+  return value.replace(/^\./, '').trim().toLowerCase();
+}
+
+function extractExtensionFromPath(path) {
+  if (!path || typeof path !== 'string') {
+    return '';
+  }
+
+  const sanitized = path.split(/[?#]/)[0];
+  const lastSegment = sanitized.split('/').pop() || '';
+  const dotIndex = lastSegment.lastIndexOf('.');
+  if (dotIndex <= 0 || dotIndex === lastSegment.length - 1) {
+    return '';
+  }
+  return lastSegment.slice(dotIndex + 1).toLowerCase();
+}
+
+function deriveExtension(entry = {}) {
+  const directCandidates = [entry.exten, entry.extension];
+  for (const candidate of directCandidates) {
+    const normalized = normalizeExtension(candidate);
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  const nameExt = extractExtensionFromPath(entry.name);
+  if (nameExt) {
+    return nameExt;
+  }
+
+  const possibleUrl = entry?.assetUrl
+    || entry?.asset?.url
+    || (typeof entry?.content === 'string' && /^https?:\/\//i.test(entry.content) ? entry.content : '');
+  const urlExt = extractExtensionFromPath(possibleUrl);
+  if (urlExt) {
+    return urlExt;
+  }
+
+  return '';
+}
+
 export function inferMimeType(extension = '') {
   const normalized = extension ? extension.toLowerCase() : '';
   if (!normalized) {
@@ -139,10 +185,11 @@ function decodeBinaryPayload(data, isBase64) {
 function loadFromData(entry) {
   const hasContent = entry?.content !== undefined && entry?.content !== null;
   const content = hasContent ? entry.content : '';
+  const extension = deriveExtension(entry);
 
   if (typeof content === 'string' && content.startsWith('data:')) {
     const { mimeType, data, isBase64 } = parseDataUri(content);
-    const renderMode = determineRenderMode(mimeType, entry?.exten);
+    const renderMode = determineRenderMode(mimeType, extension);
     const rawData = isTextRenderMode(renderMode)
       ? decodeTextPayload(data, isBase64)
       : decodeBinaryPayload(data, isBase64);
@@ -153,8 +200,8 @@ function loadFromData(entry) {
     };
   }
 
-  const mimeType = inferMimeType(entry?.exten);
-  const renderMode = determineRenderMode(mimeType, entry?.exten);
+  const mimeType = inferMimeType(extension);
+  const renderMode = determineRenderMode(mimeType, extension);
   const rawData = isTextRenderMode(renderMode)
     ? content
     : textEncoder.encode(String(content || '')).buffer;
@@ -179,14 +226,16 @@ async function loadFromUrl(entry) {
     throw new Error(`Missing asset URL for "${entry?.name || 'file'}".`);
   }
 
+  const extension = deriveExtension({ ...entry, assetUrl: url });
+
   const response = await fetch(url, { cache: 'no-store' });
   if (!response.ok) {
     throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`);
   }
 
   const headerMime = response.headers.get('Content-Type');
-  const mimeType = headerMime?.split(';')[0]?.trim() || inferMimeType(entry?.exten);
-  const renderMode = determineRenderMode(mimeType, entry?.exten);
+  const mimeType = headerMime?.split(';')[0]?.trim() || inferMimeType(extension);
+  const renderMode = determineRenderMode(mimeType, extension);
   const rawData = isTextRenderMode(renderMode) ? await response.text() : await response.arrayBuffer();
   return {
     mimeType,
