@@ -260,6 +260,29 @@ const cloneFileEntryForFs = (entry = {}) => ({
   id: entry.id ?? randomId(),
 });
 
+const collectFilesystemEntryIds = (entries = [], bag = new Set()) => {
+  if (!Array.isArray(entries)) {
+    return bag;
+  }
+
+  entries.forEach((entry) => {
+    if (!entry) {
+      return;
+    }
+
+    if (entry.type === 'd' && Array.isArray(entry.entries)) {
+      collectFilesystemEntryIds(entry.entries, bag);
+      return;
+    }
+
+    if (entry.type === 'f' && entry.id) {
+      bag.add(entry.id);
+    }
+  });
+
+  return bag;
+};
+
 const findDesktopFolders = (entries = []) => {
   const queue = Array.isArray(entries) ? [...entries] : [];
   const matches = [];
@@ -327,6 +350,7 @@ const injectDesktopEntriesIntoFilesystem = (filesystemEntries, desktopEntries) =
   }
 
   let desktopFolders = findDesktopFolders(filesystemEntries);
+  const existingEntryIds = collectFilesystemEntryIds(filesystemEntries);
 
   if (desktopFolders.length === 0) {
     const synthetic = createSyntheticDesktopTree(desktopEntries);
@@ -352,13 +376,20 @@ const injectDesktopEntriesIntoFilesystem = (filesystemEntries, desktopEntries) =
     );
 
     desktopEntries.forEach((entry) => {
+      if (entry.id && existingEntryIds.has(entry.id)) {
+        return;
+      }
       const key = typeof entry.name === 'string' ? entry.name.trim().toLowerCase() : '';
       if (key.length > 0 && existingNames.has(key)) {
         return;
       }
-      folder.entries.push(cloneFileEntryForFs(entry));
+      const clone = cloneFileEntryForFs(entry);
+      folder.entries.push(clone);
       if (key.length > 0) {
         existingNames.add(key);
+      }
+      if (clone.id) {
+        existingEntryIds.add(clone.id);
       }
     });
   });
