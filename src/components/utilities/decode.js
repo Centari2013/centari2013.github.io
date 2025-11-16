@@ -25,6 +25,15 @@ function decodeBase64(base64) {
  * @returns {string} - Decoded HTML string
  */
 export function extractAndDecodeBase64(content) {
+  if (!content || typeof content !== 'string') {
+    return "";
+  }
+
+  // Pass through plain URLs/strings instead of trying to decode them.
+  if (!content.trim().startsWith('data:')) {
+    return content;
+  }
+
   const base64 = extractBase64Data(content);
   if (!base64) return "";
   const decoded = decodeBase64(base64);
