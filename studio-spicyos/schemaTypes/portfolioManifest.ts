@@ -10,6 +10,17 @@ export const portfolioEntry = defineType({
     defineField({ name: 'contentMode', type: 'string', options: { list: ['url', 'data'] } }),
     defineField({ name: 'content', type: 'text', rows: 3 }),
     defineField({ name: 'asset', type: 'file' }),
+    defineField({ name: 'shortcutTargetPath',
+      type: 'string',
+      description: 'Absolute or ~-relative path to the file this shortcut should open.',
+      hidden: ({ parent }) => parent?.kind !== 'shortcut',
+      validation: (Rule) => Rule.custom((value, context) => {
+        if (context?.parent?.kind === 'shortcut' && !value) {
+          return 'Shortcut target path is required when kind is set to "shortcut"';
+        }
+        return true;
+      }),
+    }),
     defineField({ name: 'tags', type: 'array', of: [{ type: 'string' }] }),
     //defineField({ name: 'meta', type: 'object', fields: []}),
   ],
