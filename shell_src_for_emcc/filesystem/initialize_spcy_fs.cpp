@@ -41,8 +41,27 @@ std::string normalize_path(std::string value) {
         return value;
     }
 
-    std::replace(value.begin(), value.end(), '\\', '/');
-    return value;
+    std::string normalized;
+    normalized.reserve(value.size());
+
+    for (size_t i = 0; i < value.size(); ++i) {
+        const char ch = value[i];
+        if (ch == '\\') {
+            if (i + 1 < value.size()) {
+                const char next = value[i + 1];
+                if (std::isspace(static_cast<unsigned char>(next))) {
+                    normalized.push_back(next);
+                    ++i;
+                    continue;
+                }
+            }
+            normalized.push_back('/');
+        } else {
+            normalized.push_back(ch);
+        }
+    }
+
+    return normalized;
 }
 
 struct FilePathParts {
@@ -90,7 +109,7 @@ std::shared_ptr<File> find_file_in_directory(Directory *dir, const std::string &
 
     if (!extension.empty()) {
         for (auto &candidate : dir->files) {
-            if (candidate && candidate->name == name && candidate->extension == extension) {
+            if (candidate && candidate->name == name && candidate->extension_abbr == extension) {
                 return candidate;
             }
         }
@@ -98,7 +117,7 @@ std::shared_ptr<File> find_file_in_directory(Directory *dir, const std::string &
     }
 
     for (auto &candidate : dir->files) {
-        if (candidate && candidate->name == name && candidate->extension.empty()) {
+        if (candidate && candidate->name == name && candidate->extension_abbr.empty()) {
             return candidate;
         }
     }
@@ -179,7 +198,7 @@ bool has_file(const Directory *dir, const std::string &name, const std::string &
         if (!existing) {
             return false;
         }
-        return existing->name == name && existing->extension == extension;
+        return existing->name == name && existing->extension_abbr == extension;
     });
 }
 
@@ -188,7 +207,7 @@ void append_file_unique(Directory *dir, std::shared_ptr<File> file) {
         return;
     }
 
-    if (has_file(dir, file->name, file->extension)) {
+    if (has_file(dir, file->name, file->extension_abbr)) {
         return;
     }
 
