@@ -36,8 +36,76 @@ async function fetchManifestFromUrl(url) {
   return fetchJson(url);
 }
 
+function buildSanityAssetUrl(ref, projectId, dataset) {
+  if (!ref || !projectId || !dataset) {
+    return null;
+  }
+
+  const fileMatch = /^file-([^-]+)-([a-zA-Z0-9]+)$/.exec(ref);
+  if (fileMatch) {
+    const [, hash, extension] = fileMatch;
+    return `https://cdn.sanity.io/files/${projectId}/${dataset}/${hash}.${extension}`;
+  }
+
+  const imageMatch = /^image-([^-]+)-(\d+x\d+)-([a-zA-Z0-9]+)$/.exec(ref);
+  if (imageMatch) {
+    const [, hash, dimensions, extension] = imageMatch;
+    return `https://cdn.sanity.io/images/${projectId}/${dataset}/${hash}-${dimensions}.${extension}`;
+  }
+
+  console.warn('Unrecognized Sanity asset ref. Unable to build CDN URL.', ref);
+  return null;
+}
+
+function hydrateEntries(entries, buildUrl) {
+  if (!Array.isArray(entries)) {
+    return;
+  }
+
+  for (const entry of entries) {
+    if (!entry || typeof entry !== 'object') {
+      continue;
+    }
+
+    if (entry._type === 'portfolioEntry') {
+      const asset = entry.asset;
+      if (asset && asset._ref && !asset.url) {
+        const assetUrl = buildUrl(asset._ref);
+        if (assetUrl) {
+          asset.url = assetUrl;
+          entry.assetUrl = assetUrl;
+          if (!entry.content) {
+            entry.content = assetUrl;
+            entry.contentMode = 'url';
+          }
+        }
+      }
+    }
+
+    if (Array.isArray(entry.entries)) {
+      hydrateEntries(entry.entries, buildUrl);
+    }
+  }
+}
+
+function hydrateManifestAssets(manifest) {
+  if (!manifest || typeof manifest !== 'object') {
+    return manifest;
+  }
+
+  const projectId = requireEnv('VITE_SANITY_PROJECT_ID');
+  const dataset = requireEnv('VITE_SANITY_DATASET');
+  const buildUrl = (ref) => buildSanityAssetUrl(ref, projectId, dataset);
+
+  hydrateEntries(manifest.desktop, buildUrl);
+  hydrateEntries(manifest.filesystem, buildUrl);
+
+  return manifest;
+}
+
 export async function initFilesystem(manifestUrl) {
   const manifest = await (manifestUrl ? fetchManifestFromUrl(manifestUrl) : fetchManifestFromSanity());
+  hydrateManifestAssets(manifest);
 
   if (!window.SystemModule || typeof window.SystemModule.initFilesystem !== 'function') {
     throw new Error('SystemModule.initFilesystem is not available.');
