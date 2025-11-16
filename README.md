@@ -138,7 +138,7 @@ VITE_SANITY_DATASET="production"      # or your dataset name
 # VITE_SANITY_QUERY_PARAMS='{"slug": "main"}'
 ```
 
-Without `VITE_SANITY_PROJECT_ID` **and** `VITE_SANITY_DATASET` the app refuses to boot the manifest—there is no local JSON fallback anymore.
+Without `VITE_SANITY_PROJECT_ID` **and** `VITE_SANITY_DATASET` the app refuses to boot the manifest—there is no local JSON fallback anymore. When credentials are missing or the Sanity fetch fails, the console logs a warning explaining why the bundled fallback manifest was used.
 
 ### 2. Manifest schema
 
@@ -196,6 +196,11 @@ users, var
 Any folder without one of the roles above still loads—it just behaves like a plain directory.
 
 Because the SPA fetches the manifest straight from Sanity on every page load, any publish in Studio (or via mutations/scripts) immediately refreshes the filesystem—no JSON files, repos, or WebAssembly rebuilds are required.
+
+### Debugging manifest hydration
+
+- The Pinia `files` store now logs whether the manifest came from Sanity or the bundled fallback plus a quick summary of how many desktop and root items were hydrated.
+- For deeper inspection, open the browser console and read `window.__SPICY_MANIFEST_DEBUG__`—it contains the raw payload, normalized tree, and metadata (`source`, `fetchedAt`, `fallbackReason`, counts, etc.) so you can confirm exactly what was mounted without stepping through the store.
 
 #### Example schema
 

@@ -127,7 +127,11 @@ const buildFallbackManifest = (reason) => {
     throw new Error(reason);
   }
   console.warn(`[filesStore] ${reason} Falling back to bundled manifest.`);
-  return cloneManifestPayload(fallbackManifest);
+  return {
+    payload: cloneManifestPayload(fallbackManifest),
+    source: 'fallback',
+    fallbackReason: reason,
+  };
 };
 
 const loadManifestPayload = async () => {
@@ -142,7 +146,7 @@ const loadManifestPayload = async () => {
       logSanityFailure('Sanity returned an empty manifest.', remoteManifest);
       return buildFallbackManifest('Sanity returned an empty manifest.');
     }
-    return remoteManifest;
+    return { payload: remoteManifest, source: 'sanity', fallbackReason: null };
   } catch (error) {
     console.error('[filesStore] Failed to load manifest from Sanity', error);
     return buildFallbackManifest('Sanity fetch failed.');
@@ -431,6 +435,44 @@ const injectDesktopEntriesIntoFilesystem = (filesystemEntries, desktopEntries) =
   });
 };
 
+const tallyEntries = (entries = []) => {
+  if (!Array.isArray(entries)) {
+    return { files: 0, folders: 0 };
+  }
+  return entries.reduce(
+    (acc, entry) => {
+      if (!entry) {
+        return acc;
+      }
+      if (entry.type === 'f') {
+        acc.files += 1;
+        return acc;
+      }
+      if (entry.type === 'd') {
+        acc.folders += 1;
+        const nested = tallyEntries(entry.entries);
+        acc.files += nested.files;
+        acc.folders += nested.folders;
+      }
+      return acc;
+    },
+    { files: 0, folders: 0 },
+  );
+};
+
+const summarizeManifest = (manifest = {}) => {
+  const desktopCount = Array.isArray(manifest.desktop) ? manifest.desktop.length : 0;
+  const filesystemFolders = Array.isArray(manifest.filesystem) ? manifest.filesystem.length : 0;
+  const entryTotals = tallyEntries(manifest.filesystem);
+
+  return {
+    desktopCount,
+    filesystemFolders,
+    totalFiles: entryTotals.files,
+    totalFolders: entryTotals.folders,
+  };
+};
+
 const normalizeManifest = (payload = {}) => {
   const rootConfig = payload.root ?? {};
   const rootName = rootConfig.name ?? 'Filesystem';
@@ -461,6 +503,9 @@ export const useFilesStore = defineStore('files', {
     status: 'idle',
     error: null,
     manifest: null,
+    manifestSource: 'unknown',
+    manifestFetchedAt: null,
+    manifestSummary: null,
     fsSyncVersion: 0,
     remoteRootDir: null,
   }),
@@ -484,8 +529,32 @@ export const useFilesStore = defineStore('files', {
       this.error = null;
 
       try {
-        const payload = await loadManifestPayload();
+        const result = await loadManifestPayload();
+        const payload = result.payload ?? {};
         this.manifest = normalizeManifest(payload);
+        this.manifestSource = result.source ?? 'unknown';
+        this.manifestFetchedAt = new Date().toISOString();
+        this.manifestSummary = summarizeManifest(this.manifest);
+        if (this.manifestSource === 'sanity') {
+          console.info(
+            `[filesStore] Manifest loaded from Sanity. Desktop items: ${this.manifestSummary.desktopCount}. Root folders: ${this.manifestSummary.filesystemFolders}.`,
+          );
+        } else {
+          console.warn(
+            `[filesStore] Manifest loaded from fallback bundle. Reason: ${result.fallbackReason ?? 'unknown'}.
+Desktop items: ${this.manifestSummary.desktopCount}. Root folders: ${this.manifestSummary.filesystemFolders}.`,
+          );
+        }
+        if (typeof window !== 'undefined') {
+          window.__SPICY_MANIFEST_DEBUG__ = {
+            fetchedAt: this.manifestFetchedAt,
+            source: this.manifestSource,
+            fallbackReason: result.fallbackReason ?? null,
+            rawPayload: cloneManifestPayload(payload),
+            normalized: this.manifest,
+            summary: this.manifestSummary,
+          };
+        }
         const syncResult = await syncManifestToFs(this.manifest);
         this.remoteRootDir = syncResult?.remoteRootDir ?? null;
         this.fsSyncVersion += 1;
@@ -496,6 +565,12 @@ export const useFilesStore = defineStore('files', {
         this.status = 'error';
         this.manifest = null;
         this.remoteRootDir = null;
+        this.manifestSource = 'unknown';
+        this.manifestFetchedAt = null;
+        this.manifestSummary = null;
+        if (typeof window !== 'undefined' && window.__SPICY_MANIFEST_DEBUG__) {
+          delete window.__SPICY_MANIFEST_DEBUG__;
+        }
       }
     },
   },
