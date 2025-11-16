@@ -43,6 +43,14 @@ const sanityConfig = {
 
 const hasSanityConfig = Boolean(sanityConfig.projectId && sanityConfig.dataset);
 
+const logSanityFailure = (message, details) => {
+  if (details) {
+    console.error(`[filesStore] ${message}`, details);
+    return;
+  }
+  console.error(`[filesStore] ${message}`);
+};
+
 const parseSanityParams = () => {
   if (!sanityConfig.params) {
     return null;
@@ -62,20 +70,46 @@ const fetchSanityManifest = async () => {
   const encodedParams = params ? `&${new URLSearchParams(Object.entries(params)).toString()}` : '';
   const endpoint = `https://${projectId}.api.sanity.io/${apiVersion}/data/query/${dataset}?query=${encodedQuery}${encodedParams}`;
 
-  const response = await fetch(endpoint, {
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-  });
+  let response;
+  try {
+    response = await fetch(endpoint, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+  } catch (error) {
+    logSanityFailure('Network error while fetching manifest from Sanity.', { endpoint, error });
+    throw error;
+  }
 
   if (!response.ok) {
+    let body = null;
+    try {
+      body = await response.text();
+    } catch (readError) {
+      body = '<unavailable>';
+    }
+    logSanityFailure('Sanity query failed.', {
+      endpoint,
+      status: response.status,
+      statusText: response.statusText,
+      body,
+    });
     throw new Error(`Sanity query failed (HTTP ${response.status})`);
   }
 
-  const payload = await response.json();
+  let payload;
+  try {
+    payload = await response.json();
+  } catch (error) {
+    logSanityFailure('Unable to parse Sanity response JSON.', error);
+    throw error;
+  }
   if (payload.error) {
+    logSanityFailure('Sanity response returned an error.', payload.error);
     throw new Error(payload.error.description ?? 'Sanity query returned an error');
   }
 
   if (!payload.result) {
+    logSanityFailure('Sanity response was missing a result.', payload);
     throw new Error('Sanity response did not include a result');
   }
 
@@ -98,12 +132,14 @@ const buildFallbackManifest = (reason) => {
 
 const loadManifestPayload = async () => {
   if (!hasSanityConfig) {
+    console.warn('[filesStore] Missing Sanity credentials. Falling back to bundled manifest.');
     return buildFallbackManifest('Sanity credentials missing.');
   }
 
   try {
     const remoteManifest = await fetchSanityManifest();
     if (!remoteManifest || Object.keys(remoteManifest).length === 0) {
+      logSanityFailure('Sanity returned an empty manifest.', remoteManifest);
       return buildFallbackManifest('Sanity returned an empty manifest.');
     }
     return remoteManifest;

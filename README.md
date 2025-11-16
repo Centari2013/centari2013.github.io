@@ -177,6 +177,24 @@ Without `VITE_SANITY_PROJECT_ID` **and** `VITE_SANITY_DATASET` the app refuses t
 - Set `kind: "link"` (or `launch: "browser"`) to open a URL in the in-app browser.
 - Use `contentMode: "url"` whenever the `content` points at an external file; otherwise the viewer assumes a Base64 data URI.
 
+### System roles that matter
+
+The manifest normalizer in [`src/components/stores/files.js`](src/components/stores/files.js) inspects a `role` (or `systemRole`) property on folders to decide where they mount inside the faux Unix tree. Assign roles whenever the folder is meant to behave like an OS directory—otherwise it is treated as a generic folder.
+
+The runtime currently recognizes the following roles:
+
+```
+bin, custom, desktop, documents, downloads, etc,
+home, pictures, sbin, tmp, usr, usr/bin, usr/sbin,
+users, var
+```
+
+- `home` + `desktop` ensure the desktop icons and the shell point at the same path. When no `desktop` role is found the store fabricates a `home/SpicyOS/Desktop` tree, but explicitly tagging your folders avoids surprises.
+- `bin`, `usr/bin`, and `usr/sbin` are merged into the WASM shell's `$PATH`. If you leave them untagged, the CLI won't see the manifest-provided executables.
+- `documents`, `downloads`, `pictures`, etc. signal to the UI which folders deserve bespoke icons/labels.
+
+Any folder without one of the roles above still loads—it just behaves like a plain directory.
+
 Because the SPA fetches the manifest straight from Sanity on every page load, any publish in Studio (or via mutations/scripts) immediately refreshes the filesystem—no JSON files, repos, or WebAssembly rebuilds are required.
 
 #### Example schema
