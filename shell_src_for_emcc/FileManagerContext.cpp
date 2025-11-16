@@ -3,9 +3,15 @@
 
 FileManagerContext::FileManagerContext(std::shared_ptr<FileSystem> f) {
     this->fs = std::move(f);
-    this->cur_dir = fs->get_dir("$HOME");
-    this->back_history.push_back(this->cur_dir);
-    
+    FileSystem::Directory* start = this->fs->get_home_dir_ptr();
+    if (!start) {
+        start = this->fs->get_root_dir_ptr();
+    }
+    this->cur_dir = start;
+    if (this->cur_dir) {
+        this->back_history.push_back(this->cur_dir);
+    }
+
 }
 
 
@@ -81,4 +87,21 @@ FileSystem::Directory* FileManagerContext::get_documents_dir_ptr() const {
 
 FileSystem::Directory* FileManagerContext::get_desktop_dir_ptr() const {
     return this->fs->get_desktop_dir_ptr();
+}
+
+void FileManagerContext::reset(FileSystem::Directory* dir) {
+    this->forward_history.clear();
+    this->back_history.clear();
+
+    if (!dir) {
+        dir = this->fs->get_home_dir_ptr();
+    }
+    if (!dir) {
+        dir = this->fs->get_root_dir_ptr();
+    }
+
+    this->cur_dir = dir;
+    if (this->cur_dir) {
+        this->back_history.push_back(this->cur_dir);
+    }
 }

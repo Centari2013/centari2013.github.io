@@ -26,11 +26,12 @@ public:
     
     bool back_history_empty();
     bool forward_history_empty();
-    
+
     void cd_back();
     void cd_forward();
 
     FileSystem::Directory* get_cur_dir();
+    void reset(FileSystem::Directory* dir = nullptr);
 
     FileSystem::Directory* get_home_dir_ptr() const;
     FileSystem::Directory* get_downloads_dir_ptr() const;
