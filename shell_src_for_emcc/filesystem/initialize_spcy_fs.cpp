@@ -12,6 +12,183 @@ namespace {
 using Directory = FileSystem::Directory;
 using File = FileSystem::Directory::File;
 
+struct PendingShortcut {
+    std::weak_ptr<File> shortcut;
+    std::string target_path;
+};
+
+std::vector<PendingShortcut> pending_shortcuts;
+
+std::string trim_copy(std::string value) {
+    auto is_space = [](unsigned char ch) {
+        return std::isspace(ch) != 0;
+    };
+
+    value.erase(value.begin(), std::find_if(value.begin(), value.end(), [&](unsigned char ch) {
+        return !is_space(ch);
+    }));
+
+    value.erase(std::find_if(value.rbegin(), value.rend(), [&](unsigned char ch) {
+        return !is_space(ch);
+    }).base(), value.end());
+
+    return value;
+}
+
+std::string normalize_path(std::string value) {
+    value = trim_copy(std::move(value));
+    if (value.empty()) {
+        return value;
+    }
+
+    std::string normalized;
+    normalized.reserve(value.size());
+
+    for (size_t i = 0; i < value.size(); ++i) {
+        const char ch = value[i];
+        if (ch == '\\') {
+            if (i + 1 < value.size()) {
+                const char next = value[i + 1];
+                if (std::isspace(static_cast<unsigned char>(next))) {
+                    normalized.push_back(next);
+                    ++i;
+                    continue;
+                }
+            }
+            normalized.push_back('/');
+        } else {
+            normalized.push_back(ch);
+        }
+    }
+
+    return normalized;
+}
+
+struct FilePathParts {
+    std::string directory;
+    std::string filename;
+    std::string extension;
+};
+
+FilePathParts parse_file_path(const std::string &path) {
+    FilePathParts parts;
+    const std::string normalized = normalize_path(path);
+    if (normalized.empty()) {
+        return parts;
+    }
+
+    const auto slash_pos = normalized.find_last_of('/');
+    if (slash_pos == std::string::npos) {
+        parts.directory = "/";
+        parts.filename = normalized;
+    } else {
+        parts.directory = normalized.substr(0, slash_pos);
+        parts.filename = normalized.substr(slash_pos + 1);
+        if (parts.directory.empty()) {
+            parts.directory = "/";
+        }
+    }
+
+    if (parts.filename.empty()) {
+        return parts;
+    }
+
+    const auto dot_pos = parts.filename.find_last_of('.');
+    if (dot_pos != std::string::npos && dot_pos != 0 && dot_pos < parts.filename.size() - 1) {
+        parts.extension = parts.filename.substr(dot_pos + 1);
+        parts.filename = parts.filename.substr(0, dot_pos);
+    }
+
+    return parts;
+}
+
+std::shared_ptr<File> find_file_in_directory(Directory *dir, const std::string &name, const std::string &extension) {
+    if (!dir || name.empty()) {
+        return nullptr;
+    }
+
+    if (!extension.empty()) {
+        for (auto &candidate : dir->files) {
+            if (candidate && candidate->name == name && candidate->extension_abbr == extension) {
+                return candidate;
+            }
+        }
+        return nullptr;
+    }
+
+    for (auto &candidate : dir->files) {
+        if (candidate && candidate->name == name && candidate->extension_abbr.empty()) {
+            return candidate;
+        }
+    }
+
+    std::shared_ptr<File> unique_match;
+    for (auto &candidate : dir->files) {
+        if (candidate && candidate->name == name) {
+            if (unique_match) {
+                return nullptr;
+            }
+            unique_match = candidate;
+        }
+    }
+    return unique_match;
+}
+
+std::shared_ptr<File> find_file_by_path(FileSystem &fs, const std::string &path) {
+    const FilePathParts parts = parse_file_path(path);
+    if (parts.filename.empty()) {
+        return nullptr;
+    }
+
+    Directory *dir = nullptr;
+    if (parts.directory.empty() || parts.directory == ".") {
+        dir = fs.get_root_dir_ptr();
+    } else {
+        dir = fs.get_dir(parts.directory);
+    }
+
+    if (!dir) {
+        return nullptr;
+    }
+
+    return find_file_in_directory(dir, parts.filename, parts.extension);
+}
+
+void register_pending_shortcut(const std::shared_ptr<File> &shortcut, const std::string &target_path) {
+    if (!shortcut) {
+        return;
+    }
+
+    const std::string sanitized = normalize_path(target_path);
+    if (sanitized.empty()) {
+        return;
+    }
+
+    pending_shortcuts.push_back(PendingShortcut{shortcut, sanitized});
+}
+
+void log_shortcut_warning(const std::string &target_path) {
+    emscripten::val::global("console").call<void>("warn", std::string("[filesystem] Unable to resolve shortcut target: ") + target_path);
+}
+
+void resolve_pending_shortcuts(FileSystem &fs) {
+    for (const auto &pending : pending_shortcuts) {
+        auto shortcut = pending.shortcut.lock();
+        if (!shortcut) {
+            continue;
+        }
+
+        auto target = find_file_by_path(fs, pending.target_path);
+        if (target) {
+            shortcut->shortcut_target = target;
+        } else {
+            log_shortcut_warning(pending.target_path);
+        }
+    }
+
+    pending_shortcuts.clear();
+}
+
 bool has_file(const Directory *dir, const std::string &name, const std::string &extension) {
     if (!dir) {
         return false;
@@ -21,7 +198,7 @@ bool has_file(const Directory *dir, const std::string &name, const std::string &
         if (!existing) {
             return false;
         }
-        return existing->name == name && existing->extension == extension;
+        return existing->name == name && existing->extension_abbr == extension;
     });
 }
 
@@ -30,7 +207,7 @@ void append_file_unique(Directory *dir, std::shared_ptr<File> file) {
         return;
     }
 
-    if (has_file(dir, file->name, file->extension)) {
+    if (has_file(dir, file->name, file->extension_abbr)) {
         return;
     }
 
@@ -142,6 +319,11 @@ std::shared_ptr<File> buildFile(const emscripten::val &entry) {
         file->is_link = true;
     } else if (kind == "shortcut") {
         file->is_shortcut = true;
+        std::string target_path = read_string(entry, "shortcutTargetPath");
+        if (target_path.empty()) {
+            target_path = read_string(entry, "shortcut_target_path");
+        }
+        register_pending_shortcut(file, target_path);
     }
 
     return file;
@@ -212,6 +394,8 @@ void loadFilesystemFromManifest(std::shared_ptr<FileSystem> fs, const emscripten
         return;
     }
 
+    pending_shortcuts.clear();
+
     Directory *root = fs->get_root_dir_ptr();
     if (!root) {
         return;
@@ -255,6 +439,8 @@ void loadFilesystemFromManifest(std::shared_ptr<FileSystem> fs, const emscripten
     }
 
     apply_desktop_manifest(*fs, manifest_json);
+
+    resolve_pending_shortcuts(*fs);
 
     Directory *home = fs->get_home_dir_ptr();
     if (home) {

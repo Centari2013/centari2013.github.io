@@ -85,6 +85,10 @@ npm run dev
 
 No Emscripten required unless you're going under the hood.
 
+### 🗂️ Authoring filesystem shortcuts
+
+If you're editing the manifest in Sanity, any entry whose `kind` is set to `shortcut` now exposes a `shortcutTargetPath` field. Point it at the absolute path of the file you want to open (e.g. `/home/SpicyKneecaps/Documents/Resume.md` or `~/Documents/Resume.md`). The WebAssembly loader resolves that path at boot so shortcuts behave like real desktop aliases without duplicating content. Paths with spaces are supported—either type the literal space or use shell-style escapes (e.g. `/Users/Zaria\ Burton/Documents/Resume.md`) and the loader will normalize them automatically.
+
 ---
 
 ### ⚙️ Recompiling the Shell Backend (C++)
