@@ -253,6 +253,117 @@ const normalizeFolder = (folder = {}, parentSegments = []) => {
   };
 };
 
+const cloneFileEntryForFs = (entry = {}) => ({
+  ...entry,
+  tags: Array.isArray(entry.tags) ? [...entry.tags] : [],
+  meta: entry.meta ? { ...entry.meta } : {},
+  id: entry.id ?? randomId(),
+});
+
+const findDesktopFolders = (entries = []) => {
+  const queue = Array.isArray(entries) ? [...entries] : [];
+  const matches = [];
+
+  while (queue.length > 0) {
+    const node = queue.shift();
+    if (!node || node.type !== 'd') {
+      continue;
+    }
+    if (node.role === 'desktop') {
+      matches.push(node);
+    }
+    if (Array.isArray(node.entries)) {
+      queue.push(...node.entries);
+    }
+  }
+
+  return matches;
+};
+
+const createSyntheticDesktopTree = (desktopEntries = []) => {
+  if (!Array.isArray(desktopEntries) || desktopEntries.length === 0) {
+    return null;
+  }
+
+  const desktopFolder = {
+    id: randomId(),
+    type: 'd',
+    name: 'Desktop',
+    source: 'manifest',
+    role: 'desktop',
+    entries: desktopEntries.map((entry) => cloneFileEntryForFs(entry)),
+  };
+
+  const homeDirectory = {
+    id: randomId(),
+    type: 'd',
+    name: 'SpicyOS',
+    source: 'manifest',
+    role: 'home',
+    entries: [desktopFolder],
+  };
+
+  const homeRoot = {
+    id: randomId(),
+    type: 'd',
+    name: 'home',
+    source: 'manifest',
+    entries: [homeDirectory],
+  };
+
+  return {
+    desktopFolder,
+    synthesizedEntries: [homeRoot],
+  };
+};
+
+const injectDesktopEntriesIntoFilesystem = (filesystemEntries, desktopEntries) => {
+  if (!Array.isArray(desktopEntries) || desktopEntries.length === 0) {
+    return;
+  }
+
+  if (!Array.isArray(filesystemEntries)) {
+    return;
+  }
+
+  let desktopFolders = findDesktopFolders(filesystemEntries);
+
+  if (desktopFolders.length === 0) {
+    const synthetic = createSyntheticDesktopTree(desktopEntries);
+    if (synthetic) {
+      filesystemEntries.push(...synthetic.synthesizedEntries);
+      desktopFolders = [synthetic.desktopFolder];
+    }
+  }
+
+  desktopFolders.forEach((folder) => {
+    if (!folder || folder.type !== 'd') {
+      return;
+    }
+
+    if (!Array.isArray(folder.entries)) {
+      folder.entries = [];
+    }
+
+    const existingNames = new Set(
+      folder.entries
+        .map((entry) => (typeof entry.name === 'string' ? entry.name.trim().toLowerCase() : ''))
+        .filter((name) => name.length > 0),
+    );
+
+    desktopEntries.forEach((entry) => {
+      const key = typeof entry.name === 'string' ? entry.name.trim().toLowerCase() : '';
+      if (key.length > 0 && existingNames.has(key)) {
+        return;
+      }
+      folder.entries.push(cloneFileEntryForFs(entry));
+      if (key.length > 0) {
+        existingNames.add(key);
+      }
+    });
+  });
+};
+
 const normalizeManifest = (payload = {}) => {
   const rootConfig = payload.root ?? {};
   const rootName = rootConfig.name ?? 'Filesystem';
@@ -262,6 +373,8 @@ const normalizeManifest = (payload = {}) => {
   const desktopEntries = Array.isArray(payload.desktop)
     ? payload.desktop.map((entry) => normalizeFileEntry(entry, ['desktop']))
     : [];
+
+  injectDesktopEntriesIntoFilesystem(filesystemEntries, desktopEntries);
 
   return {
     desktop: desktopEntries,
