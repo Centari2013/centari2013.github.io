@@ -137,10 +137,8 @@ function decodeBinaryPayload(data, isBase64) {
 }
 
 function loadFromData(entry) {
-  const content = entry?.content;
-  if (!content) {
-    throw new Error(`File "${entry?.name || 'untitled'}" has no data to render.`);
-  }
+  const hasContent = entry?.content !== undefined && entry?.content !== null;
+  const content = hasContent ? entry.content : '';
 
   if (typeof content === 'string' && content.startsWith('data:')) {
     const { mimeType, data, isBase64 } = parseDataUri(content);
@@ -157,7 +155,17 @@ function loadFromData(entry) {
 
   const mimeType = inferMimeType(entry?.exten);
   const renderMode = determineRenderMode(mimeType, entry?.exten);
-  const rawData = isTextRenderMode(renderMode) ? content : textEncoder.encode(content).buffer;
+  const rawData = isTextRenderMode(renderMode)
+    ? content
+    : textEncoder.encode(String(content || '')).buffer;
+  if (!hasContent && !isTextRenderMode(renderMode)) {
+    // Provide an empty ArrayBuffer so downstream renderers don't crash.
+    return {
+      mimeType,
+      rawData: new ArrayBuffer(0),
+      renderMode
+    };
+  }
   return {
     mimeType,
     rawData,
