@@ -1,124 +1,198 @@
 <template>
   <div class="doc-viewer">
-    <!-- Handle different file types -->
-    <div v-if="isTextFile" class="page-content-container">
-      <div  class="page-content" v-html="renderDecodedContent()"></div>
+    <div v-if="loading" class="page-content-container">
+      <div class="page-content">Loading file…</div>
     </div>
 
-    <img v-else-if="isImageFile" :src="content" alt="Image preview" class="image-preview" />
-    <video v-else-if="isVideoFile" :src="content" controls class="video-preview"></video>
-    <audio v-else-if="isAudioFile" :src="content" controls class="audio-preview"></audio>
+    <div v-else-if="error" class="page-content-container">
+      <div class="page-content unsupported">{{ error }}</div>
+    </div>
 
-    <div v-else-if="isMarkdown" class="page-content-container">
-      <div :id="id" class="page-content" v-html="renderMarkdown()"></div>
-    </div>
-    <div v-else class="unsupported">
-      Unsupported file type: {{ file_ext }}
-    </div>
+    <template v-else>
+      <div v-if="renderer.mode === 'text'" class="page-content-container">
+        <div class="page-content" v-html="renderer.content"></div>
+      </div>
+
+      <div v-else-if="renderer.mode === 'markdown'" class="page-content-container">
+        <div :id="id" class="page-content" v-html="renderer.content"></div>
+      </div>
+
+      <img v-else-if="renderer.mode === 'image'" :src="renderer.source" alt="Image preview" class="image-preview" />
+      <video v-else-if="renderer.mode === 'video'" :src="renderer.source" controls class="video-preview"></video>
+      <audio v-else-if="renderer.mode === 'audio'" :src="renderer.source" controls class="audio-preview"></audio>
+      <iframe v-else-if="renderer.mode === 'pdf'" :src="renderer.source" class="pdf-frame"></iframe>
+
+      <div v-else class="unsupported">
+        Unsupported file type: {{ file.exten || 'unknown' }}
+      </div>
+    </template>
   </div>
 </template>
 
-<script>
+<script setup>
 import { marked } from 'marked';
 import { markedEmoji } from 'marked-emoji';
+import { onBeforeUnmount, ref, watch } from 'vue';
 
-import { extractAndDecodeBase64 } from '@/components/utilities/decode'
+import { loadFileContents } from '@/components/utilities/fileLoader';
 
-export default {
-  props: {
-    id: {
-      type: String,
-      required: true
-    },
-    content: {
-      type: String, // Base64 data URI for binary files or raw text
-      required: true,
-    },
-    name: {
-      type: String,
-      default: "File_Name",
-    },
-    file_ext: {
-      type: String, // File extension (e.g., 'txt', 'png', 'mp3')
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: String,
+    required: true
   },
-  computed: {
-    isTextFile() {
-      return ['txt', 'json', 'html', 'css', 'js', 'cpp', 'h', ''].includes(this.file_ext.toLowerCase());
-    },
-    isImageFile() {
-      return ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(this.file_ext.toLowerCase());
-    },
-    isVideoFile() {
-      return ['mp4', 'webm', 'ogg', 'mov'].includes(this.file_ext.toLowerCase());
-    },
-    isAudioFile() {
-      return ['mp3', 'wav', 'ogg', 'm4a'].includes(this.file_ext.toLowerCase());
-    },
-    isMarkdown() {
-      return this.file_ext.toLowerCase() == 'md';
-    }
-  },
-  methods: {
-    renderDecodedContent() {
-    const decodedText = extractAndDecodeBase64(this.content);
-    return decodedText.replace(/\n/g, "<br>");
-    },
-    renderMarkdown() {
-      // Ensure links open in a new tab
-        const renderer = new marked.Renderer();
-        renderer.link = function (href, title, text) {
-          var link = marked.Renderer.prototype.link.call(this, href, title, text);
-          return link.replace("<a","<a target='_blank' ");
-        }
-
-        // Emoji options for marked
-        const emojiOptions = {
-        emojis: {
-          "star": "🌟",
-          "chili": "🌶️",
-          "laptop": "💻",
-          "rainbow": "🌈",
-          "briefcase": "💼",
-          "woman_technologist": "👩🏽‍💻",
-          "heart": "❤️",
-          "tada": "🎉",
-          // add new ones from README
-          "arrow_right": "➡️",
-          "computer": "🖥️",
-          "mag": "🔍",
-          "handshake": "🤝"
-        },
-        renderer: (token) => token.emoji,
-      };
-
-
-      // Apply emoji options (only once)
-      if (!marked.extensions?.emojiApplied) {
-        marked.use(markedEmoji(emojiOptions));
-        marked.extensions = { ...marked.extensions, emojiApplied: true };
-      }
-
-      // Decode Base64 content and parse Markdown
-      try {
-        const decodedContent = extractAndDecodeBase64(this.content);
-        return marked.parse(decodedContent, { renderer });
-      } catch (error) {
-        console.error("Error decoding Base64 content:", error);
-        return "<p>Invalid content provided.</p>";
-      }
-    }
-
+  file: {
+    type: Object,
+    required: true
   }
+});
+
+const emit = defineEmits(['loaded']);
+
+const loading = ref(true);
+const error = ref(null);
+const renderer = ref({ mode: 'loading' });
+const activeObjectUrl = ref(null);
+let loadToken = 0;
+
+const markdownRenderer = new marked.Renderer();
+markdownRenderer.link = function (href, title, text) {
+  const link = marked.Renderer.prototype.link.call(this, href, title, text);
+  return link.replace('<a', "<a target='_blank' ");
 };
+
+const emojiOptions = {
+  emojis: {
+    star: '🌟',
+    chili: '🌶️',
+    laptop: '💻',
+    rainbow: '🌈',
+    briefcase: '💼',
+    woman_technologist: '👩🏽‍💻',
+    heart: '❤️',
+    tada: '🎉',
+    arrow_right: '➡️',
+    computer: '🖥️',
+    mag: '🔍',
+    handshake: '🤝'
+  },
+  renderer: (token) => token.emoji
+};
+
+if (!marked.__spicyEmojiApplied) {
+  marked.use(markedEmoji(emojiOptions));
+  marked.__spicyEmojiApplied = true;
+}
+
+watch(
+  () => props.file,
+  () => {
+    hydrateFile();
+  },
+  { immediate: true }
+);
+
+async function hydrateFile() {
+  const token = ++loadToken;
+  loading.value = true;
+  error.value = null;
+  renderer.value = { mode: 'loading' };
+  cleanupObjectUrl();
+
+  try {
+    const renderableFile = await loadFileContents(props.file);
+    if (token !== loadToken) {
+      return;
+    }
+    renderer.value = renderFile(renderableFile);
+    emit('loaded', renderableFile);
+  } catch (err) {
+    if (token !== loadToken) {
+      return;
+    }
+    console.error('Failed to load file', err);
+    error.value = err?.message || 'Failed to load file.';
+  } finally {
+    if (token === loadToken) {
+      loading.value = false;
+    }
+  }
+}
+
+function renderFile(file) {
+  if (!file) {
+    return { mode: 'unsupported' };
+  }
+
+  if (file.renderMode === 'markdown') {
+    return { mode: 'markdown', content: renderMarkdownContent(file.rawData) };
+  }
+
+  if (file.renderMode === 'text') {
+    return { mode: 'text', content: formatTextContent(file.rawData) };
+  }
+
+  if (['image', 'audio', 'video', 'pdf'].includes(file.renderMode)) {
+    return { mode: file.renderMode, source: getMediaSource(file) };
+  }
+
+  return { mode: 'unsupported' };
+}
+
+function formatTextContent(raw) {
+  if (typeof raw !== 'string') {
+    return '';
+  }
+  return raw.replace(/\n/g, '<br>');
+}
+
+function renderMarkdownContent(raw) {
+  const value = typeof raw === 'string' ? raw : '';
+  try {
+    return marked.parse(value, { renderer: markdownRenderer });
+  } catch (err) {
+    console.error('Error rendering markdown', err);
+    return '<p>Invalid content provided.</p>';
+  }
+}
+
+function cleanupObjectUrl() {
+  if (activeObjectUrl.value) {
+    URL.revokeObjectURL(activeObjectUrl.value);
+    activeObjectUrl.value = null;
+  }
+}
+
+function getMediaSource(file) {
+  cleanupObjectUrl();
+  const { rawData, mimeType, sourceUrl } = file;
+
+  if (typeof rawData === 'string') {
+    if (rawData.startsWith('data:') || /^https?:\/\//i.test(rawData)) {
+      return rawData;
+    }
+    return sourceUrl || rawData;
+  }
+
+  if (rawData instanceof ArrayBuffer) {
+    const blob = new Blob([rawData], { type: mimeType || 'application/octet-stream' });
+    activeObjectUrl.value = URL.createObjectURL(blob);
+    return activeObjectUrl.value;
+  }
+
+  return sourceUrl || '';
+}
+
+onBeforeUnmount(() => {
+  cleanupObjectUrl();
+});
 </script>
 
 <style>
 @reference '../../style.css';
 
 .doc-viewer {
-  @apply w-full h-full flex flex-col items-center p-0; /* Container for all file previews */
+  @apply w-full h-full flex flex-col items-center p-0;
 }
 
 .page-content-container {
@@ -130,27 +204,31 @@ export default {
 }
 
 .page-content {
-  @apply relative text-primary-dark-base p-8 h-full overflow-auto; /* Styling for text content */
-  filter: brightness(0.5); /* Neutralize brightness for text */
+  @apply relative text-primary-dark-base p-8 h-full overflow-auto;
+  filter: brightness(0.5);
   line-height: 1.8rem;
-  
 }
 
 .image-preview {
-  @apply w-auto h-auto max-w-full max-h-full p-3; /* Ensures the image maintains aspect ratio */
-  object-fit: contain; /* Ensures the image fits within its container while keeping aspect ratio */
-  display: block; /* Prevent inline gaps */
+  @apply w-auto h-auto max-w-full max-h-full p-3;
+  object-fit: contain;
+  display: block;
   filter: brightness(0.5);
 }
 
 .video-preview,
 .audio-preview {
-  @apply w-full max-w-4xl; /* Styling for videos and audio */
+  @apply w-full max-w-4xl;
   filter: brightness(0.5);
 }
 
+.pdf-frame {
+  @apply w-full h-full border-none;
+  background-color: #111827;
+}
+
 .unsupported {
-  @apply text-red-500 font-bold; /* Styling for unsupported file types */
+  @apply text-red-500 font-bold;
 }
 
 .page-content ul {
@@ -181,13 +259,9 @@ export default {
   @apply pb-3;
 }
 
-
-
-
 @media (max-width: 768px) {
   .image-preview {
-    @apply max-w-full max-h-[80vh]; /* Adjust image size for smaller screens */
+    @apply max-w-full max-h-[80vh];
   }
 }
 </style>
-
