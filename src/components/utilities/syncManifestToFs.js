@@ -1,3 +1,4 @@
+import { toRaw } from 'vue';
 import { whenSystemModuleReady } from './systemModuleReady';
 
 const ensureFsSupport = (module) => typeof module?.build_fs_from_manifest === 'function';
@@ -7,16 +8,9 @@ const cloneManifestEntries = (entries) => {
     return null;
   }
 
-  if (typeof globalThis.structuredClone === 'function') {
-    try {
-      return globalThis.structuredClone(entries);
-    } catch (error) {
-      console.warn('[syncManifestToFs] structuredClone failed, falling back to JSON copy.', error);
-    }
-  }
-
   try {
-    return JSON.parse(JSON.stringify(entries));
+    const rawEntries = toRaw(entries);
+    return JSON.parse(JSON.stringify(rawEntries));
   } catch (error) {
     console.error('[syncManifestToFs] Unable to serialize manifest entries for SystemModule.', error);
     return null;
