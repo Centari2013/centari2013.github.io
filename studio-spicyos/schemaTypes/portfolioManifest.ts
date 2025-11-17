@@ -12,7 +12,7 @@ export const portfolioEntry = defineType({
     defineField({ name: 'asset', type: 'file' }),
     defineField({ name: 'shortcutTargetPath',
       type: 'string',
-      description: 'Absolute or ~-relative path to the file this shortcut should open.',
+      description: 'Absolute or ~-relative path to the file or folder this shortcut should open.',
       hidden: ({ parent }) => parent?.kind !== 'shortcut',
       validation: (Rule) => Rule.custom((value, context) => {
         if (context?.parent?.kind === 'shortcut' && !value) {
@@ -20,6 +20,20 @@ export const portfolioEntry = defineType({
         }
         return true;
       }),
+    }),
+    defineField({
+      name: 'shortcutTargetType',
+      type: 'string',
+      initialValue: 'file',
+      options: {
+        layout: 'radio',
+        list: [
+          { title: 'File', value: 'file' },
+          { title: 'Directory', value: 'directory' },
+        ],
+      },
+      description: 'Choose whether the shortcut opens a file directly or launches the File Manager in a folder.',
+      hidden: ({ parent }) => parent?.kind !== 'shortcut',
     }),
     defineField({ name: 'tags', type: 'array', of: [{ type: 'string' }] }),
     //defineField({ name: 'meta', type: 'object', fields: []}),

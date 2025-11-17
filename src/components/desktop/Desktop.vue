@@ -28,8 +28,16 @@
             @dblclick="handleFileOpen(item)"
           >
             <Icon v-if="item.type === 'd'" :image="'directory'" class="d"/>
-            <Icon v-else-if="item.type === 'f' && !item.is_shortcut && !item.is_link" :image="'file'" class="d" />
-            <Icon v-else-if="item.type === 'f' && item.is_shortcut" :image="'shortcut'" class="d" />
+            <Icon
+              v-else-if="item.type === 'f' && item.is_shortcut && item.shortcutTargetsDirectory"
+              :image="'directory_shortcut'"
+              class="d"
+            />
+            <Icon
+              v-else-if="item.type === 'f' && item.is_shortcut"
+              :image="'shortcut'"
+              class="d"
+            />
             <Icon v-else-if="item.type === 'f' && item.is_link" :image="'browserLink'" class="d" />
             <div class="file-info">
               <span class="file-name">{{ item.name }}</span>
@@ -49,7 +57,7 @@ import MinimizedFileBar from '@/components/desktop/MinimizedFileBar.vue';
 import { createLoader } from '@/components/utilities/simulateLoading';
 import { initFilesystem as bootstrapFilesystem } from '@/components/utilities/initFilesystem';
 
-import { ref, toRaw, defineAsyncComponent, reactive, provide, onMounted } from 'vue';
+import { ref, defineAsyncComponent, reactive, provide, onMounted } from 'vue';
 
 const ContentWindow = defineAsyncComponent(() => import("@/components/windows/ContentWindow.vue"));
 const emit = defineEmits(['initialized', 'progress'])
@@ -59,6 +67,7 @@ import { storeToRefs } from 'pinia';
 import makeDirectoryItems from '@/components/utilities/makeDirectoryItems';
 import { makeFileItems } from '@/components/utilities/makeFileItems';
 import { openFile } from '@/components/utilities/openFile';
+import { openDirectoryInFileManager } from '@/components/utilities/openDirectory';
 import { useIsMobile } from "@/components/utilities/useIsMobile";
 
 const {isMobile} = useIsMobile()
@@ -67,7 +76,7 @@ const windowRefs = reactive({});
 provide('windowRefs', windowRefs);
 const desktopContents = ref([]);
 const appsStore = useAppsStore();
-const { openApps, openFiles, isAppOpen } = storeToRefs(appsStore);
+const { openApps, openFiles } = storeToRefs(appsStore);
 const fmId = 'file_manager'
 const browserId = 'browser'
 
@@ -83,14 +92,8 @@ const assignWindowRef = (id) => (el) => {
 
 
 const opendir = (item) => {
-  //TODO: FIX
-  
-  if (!isAppOpen(fmId)){
-    openApp(fmId);
-  }
-  const fm = windowRefs.find(app => app.id === fmId);
-  fm.chdir(item);
-}
+  openDirectoryInFileManager(item);
+};
 const getDesktopContents = () => {
   const desktop_ptr = SystemModule.get_desktop_dir_ptr();
   const files = SystemModule.list_files(desktop_ptr);
@@ -115,7 +118,7 @@ const getRandomPosition = (id) => {
 
 const handleFileOpen = (item) => {
   if (item.type === 'd') {
-    opendir(toRaw(item.object))
+    opendir(item.object)
   } else if (item.type === 'f' && item.is_link) {
     appsStore.openApp(browserId, { url: item.content })
   }else {

@@ -1,6 +1,7 @@
 import { toRaw } from "vue";
 import { makeFileItem } from "@/components/utilities/makeFileItems";
 import { useAppsStore } from "@/components/stores/apps";
+import { openDirectoryInFileManager } from "@/components/utilities/openDirectory";
 
 const BROWSER_APP_ID = 'browser';
 
@@ -17,6 +18,14 @@ export function openFile(item) {
   }
 
   if (item.is_shortcut) {
+    if (item.shortcutTargetsDirectory) {
+      if (item.shortcutTargetPath) {
+        openDirectoryInFileManager(null, { path: item.shortcutTargetPath });
+      } else {
+        alert("Shortcut target directory is missing or broken.");
+      }
+      return;
+    }
     const target = SystemModule.resolve_shortcut(toRaw(item.object));
     if (target) {
       appsStore.openFile(makeFileItem(target));

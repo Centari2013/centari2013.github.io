@@ -49,6 +49,11 @@
           >
             <Icon v-if="item.type === 'd'" :image="'directory'" class="d"/>
             <Icon v-else-if="item.type === 'f' && !item.is_shortcut && !item.is_link" :image="'file'" class="d" />
+            <Icon
+              v-else-if="item.type === 'f' && item.is_shortcut && item.shortcutTargetsDirectory"
+              :image="'directory_shortcut'"
+              class="d"
+            />
             <Icon v-else-if="item.type === 'f' && item.is_shortcut" :image="'shortcut'" class="d" />
             <Icon
               v-else-if="item.type === 'f' && item.is_link"
@@ -68,16 +73,22 @@
 
 <script>
 import "@/assets/js/terminal/system";
-import { ref, onMounted, toRaw } from "vue";
+import { ref, onMounted, toRaw, watch } from "vue";
 import Icon from "@/components/desktop/Icon.vue";
-import { useAppsStore } from "@/components/stores/apps";
+import { findDirectoryByPath } from "@/components/utilities/shortcutMetadata";
 import makeDirectoryItems from "@/components/utilities/makeDirectoryItems";
 import {makeFileItems} from "@/components/utilities/makeFileItems";
 import { openFile } from '@/components/utilities/openFile'
 
 export default {
   components: { Icon },
-setup() {
+  props: {
+    args: {
+      type: Object,
+      default: null,
+    },
+  },
+setup(props) {
     // Reactive states
     const contents = ref([]);
     const disableBack = ref(true);
@@ -105,6 +116,46 @@ setup() {
       contents.value = getDirContents();
       syncButtonState();
     };
+
+    const tryNavigateToPath = (path) => {
+      if (!path) {
+        return false;
+      }
+
+      const resolved = findDirectoryByPath(path);
+      if (resolved) {
+        chdir(resolved);
+        return true;
+      }
+
+      return false;
+    };
+
+    const handleNavigationArgs = (args) => {
+      if (!args) {
+        return;
+      }
+
+      if (args.targetDirectory) {
+        chdir(toRaw(args.targetDirectory));
+        return;
+      }
+
+      if (args.targetPath) {
+        const success = tryNavigateToPath(args.targetPath);
+        if (!success) {
+          alert(`Unable to locate ${args.targetPath}. The shortcut may be out of date.`);
+        }
+      }
+    };
+
+    watch(
+      () => props.args,
+      (args) => {
+        handleNavigationArgs(args);
+      },
+      { immediate: true }
+    );
 
     const back = () => {
       SystemModule.cd_back();
