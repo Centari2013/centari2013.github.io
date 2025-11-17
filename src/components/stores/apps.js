@@ -48,10 +48,17 @@ export const useAppsStore = defineStore('apps', {
       return this.openApps.find(app => app.id === id).maximized;
     },
     openApp(id, args=null) {
-      if (!this.openApps.find(app => app.id === id)) {
+      const existingApp = this.openApps.find(app => app.id === id);
+
+      if (!existingApp) {
         const minWidth = this.allApps.find(app => app.id === id).minWidth;
         this.openApps.push({ id, args, zIndex: ++this.zIndexCounter, maximized: false, minimized: false, ...(minWidth ? { minWidth } : {})});
+        return;
       }
+
+      existingApp.args = args;
+      existingApp.minimized = false;
+      this.bringAppToFront(id);
     },
     setAppMinimize(id, bool) {
       this.openApps.find(app => app.id === id).minimized = bool; 
