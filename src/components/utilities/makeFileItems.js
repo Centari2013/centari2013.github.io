@@ -1,3 +1,5 @@
+import { getShortcutMetadataForFile } from '@/components/utilities/shortcutMetadata';
+
 function extractAssetUrl(file) {
     return (
         file?.assetUrl ||
@@ -32,6 +34,7 @@ function deriveContentMode(file) {
 function toFileObject(f) {
     const assetUrl = extractAssetUrl(f);
     const contentMode = deriveContentMode(f);
+    const shortcutMetadata = getShortcutMetadataForFile(f);
     return {
         object: f,
         type: "f",
@@ -42,7 +45,9 @@ function toFileObject(f) {
         assetUrl: assetUrl || (contentMode === 'url' ? f.content : null),
         asset: f.asset,
         is_shortcut: f.is_shortcut,
-        is_link: f.is_link
+        is_link: f.is_link,
+        shortcutTargetsDirectory: shortcutMetadata?.targetType === 'directory',
+        shortcutTargetPath: shortcutMetadata?.targetPath || null,
     };
 }
 
