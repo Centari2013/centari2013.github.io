@@ -5,7 +5,7 @@
       <div class="flex items-center gap-2 w-full pt-1">
 
         <!-- Back button -->
-        <button class="browser-button" @click="goBack">
+        <button class="browser-button" @click="goBack" :disabled="!canGoBack">
           <BrowserBackIcon class="browser-icon"/>
         </button>
 
@@ -35,7 +35,7 @@
 
 
 <script setup>
-import { ref, useTemplateRef } from 'vue';
+import { computed, ref, useTemplateRef, watch } from 'vue';
 import { extractAndDecodeBase64 } from '@/components/utilities/decode'
 import BrowserBackIcon from '@/assets/icons/browserBack.svg'
 import BrowserNewTabIcon from '@/assets/icons/browserNewTab.svg'
@@ -48,13 +48,55 @@ const props = defineProps({
   }
 })
 
-const currentUrl = ref("https://centari2013.github.io/SoundRoom");
+const DEFAULT_URL = "https://centari2013.github.io/SoundRoom";
 const iframe = useTemplateRef('iframe')
+const currentUrl = ref('');
+const history = ref([]);
+const historyIndex = ref(-1);
 
-if (props.args) {
-  const propLink = extractAndDecodeBase64(props.args.url)
-  currentUrl.value = propLink;
-}
+const loadUrl = (url, { pushHistory = true } = {}) => {
+  if (!url) return;
+
+  currentUrl.value = url;
+
+  if (!pushHistory) {
+    return;
+  }
+
+  history.value = history.value.slice(0, historyIndex.value + 1);
+  history.value.push(url);
+  historyIndex.value = history.value.length - 1;
+};
+
+const initialUrl = props.args?.url
+  ? extractAndDecodeBase64(props.args.url)
+  : DEFAULT_URL;
+
+loadUrl(initialUrl);
+
+watch(
+  () => props.args?.url,
+  (encodedUrl, previousEncodedUrl) => {
+    if (!encodedUrl || encodedUrl === previousEncodedUrl) return;
+
+    const decodedUrl = extractAndDecodeBase64(encodedUrl);
+
+    if (!decodedUrl || decodedUrl === currentUrl.value) {
+      return;
+    }
+
+    loadUrl(decodedUrl);
+  }
+);
+
+const canGoBack = computed(() => historyIndex.value > 0);
+
+const goBack = () => {
+  if (historyIndex.value <= 0) return;
+
+  historyIndex.value -= 1;
+  currentUrl.value = history.value[historyIndex.value];
+};
 
 const openInNewTab = () =>{
   window.open(currentUrl.value, "_blank");
@@ -106,5 +148,9 @@ const reloadPage = () => {
 
 .browser-button {
   @apply w-1/5 p-0 aspect-square bg-transparent flex items-center justify-center rounded-none border-none;
+}
+
+.browser-button:disabled {
+  @apply cursor-not-allowed opacity-50;
 }
 </style>

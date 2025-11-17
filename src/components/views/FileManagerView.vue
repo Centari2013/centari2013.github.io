@@ -41,14 +41,20 @@
       <div class="file-grid-container">
         <!-- Responsive Grid that Auto-adjusts -->
         <div class="file-grid">
-          <div 
-            v-for="item in contents" 
-            :key="item.name" 
+          <div
+            v-for="item in contents"
+            :key="item.name"
             class="file-item"
             @dblclick="item.type === 'd' ? chdir(toRaw(item.object)) : openFile(item)"
           >
             <Icon v-if="item.type === 'd'" :image="'directory'" class="d"/>
-            <Icon v-else-if="item.type === 'f'" :image="'file'" />
+            <Icon v-else-if="item.type === 'f' && !item.is_shortcut && !item.is_link" :image="'file'" class="d" />
+            <Icon v-else-if="item.type === 'f' && item.is_shortcut" :image="'shortcut'" class="d" />
+            <Icon
+              v-else-if="item.type === 'f' && item.is_link"
+              :image="'browserLink'"
+              class="d link-highlight"
+            />
             <div class="file-info">
               <span class="file-name">{{ item.name }}</span>
             </div>
@@ -261,8 +267,24 @@ setup() {
   @apply overflow-auto max-h-full;
 }
 
-.d :deep(path) {
+.d :deep(path),
+.d :deep(circle),
+.d :deep(ellipse),
+.d :deep(rect),
+.d :deep(line),
+.d :deep(polygon),
+.d :deep(polyline) {
   @apply stroke-black;
+}
+
+.link-highlight :deep(path),
+.link-highlight :deep(circle),
+.link-highlight :deep(ellipse),
+.link-highlight :deep(rect),
+.link-highlight :deep(line),
+.link-highlight :deep(polygon),
+.link-highlight :deep(polyline) {
+  @apply stroke-accent-yellow-shadow;
 }
 
 .file-item {
