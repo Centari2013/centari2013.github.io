@@ -96,15 +96,20 @@ setup(props) {
     const directoryTitle = ref("Directory");
     const activePtr = ref(null);
 
+    // Sync button states
+    const syncButtonState = () => {
+      disableBack.value = SystemModule.back_history_empty();
+      disableForward.value = SystemModule.forward_history_empty();
+    };
+
     // Fetch directory contents
     const getDirContents = () => {
       const files = SystemModule.list_files(SystemModule.get_cur_fs_dir());
       const directories = SystemModule.list_directories(SystemModule.get_cur_fs_dir());
       directoryTitle.value = SystemModule.get_cur_fs_dir().name;
 
-      //const contentsList = [];
       const contentsList = makeDirectoryItems(directories).concat(makeFileItems(files));
-      
+
       contentsList.sort((a, b) => a.name.localeCompare(b.name));
       return contentsList;
     };
@@ -167,12 +172,6 @@ setup(props) {
       SystemModule.cd_forward();
       contents.value = getDirContents();
       syncButtonState();
-    };
-
-    // Sync button states
-    const syncButtonState = () => {
-      disableBack.value = SystemModule.back_history_empty();
-      disableForward.value = SystemModule.forward_history_empty();
     };
 
     // On mounted, initialize contents and button states

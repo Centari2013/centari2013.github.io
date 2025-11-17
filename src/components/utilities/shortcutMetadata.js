@@ -162,16 +162,19 @@ export function findDirectoryByPath(path, moduleRef = window.SystemModule) {
   }
 
   for (const segment of segments) {
-    if (!segment) {
+    const normalizedSegment = typeof segment === 'string' ? segment.trim() : '';
+    if (!normalizedSegment) {
       continue;
     }
 
     const directories = moduleRef.list_directories(current);
     let match = null;
+    const segmentLower = normalizedSegment.toLowerCase();
     if (directories && typeof directories.size === 'function') {
       for (let i = 0; i < directories.size(); i++) {
         const child = directories.get(i);
-        if (child?.name === segment) {
+        const childName = child?.name;
+        if (childName && childName.toLowerCase?.() === segmentLower) {
           match = child;
           break;
         }
