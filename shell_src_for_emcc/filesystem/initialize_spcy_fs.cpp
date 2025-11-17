@@ -319,6 +319,13 @@ std::shared_ptr<File> buildFile(const emscripten::val &entry) {
 
     auto file = std::make_shared<File>(name, extension, content);
     const std::string kind = to_lower(read_string(entry, "kind", "file"));
+    std::string shortcut_target_type = to_lower(read_string(entry, "shortcutTargetType"));
+    if (shortcut_target_type.empty()) {
+        shortcut_target_type = to_lower(read_string(entry, "shortcut_target_type"));
+    }
+    if (shortcut_target_type.empty()) {
+        shortcut_target_type = "file";
+    }
 
     if (kind == "link") {
         file->is_link = true;
@@ -328,7 +335,10 @@ std::shared_ptr<File> buildFile(const emscripten::val &entry) {
         if (target_path.empty()) {
             target_path = read_string(entry, "shortcut_target_path");
         }
-        register_pending_shortcut(file, target_path);
+        const bool targets_directory = shortcut_target_type == "directory";
+        if (!targets_directory) {
+            register_pending_shortcut(file, target_path);
+        }
     }
 
     return file;
