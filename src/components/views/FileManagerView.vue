@@ -263,8 +263,14 @@ setup() {
   @apply overflow-auto max-h-full;
 }
 
-.d :deep(path) {
-  @apply stroke-black;
+.d :deep(path),
+.d :deep(circle),
+.d :deep(ellipse),
+.d :deep(rect),
+.d :deep(line),
+.d :deep(polygon),
+.d :deep(polyline) {
+  @apply stroke-accent-yellow-shadow;
 }
 
 .file-item {
