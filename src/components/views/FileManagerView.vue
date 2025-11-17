@@ -50,7 +50,11 @@
             <Icon v-if="item.type === 'd'" :image="'directory'" class="d"/>
             <Icon v-else-if="item.type === 'f' && !item.is_shortcut && !item.is_link" :image="'file'" class="d" />
             <Icon v-else-if="item.type === 'f' && item.is_shortcut" :image="'shortcut'" class="d" />
-            <Icon v-else-if="item.type === 'f' && item.is_link" :image="'browserLink'" class="d" />
+            <Icon
+              v-else-if="item.type === 'f' && item.is_link"
+              :image="'browserLink'"
+              class="d link-highlight"
+            />
             <div class="file-info">
               <span class="file-name">{{ item.name }}</span>
             </div>
@@ -270,6 +274,16 @@ setup() {
 .d :deep(line),
 .d :deep(polygon),
 .d :deep(polyline) {
+  @apply stroke-black;
+}
+
+.link-highlight :deep(path),
+.link-highlight :deep(circle),
+.link-highlight :deep(ellipse),
+.link-highlight :deep(rect),
+.link-highlight :deep(line),
+.link-highlight :deep(polygon),
+.link-highlight :deep(polyline) {
   @apply stroke-accent-yellow-shadow;
 }
 
