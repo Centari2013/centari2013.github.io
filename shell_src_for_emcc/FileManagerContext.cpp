@@ -89,6 +89,10 @@ FileSystem::Directory* FileManagerContext::get_desktop_dir_ptr() const {
     return this->fs->get_desktop_dir_ptr();
 }
 
+FileSystem::Directory* FileManagerContext::get_projects_dir_ptr() const {
+    return this->fs->get_projects_dir_ptr();
+}
+
 void FileManagerContext::reset(FileSystem::Directory* dir) {
     this->forward_history.clear();
     this->back_history.clear();

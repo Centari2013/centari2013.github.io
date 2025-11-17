@@ -289,6 +289,11 @@ void register_role(FileSystem &fs, const std::string &role, Directory *dir) {
         return;
     }
 
+    if (role == "projects") {
+        fs.set_projects_dir_ptr(dir);
+        return;
+    }
+
     if (role == "bin") {
         const std::string path = fs.get_dir_path(dir);
         if (!fs.PATH.empty()) {
@@ -409,6 +414,7 @@ void loadFilesystemFromManifest(std::shared_ptr<FileSystem> fs, const emscripten
     fs->set_pictures_dir_ptr(nullptr);
     fs->set_documents_dir_ptr(nullptr);
     fs->set_desktop_dir_ptr(nullptr);
+    fs->set_projects_dir_ptr(nullptr);
     fs->PATH.clear();
 
     if (has_property(manifest_json, "root")) {

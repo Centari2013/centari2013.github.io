@@ -3,33 +3,37 @@
     <div ref="terminalDiv" id="terminal"></div>
 </template>
 
-<script>
-import "@/assets/js/terminal/system.js"
-import { initializeTerminal } from '../../assets/js/terminal/terminal.js';
+<script setup>
+import { onMounted, ref } from "vue";
+import "@/assets/js/terminal/system.js";
+import { initializeTerminal } from "@/assets/js/terminal/terminal.js";
+import { useAppsStore } from "@/components/stores/apps";
 
-export default {
-   
-    mounted() {
-        this.initTerminal(); // Initialize the terminal after the component is mounted
+const props = defineProps({
+    contentType: {
+        type: String,
+        default: "terminal",
     },
+});
 
-    methods: {
-        initTerminal() {
-            // Access the terminal div using $refs
-            const contentElement = this.$refs.terminalDiv;
-            if (contentElement) {
-            
-                initializeTerminal(contentElement, this.$parent);  // Pass the terminal container as the argument
-            
-            }
-        },
+const terminalDiv = ref(null);
+const appsStore = useAppsStore();
 
-    },
+const initTerminal = () => {
+    const contentElement = terminalDiv.value;
+    if (!contentElement) return;
+
+    initializeTerminal(contentElement, {
+        closeApp: () => appsStore.closeApp(props.contentType || "terminal"),
+    });
 };
+
+onMounted(() => {
+    initTerminal();
+});
 </script>
 <style scoped>
 #terminal {
     @apply h-full w-full;
 }
 </style>
-

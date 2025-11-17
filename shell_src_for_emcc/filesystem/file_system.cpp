@@ -9,6 +9,8 @@ FileSystem::FileSystem(const std::string &name, const std::string&root_name = "/
     this->pictures = nullptr;
     this->documents = nullptr;
     this->current_dir = this->root.get();
+    this->desktop = nullptr;
+    this->projects = nullptr;
 
 }
 
@@ -33,6 +35,10 @@ void FileSystem::set_desktop_dir_ptr(FileSystem::Directory* p){
     this->desktop = p;
 }
 
+void FileSystem::set_projects_dir_ptr(FileSystem::Directory* p){
+    this->projects = p;
+}
+
 FileSystem::Directory* FileSystem::get_home_dir_ptr() const {
     return this->home;
 }
@@ -55,6 +61,10 @@ FileSystem::Directory* FileSystem::get_documents_dir_ptr() const {
 
 FileSystem::Directory* FileSystem::get_desktop_dir_ptr() const {
     return this->desktop;
+}
+
+FileSystem::Directory* FileSystem::get_projects_dir_ptr() const {
+    return this->projects;
 }
 
 std::string FileSystem::get_home_dir(){

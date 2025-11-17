@@ -39,6 +39,7 @@ public:
     FileSystem::Directory* get_root_dir_ptr() const;
     FileSystem::Directory* get_documents_dir_ptr() const;
     FileSystem::Directory* get_desktop_dir_ptr() const;
+    FileSystem::Directory* get_projects_dir_ptr() const;
     
 private:
     FileSystem::Directory* cur_dir;

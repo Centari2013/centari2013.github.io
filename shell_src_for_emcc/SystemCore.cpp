@@ -64,6 +64,10 @@ FileSystem::Directory* SystemCore::get_desktop_dir_ptr() const {
     return this->f.get_desktop_dir_ptr();
 }
 
+FileSystem::Directory* SystemCore::get_projects_dir_ptr() const {
+    return this->f.get_projects_dir_ptr();
+}
+
 void SystemCore::reset_filesystem_state() {
     FileSystem::Directory* start = this->fs->get_home_dir_ptr();
     if (!start) {

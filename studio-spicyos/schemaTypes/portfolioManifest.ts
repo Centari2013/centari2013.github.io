@@ -44,6 +44,7 @@ export const remoteFolder = defineType({
           { title: 'Documents', value: 'documents' },
           { title: 'Downloads', value: 'downloads' },
           { title: 'Pictures', value: 'pictures' },
+          { title: 'Projects', value: 'projects' },
           { title: '/bin', value: 'bin' },
           { title: '/etc', value: 'etc' },
           { title: '/usr', value: 'usr' },
