@@ -5,11 +5,11 @@ import "@xterm/xterm/css/xterm.css";
 import { useIsMobile } from "@/components/utilities/useIsMobile";
 
 // Function to initialize the terminal
-export function initializeTerminal(terminalContainer, parentWindow) {
-    const term = terminalSetup(terminalContainer, parentWindow);
+export function initializeTerminal(terminalContainer, windowControls = {}) {
+    const term = terminalSetup(terminalContainer, windowControls);
 
     SystemModule.set_terminal(term);
-  
+
 }
 
 function printIntro(art, terminal) {
@@ -32,7 +32,7 @@ Type 'help' to get started.      \r\n
 `;
 
 
-function terminalSetup(terminalContainer, parentWindow) {
+function terminalSetup(terminalContainer, windowControls) {
     let fontSize = 16;
     const {isMobile} = useIsMobile();
     if (isMobile.value) fontSize = 12;
@@ -118,7 +118,7 @@ function terminalSetup(terminalContainer, parentWindow) {
             cursorPosition = 0;
             if (inputBuffer.length !== 0) {
                 if (inputBuffer == 'exit'){
-                    parentWindow.closeApp();
+                    windowControls.closeApp?.();
                 }
                 // Add command to history (if not duplicate of the last command)
                 if (commandHistory.length === 0 || commandHistory[commandHistory.length - 1] !== inputBuffer) {
