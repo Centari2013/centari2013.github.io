@@ -186,7 +186,8 @@ onMounted(() => {
 .f :deep(line),
 .f :deep(polygon),
 .f :deep(polyline) {
-  @apply stroke-accent-yellow-shadow fill-accent-yellow-shadow;
+  @apply stroke-accent-yellow-shadow;
+  fill: none;
 }
 
 
