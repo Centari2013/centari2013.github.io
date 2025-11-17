@@ -1,3 +1,8 @@
+import {
+  primeFilesystemMetadataFromManifest,
+  rebuildFilesystemMetadataSnapshot,
+} from '@/components/utilities/filesystemMetadata';
+
 const MANIFEST_QUERY = '*[_type == "portfolioManifest"][0]';
 
 function requireEnv(name) {
@@ -106,11 +111,13 @@ function hydrateManifestAssets(manifest) {
 export async function initFilesystem(manifestUrl) {
   const manifest = await (manifestUrl ? fetchManifestFromUrl(manifestUrl) : fetchManifestFromSanity());
   hydrateManifestAssets(manifest);
+  primeFilesystemMetadataFromManifest(manifest);
 
   if (!window.SystemModule || typeof window.SystemModule.initFilesystem !== 'function') {
     throw new Error('SystemModule.initFilesystem is not available.');
   }
 
   window.SystemModule.initFilesystem(manifest);
+  rebuildFilesystemMetadataSnapshot();
   return manifest;
 }

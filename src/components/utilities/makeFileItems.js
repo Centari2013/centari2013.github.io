@@ -29,9 +29,15 @@ function deriveContentMode(file) {
     return 'data';
 }
 
+import {
+    getShortcutTargetPath,
+    shortcutTargetsDirectory,
+} from '@/components/utilities/filesystemMetadata';
+
 function toFileObject(f) {
     const assetUrl = extractAssetUrl(f);
     const contentMode = deriveContentMode(f);
+    const targetsDirectory = shortcutTargetsDirectory(f);
     return {
         object: f,
         type: "f",
@@ -42,7 +48,9 @@ function toFileObject(f) {
         assetUrl: assetUrl || (contentMode === 'url' ? f.content : null),
         asset: f.asset,
         is_shortcut: f.is_shortcut,
-        is_link: f.is_link
+        is_link: f.is_link,
+        shortcutTargetsDirectory: targetsDirectory,
+        shortcutTargetPath: targetsDirectory ? getShortcutTargetPath(f) : null,
     };
 }
 

@@ -21,6 +21,20 @@ export const portfolioEntry = defineType({
         return true;
       }),
     }),
+    defineField({
+      name: 'shortcutTargetType',
+      title: 'Shortcut target type',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'File', value: 'file' },
+          { title: 'Directory', value: 'directory' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'file',
+      hidden: ({ parent }) => parent?.kind !== 'shortcut',
+    }),
     defineField({ name: 'tags', type: 'array', of: [{ type: 'string' }] }),
     //defineField({ name: 'meta', type: 'object', fields: []}),
   ],

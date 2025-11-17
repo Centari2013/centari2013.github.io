@@ -49,6 +49,7 @@
           >
             <Icon v-if="item.type === 'd'" :image="'directory'" class="d"/>
             <Icon v-else-if="item.type === 'f' && !item.is_shortcut && !item.is_link" :image="'file'" class="d" />
+            <Icon v-else-if="item.type === 'f' && item.is_shortcut && item.shortcutTargetsDirectory" :image="'directory_shortcut'" class="d" />
             <Icon v-else-if="item.type === 'f' && item.is_shortcut" :image="'shortcut'" class="d" />
             <Icon
               v-else-if="item.type === 'f' && item.is_link"
@@ -68,7 +69,7 @@
 
 <script>
 import "@/assets/js/terminal/system";
-import { ref, onMounted, toRaw } from "vue";
+import { ref, onMounted, toRaw, watch } from "vue";
 import Icon from "@/components/desktop/Icon.vue";
 import { useAppsStore } from "@/components/stores/apps";
 import makeDirectoryItems from "@/components/utilities/makeDirectoryItems";
@@ -77,7 +78,13 @@ import { openFile } from '@/components/utilities/openFile'
 
 export default {
   components: { Icon },
-setup() {
+  props: {
+    args: {
+      type: Object,
+      default: null,
+    },
+  },
+setup(props) {
     // Reactive states
     const contents = ref([]);
     const disableBack = ref(true);
@@ -99,11 +106,20 @@ setup() {
     };
 
     // Navigation methods
-    const chdir = (item) => {
-      SystemModule.cd(item);
-      activePtr.value = item; // <-- track current ptr
+    const navigateToDirectory = (targetPtr) => {
+      const rawPtr = toRaw(targetPtr);
+      if (!rawPtr) {
+        return;
+      }
+
+      SystemModule.cd(rawPtr);
+      activePtr.value = rawPtr;
       contents.value = getDirContents();
       syncButtonState();
+    };
+
+    const chdir = (item) => {
+      navigateToDirectory(item);
     };
 
     const back = () => {
@@ -130,6 +146,20 @@ setup() {
       activePtr.value = SystemModule.get_cur_fs_dir(); // Set current dir on load
       syncButtonState();
     });
+
+    let lastDirectoryArg = null;
+    watch(
+      () => props.args?.directoryPtr,
+      (dirPtr) => {
+        const ptrId = dirPtr?.$$?.ptr;
+        if (!dirPtr || ptrId === lastDirectoryArg) {
+          return;
+        }
+        lastDirectoryArg = ptrId;
+        navigateToDirectory(dirPtr);
+      },
+      { immediate: true }
+    );
 
 
     const downloads_ptr = SystemModule.get_downloads_dir_ptr();

@@ -20,15 +20,16 @@
         />
     </template>
     <div id="filespace">
-      <div 
-            v-for="item in desktopContents" 
-            :key="item.name" 
+      <div
+            v-for="item in desktopContents"
+            :key="item.name"
             class="file-item "
             :class="{'h-35 w-35': isMobile, 'h-40 w-40': !isMobile}"
             @dblclick="handleFileOpen(item)"
           >
             <Icon v-if="item.type === 'd'" :image="'directory'" class="d"/>
             <Icon v-else-if="item.type === 'f' && !item.is_shortcut && !item.is_link" :image="'file'" class="d" />
+            <Icon v-else-if="item.type === 'f' && item.is_shortcut && item.shortcutTargetsDirectory" :image="'directory_shortcut'" class="d" />
             <Icon v-else-if="item.type === 'f' && item.is_shortcut" :image="'shortcut'" class="d" />
             <Icon v-else-if="item.type === 'f' && item.is_link" :image="'browserLink'" class="d" />
             <div class="file-info">
@@ -67,7 +68,7 @@ const windowRefs = reactive({});
 provide('windowRefs', windowRefs);
 const desktopContents = ref([]);
 const appsStore = useAppsStore();
-const { openApps, openFiles, isAppOpen } = storeToRefs(appsStore);
+const { openApps, openFiles } = storeToRefs(appsStore);
 const fmId = 'file_manager'
 const browserId = 'browser'
 
@@ -82,15 +83,13 @@ const assignWindowRef = (id) => (el) => {
 };
 
 
-const opendir = (item) => {
-  //TODO: FIX
-  
-  if (!isAppOpen(fmId)){
-    openApp(fmId);
+const openDirectoryInFileManager = (directoryPtr) => {
+  if (!directoryPtr) {
+    return;
   }
-  const fm = windowRefs.find(app => app.id === fmId);
-  fm.chdir(item);
-}
+
+  appsStore.openApp(fmId, { directoryPtr });
+};
 const getDesktopContents = () => {
   const desktop_ptr = SystemModule.get_desktop_dir_ptr();
   const files = SystemModule.list_files(desktop_ptr);
@@ -115,7 +114,7 @@ const getRandomPosition = (id) => {
 
 const handleFileOpen = (item) => {
   if (item.type === 'd') {
-    opendir(toRaw(item.object))
+    openDirectoryInFileManager(toRaw(item.object));
   } else if (item.type === 'f' && item.is_link) {
     appsStore.openApp(browserId, { url: item.content })
   }else {
