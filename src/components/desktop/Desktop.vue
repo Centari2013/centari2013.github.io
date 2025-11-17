@@ -179,8 +179,14 @@ onMounted(() => {
   @apply stroke-accent-yellow-shadow;
 }
 
-.f path {
-  @apply stroke-accent-yellow-shadow;
+.f :deep(path),
+.f :deep(circle),
+.f :deep(ellipse),
+.f :deep(rect),
+.f :deep(line),
+.f :deep(polygon),
+.f :deep(polyline) {
+  @apply stroke-accent-yellow-shadow fill-accent-yellow-shadow;
 }
 
 
