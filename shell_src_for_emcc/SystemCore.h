@@ -7,11 +7,12 @@
 class SystemCore
 {
 private:
+    std::shared_ptr<FileSystem> fs;
     TerminalShellContext t;
     FileManagerContext f;
 public:
     SystemCore(std::shared_ptr<FileSystem> fs):
-    t(TerminalShellContext(fs)), f(FileManagerContext(fs)){}
+    fs(std::move(fs)), t(TerminalShellContext(this->fs)), f(FileManagerContext(this->fs)){}
 
     void set_terminal(emscripten::val terminal);
     void process_command(std::string command);
@@ -31,6 +32,7 @@ public:
     FileSystem::Directory* get_desktop_dir_ptr() const;
 
     FileSystem::Directory* get_cur_fs_dir();
+    void reset_filesystem_state();
 };
 
 #endif // SYSTEMCORE_H

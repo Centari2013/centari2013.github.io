@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpo9_3uio4.js
+// include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpg73uy759.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -209,25 +209,25 @@ Module['FS_createPath']("/filesystem", "files", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/filesystem/file_system.cpp", "start": 0, "end": 7885}, {"filename": "/filesystem/file_system.h", "start": 7885, "end": 16210}, {"filename": "/filesystem/files/.DS_Store", "start": 16210, "end": 22358}, {"filename": "/filesystem/files/about_me.md", "start": 22358, "end": 24691}, {"filename": "/filesystem/files/cache.txt", "start": 24691, "end": 26508}, {"filename": "/filesystem/files/echo.txt", "start": 26508, "end": 27637}, {"filename": "/filesystem/files/files.cpp", "start": 27637, "end": 4890719}, {"filename": "/filesystem/files/files.h", "start": 4890719, "end": 4891356}, {"filename": "/filesystem/files/gcc.txt", "start": 4891356, "end": 4894041}, {"filename": "/filesystem/files/hiiii.jpeg", "start": 4894041, "end": 6173774}, {"filename": "/filesystem/files/hostname.txt", "start": 6173774, "end": 6175393}, {"filename": "/filesystem/files/its_a_me.jpeg", "start": 6175393, "end": 6867381}, {"filename": "/filesystem/files/log.txt", "start": 6867381, "end": 6869675}, {"filename": "/filesystem/files/ls.txt", "start": 6869675, "end": 6870824}, {"filename": "/filesystem/files/mel_cosplay_makeup.jpeg", "start": 6870824, "end": 7566864}, {"filename": "/filesystem/files/passwd.txt", "start": 7566864, "end": 7568973}, {"filename": "/filesystem/files/python3.txt", "start": 7568973, "end": 7571247}, {"filename": "/filesystem/files/resume.md", "start": 7571247, "end": 7574317}, {"filename": "/filesystem/files/shadow.txt", "start": 7574317, "end": 7577214}, {"filename": "/filesystem/files/sound_room_link.txt", "start": 7577214, "end": 7577254}, {"filename": "/filesystem/files/tmp.txt", "start": 7577254, "end": 7579155}, {"filename": "/filesystem/initialize_spcy_fs.cpp", "start": 7579155, "end": 7584908}, {"filename": "/filesystem/initialize_spcy_fs.h", "start": 7584908, "end": 7585122}], "remote_package_size": 7585122});
+    loadPackage({"files": [{"filename": "/filesystem/file_system.cpp", "start": 0, "end": 7885}, {"filename": "/filesystem/file_system.h", "start": 7885, "end": 16210}, {"filename": "/filesystem/files/.DS_Store", "start": 16210, "end": 22358}, {"filename": "/filesystem/files/about_me.md", "start": 22358, "end": 24691}, {"filename": "/filesystem/files/cache.txt", "start": 24691, "end": 26508}, {"filename": "/filesystem/files/echo.txt", "start": 26508, "end": 27637}, {"filename": "/filesystem/files/files.cpp", "start": 27637, "end": 4890719}, {"filename": "/filesystem/files/files.h", "start": 4890719, "end": 4891356}, {"filename": "/filesystem/files/gcc.txt", "start": 4891356, "end": 4894041}, {"filename": "/filesystem/files/hiiii.jpeg", "start": 4894041, "end": 6173774}, {"filename": "/filesystem/files/hostname.txt", "start": 6173774, "end": 6175393}, {"filename": "/filesystem/files/its_a_me.jpeg", "start": 6175393, "end": 6867381}, {"filename": "/filesystem/files/log.txt", "start": 6867381, "end": 6869675}, {"filename": "/filesystem/files/ls.txt", "start": 6869675, "end": 6870824}, {"filename": "/filesystem/files/mel_cosplay_makeup.jpeg", "start": 6870824, "end": 7566864}, {"filename": "/filesystem/files/passwd.txt", "start": 7566864, "end": 7568973}, {"filename": "/filesystem/files/python3.txt", "start": 7568973, "end": 7571247}, {"filename": "/filesystem/files/resume.md", "start": 7571247, "end": 7574317}, {"filename": "/filesystem/files/shadow.txt", "start": 7574317, "end": 7577214}, {"filename": "/filesystem/files/sound_room_link.txt", "start": 7577214, "end": 7577254}, {"filename": "/filesystem/files/tmp.txt", "start": 7577254, "end": 7579155}, {"filename": "/filesystem/initialize_spcy_fs.cpp", "start": 7579155, "end": 7591396}, {"filename": "/filesystem/initialize_spcy_fs.h", "start": 7591396, "end": 7591716}], "remote_package_size": 7591716});
 
   })();
 
-// end include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpo9_3uio4.js
-// include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpwpqauguf.js
+// end include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpg73uy759.js
+// include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpg49ly1gm.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if (Module['$ww'] || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpwpqauguf.js
-// include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpm0h2r_9a.js
+  // end include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpg49ly1gm.js
+// include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpq0u25ctl.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpm0h2r_9a.js
+  // end include: /var/folders/b8/gpk64dmd37jck17qs_vhn52r0000gn/T/tmpq0u25ctl.js
 
 
 var arguments_ = [];
@@ -3206,6 +3206,32 @@ async function createWasm() {
       });
     };
 
+  
+  
+  
+  var requireRegisteredType = (rawType, humanName) => {
+      var impl = registeredTypes[rawType];
+      if (undefined === impl) {
+        throwBindingError(`${humanName} has unknown type ${getTypeName(rawType)}`);
+      }
+      return impl;
+    };
+  
+  var emval_returnValue = (returnType, destructorsRef, handle) => {
+      var destructors = [];
+      var result = returnType['toWireType'](destructors, handle);
+      if (destructors.length) {
+        // void, primitives and any other types w/o destructors don't need to allocate a handle
+        HEAPU32[((destructorsRef)>>2)] = Emval.toHandle(destructors);
+      }
+      return result;
+    };
+  var __emval_as = (handle, returnType, destructorsRef) => {
+      handle = Emval.toValue(handle);
+      returnType = requireRegisteredType(returnType, 'emval::as');
+      return emval_returnValue(returnType, destructorsRef, handle);
+    };
+
   var emval_methodCallers = [];
   
   var __emval_call = (caller, handle, destructorsRef, args) => {
@@ -3234,21 +3260,31 @@ async function createWasm() {
     };
 
 
+  
+  
+  var emval_get_global = () => {
+      if (typeof globalThis == 'object') {
+        return globalThis;
+      }
+      return (function(){
+        return Function;
+      })()('return this')();
+    };
+  var __emval_get_global = (name) => {
+      if (name===0) {
+        return Emval.toHandle(emval_get_global());
+      } else {
+        name = getStringOrSymbol(name);
+        return Emval.toHandle(emval_get_global()[name]);
+      }
+    };
+
   var emval_addMethodCaller = (caller) => {
       var id = emval_methodCallers.length;
       emval_methodCallers.push(caller);
       return id;
     };
   
-  
-  
-  var requireRegisteredType = (rawType, humanName) => {
-      var impl = registeredTypes[rawType];
-      if (undefined === impl) {
-        throwBindingError(`${humanName} has unknown type ${getTypeName(rawType)}`);
-      }
-      return impl;
-    };
   var emval_lookupTypes = (argCount, argTypes) => {
       var a = new Array(argCount);
       for (var i = 0; i < argCount; ++i) {
@@ -3259,15 +3295,6 @@ async function createWasm() {
     };
   
   
-  var emval_returnValue = (returnType, destructorsRef, handle) => {
-      var destructors = [];
-      var result = returnType['toWireType'](destructors, handle);
-      if (destructors.length) {
-        // void, primitives and any other types w/o destructors don't need to allocate a handle
-        HEAPU32[((destructorsRef)>>2)] = Emval.toHandle(destructors);
-      }
-      return result;
-    };
   var __emval_get_method_caller = (argCount, argTypes, kind) => {
       var types = emval_lookupTypes(argCount, argTypes);
       var retType = types.shift();
@@ -3308,11 +3335,20 @@ async function createWasm() {
       return emval_addMethodCaller(createNamedFunction(functionName, invokerFunction));
     };
 
+  var __emval_get_property = (handle, key) => {
+      handle = Emval.toValue(handle);
+      key = Emval.toValue(key);
+      return Emval.toHandle(handle[key]);
+    };
+
   var __emval_incref = (handle) => {
       if (handle > 9) {
         emval_handles[handle + 1] += 1;
       }
     };
+
+  
+  var __emval_new_cstring = (v) => Emval.toHandle(getStringOrSymbol(v));
 
   
   
@@ -6393,7 +6429,6 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'getLiveInheritedInstances',
   'enumReadValueFromPointer',
   'setDelayFunction',
-  'emval_get_global',
 ];
 missingLibrarySymbols.forEach(missingLibrarySymbol)
 
@@ -6702,6 +6737,7 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'count_emval_handles',
   'getStringOrSymbol',
   'Emval',
+  'emval_get_global',
   'emval_returnValue',
   'emval_lookupTypes',
   'emval_methodCallers',
@@ -6757,15 +6793,23 @@ var wasmImports = {
   /** @export */
   _embind_register_void: __embind_register_void,
   /** @export */
+  _emval_as: __emval_as,
+  /** @export */
   _emval_call: __emval_call,
   /** @export */
   _emval_call_method: __emval_call_method,
   /** @export */
   _emval_decref: __emval_decref,
   /** @export */
+  _emval_get_global: __emval_get_global,
+  /** @export */
   _emval_get_method_caller: __emval_get_method_caller,
   /** @export */
+  _emval_get_property: __emval_get_property,
+  /** @export */
   _emval_incref: __emval_incref,
+  /** @export */
+  _emval_new_cstring: __emval_new_cstring,
   /** @export */
   _emval_run_destructors: __emval_run_destructors,
   /** @export */

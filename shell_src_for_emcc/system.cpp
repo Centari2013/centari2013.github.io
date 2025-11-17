@@ -79,6 +79,15 @@ FileSystem::Directory::File* resolve_shortcut(FileSystem::Directory::File* f) {
     return (f && f->is_shortcut) ? f->shortcut_target.lock().get() : nullptr;
 }
 
+void load_manifest_from_json(emscripten::val manifest) {
+    loadFilesystemFromManifest(fs, manifest);
+}
+
+void init_filesystem(emscripten::val manifest) {
+    loadFilesystemFromManifest(fs, manifest);
+    s.reset_filesystem_state();
+}
+
 
 // Expose the functions to JavaScript
 EMSCRIPTEN_BINDINGS(terminal) {
@@ -123,5 +132,10 @@ EMSCRIPTEN_BINDINGS(file_manager) {
     emscripten::function("get_desktop_dir_ptr", &get_desktop_dir_ptr, emscripten::allow_raw_pointers());
 
     emscripten::function("resolve_shortcut", &resolve_shortcut, emscripten::allow_raw_pointers());
-    
+
+}
+
+EMSCRIPTEN_BINDINGS(filesystem_manifest_loader) {
+    emscripten::function("loadFilesystemFromManifest", &load_manifest_from_json);
+    emscripten::function("initFilesystem", &init_filesystem);
 }
