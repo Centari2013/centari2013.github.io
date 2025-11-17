@@ -39,6 +39,11 @@
               class="d"
             />
             <Icon v-else-if="item.type === 'f' && item.is_link" :image="'browserLink'" class="d" />
+            <Icon
+              v-else-if="item.type === 'f'"
+              :image="'file'"
+              class="f"
+            />
             <div class="file-info">
               <span class="file-name">{{ item.name }}</span>
             </div>
