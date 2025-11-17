@@ -142,8 +142,19 @@ setup() {
         return null;
       }
 
-      const homeChildren = SystemModule.list_directories(homeDir) || [];
-      return homeChildren.find((dir) => dir?.name?.toLowerCase?.() === "projects") || null;
+      const homeChildren = SystemModule.list_directories(homeDir);
+      if (!homeChildren || typeof homeChildren.size !== "function") {
+        return null;
+      }
+
+      for (let i = 0; i < homeChildren.size(); i++) {
+        const childDir = homeChildren.get(i);
+        if (childDir?.name?.toLowerCase?.() === "projects") {
+          return childDir;
+        }
+      }
+
+      return null;
     };
 
     const projects_ptr = resolveProjectsDirPtr();
