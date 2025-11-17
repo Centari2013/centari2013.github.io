@@ -41,14 +41,16 @@
       <div class="file-grid-container">
         <!-- Responsive Grid that Auto-adjusts -->
         <div class="file-grid">
-          <div 
-            v-for="item in contents" 
-            :key="item.name" 
+          <div
+            v-for="item in contents"
+            :key="item.name"
             class="file-item"
             @dblclick="item.type === 'd' ? chdir(toRaw(item.object)) : openFile(item)"
           >
             <Icon v-if="item.type === 'd'" :image="'directory'" class="d"/>
-            <Icon v-else-if="item.type === 'f'" :image="'file'" />
+            <Icon v-else-if="item.type === 'f' && !item.is_shortcut && !item.is_link" :image="'file'" class="d" />
+            <Icon v-else-if="item.type === 'f' && item.is_shortcut" :image="'shortcut'" class="d" />
+            <Icon v-else-if="item.type === 'f' && item.is_link" :image="'browserLink'" class="d" />
             <div class="file-info">
               <span class="file-name">{{ item.name }}</span>
             </div>
