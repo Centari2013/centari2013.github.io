@@ -127,20 +127,37 @@ setup() {
 
 
     const downloads_ptr = SystemModule.get_downloads_dir_ptr();
-    const home_ptr = SystemModule.get_home_dir_ptr();
     const documents_ptr = SystemModule.get_documents_dir_ptr();
     const pictures_ptr = SystemModule.get_pictures_dir_ptr();
     const desktop_ptr = SystemModule.get_desktop_dir_ptr();
     const root_ptr = SystemModule.get_root_dir_ptr();
 
-    const sidebarDirs = ref([
-    { name: "Home", ptr: home_ptr },
-    { name: "Desktop", ptr: desktop_ptr },
-    { name: "Downloads", ptr: downloads_ptr },
-    { name: "Documents", ptr: documents_ptr },
-    { name: "Pictures", ptr: pictures_ptr },
-    { name: "Root", ptr: root_ptr }
-    ]);
+    const resolveProjectsDirPtr = () => {
+      if (typeof SystemModule.get_projects_dir_ptr === "function") {
+        return SystemModule.get_projects_dir_ptr();
+      }
+
+      const homeDir = SystemModule.get_home_dir_ptr();
+      if (!homeDir || typeof SystemModule.list_directories !== "function") {
+        return null;
+      }
+
+      const homeChildren = SystemModule.list_directories(homeDir) || [];
+      return homeChildren.find((dir) => dir?.name?.toLowerCase?.() === "projects") || null;
+    };
+
+    const projects_ptr = resolveProjectsDirPtr();
+
+    const sidebarDirs = ref(
+      [
+        { name: "Desktop", ptr: desktop_ptr },
+        { name: "Downloads", ptr: downloads_ptr },
+        { name: "Documents", ptr: documents_ptr },
+        { name: "Pictures", ptr: pictures_ptr },
+        { name: "Projects", ptr: projects_ptr },
+        { name: "Root", ptr: root_ptr }
+      ].filter((dir) => !!dir.ptr)
+    );
 
     return {
       contents,
@@ -151,11 +168,11 @@ setup() {
       forward,
       openFile,
       downloads_ptr,
-      home_ptr,
       pictures_ptr,
       documents_ptr,
       root_ptr,
       desktop_ptr,
+      projects_ptr,
       directoryTitle,
       toRaw,
       sidebarDirs,

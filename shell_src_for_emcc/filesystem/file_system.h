@@ -126,6 +126,7 @@ public:
     void set_pictures_dir_ptr(Directory* p);
     void set_documents_dir_ptr(Directory* p);
     void set_desktop_dir_ptr(Directory *p);
+    void set_projects_dir_ptr(Directory *p);
 
     Directory* get_home_dir_ptr() const;
     Directory* get_downloads_dir_ptr() const;
@@ -133,6 +134,7 @@ public:
     Directory* get_root_dir_ptr() const;
     Directory* get_documents_dir_ptr() const;
     Directory* get_desktop_dir_ptr() const;
+    Directory* get_projects_dir_ptr() const;
 
     /**
      * @brief Sets the home directory.
@@ -232,6 +234,7 @@ private:
     Directory* pictures; /** Pointer to picures directory. */
     Directory* documents; /** Pointer to documents directory. */
     Directory* desktop; /** Pointer to desktop directory. */
+    Directory* projects; /** Pointer to projects directory. */
 
 
     Directory *current_dir; /** Pointer to current working directory. */
