@@ -86,6 +86,7 @@ const fmId = 'file_manager'
 const browserId = 'browser'
 
 const loader = createLoader(2, p => emit('progress', p))
+let systemModulePromise
 
 const assignWindowRef = (id) => (el) => {
   if (el) {
@@ -132,22 +133,45 @@ const handleFileOpen = (item) => {
 
 }
 
-onMounted(() => {
-  // initialize file system
-  SystemModule.onRuntimeInitialized = async () => {
-    loader.checkpoint()
-    try {
-      await bootstrapFilesystem();
-      console.log("SystemModule filesystem initialized from manifest.");
-    } catch (error) {
-      console.error("Failed to initialize filesystem", error);
-    }
-    desktopContents.value = getDesktopContents();
-    loader.checkpoint()
-  };
+const runDesktopBootstrap = async () => {
+  loader.checkpoint()
+  try {
+    await bootstrapFilesystem();
+    console.log("SystemModule filesystem initialized from manifest.");
+  } catch (error) {
+    console.error("Failed to initialize filesystem", error);
+  }
+  desktopContents.value = getDesktopContents();
+  loader.checkpoint()
+}
 
+const loadSystemModule = async () => {
+  if (!systemModulePromise) {
+    systemModulePromise = import('@/assets/js/terminal/system')
+  }
+  return systemModulePromise
+}
+
+const initializeSystemModule = async () => {
+  if (window.SystemModule?.calledRun) {
+    await runDesktopBootstrap()
+    return
+  }
+
+  window.SystemModule = window.SystemModule || {}
+
+  if (!window.SystemModule.onRuntimeInitialized) {
+    window.SystemModule.onRuntimeInitialized = async () => {
+      await runDesktopBootstrap()
+    }
+  }
+
+  await loadSystemModule()
+}
+
+onMounted(async () => {
+  await initializeSystemModule()
   loader.done.then(() => emit('initialized'))
-  
 })
 
 
