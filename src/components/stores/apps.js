@@ -16,6 +16,7 @@ export const useAppsStore = defineStore('apps', {
       { id: 'terminal', name: 'Terminal', image: 'terminal', shared: true, minWidth: getIsMobile().value ? 400 : 495},
       { id: 'file_manager', name: 'File Manager', image: 'directory', shared: true},
       { id: 'browser', name: 'Browser', image: 'browser', shared: true},
+      { id: 'blog', name: 'Blog', image: 'browser', shared: true, defaultArgs: { url: '/blog' }},
     ],
 
     openApps: [], // [{ id: 'terminal', zIndex: 1, ... }]
