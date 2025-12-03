@@ -1,44 +1,7 @@
 <template>
-  <!-- Fade transition around the loader -->
-  <transition name="fade">
-    <!-- Pass the `progress` prop and listen for skip -->
-    <LoadingScreen
-      v-if="loading"
-      :progress="progress"
-      @skip="loading = false"
-    />
-  </transition>
-
-  <Desktop
-    @initialized="onDesktopReady"
-    @progress="p => progress = p"
-  />
+  <RouterView />
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import LoadingScreen from '@/components/desktop/LoadingScreen.vue'
-import Desktop from '@/components/desktop/Desktop.vue'
-
-const loading = ref(true)
-const progress = ref(0)
-
-function onDesktopReady() {
-  // ensure bar can hit 100% and show the fade
-  setTimeout(() => {
-    loading.value = false
-  }, 200)
-}
+import { RouterView } from 'vue-router'
 </script>
-
-<style scoped>
-/* Fade transition */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

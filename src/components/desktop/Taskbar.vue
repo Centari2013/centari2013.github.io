@@ -87,8 +87,9 @@ onMounted(() => {
 const windowRefs = inject('windowRefs');
 
 const openOrToggleApp = (id) => {
+  const appDefinition = appsStore.allApps.find(app => app.id === id);
   const app = windowRefs[id];
-  if (!app) return appsStore.openApp(id);
+  if (!app) return appsStore.openApp(id, appDefinition?.defaultArgs ?? null);
 
   const window = app.$refs.baseWindow;
   if (!window) return;

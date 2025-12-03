@@ -48,8 +48,8 @@ const contentComponent = computed(() => {
   } else if (props.id === "file_manager") {
     title.value = "File Manager";
     return FileManagerView;
-  }else if (props.id === "browser") {
-    title.value = "Browser";
+  } else if (props.id === "browser" || props.id === "blog") {
+    title.value = props.id === "blog" ? "Blog" : "Browser";
     return BrowserView;
   }
   return null;
