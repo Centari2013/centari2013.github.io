@@ -97,6 +97,9 @@ function determineRenderMode(mimeType = '', extension = '') {
   if (normalizedExt === 'md' || normalizedMime === 'text/markdown') {
     return 'markdown';
   }
+  if (normalizedExt === 'html' || normalizedExt === 'htm' || normalizedMime === 'text/html') {
+    return 'html';
+  }
   if (normalizedMime.startsWith('image/')) {
     return 'image';
   }
@@ -119,7 +122,7 @@ function determineRenderMode(mimeType = '', extension = '') {
 }
 
 function isTextRenderMode(renderMode) {
-  return renderMode === 'text' || renderMode === 'markdown';
+  return renderMode === 'text' || renderMode === 'markdown' || renderMode === 'html';
 }
 
 function detectContentMode(entry = {}) {

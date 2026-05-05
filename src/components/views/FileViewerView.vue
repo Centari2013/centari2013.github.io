@@ -17,6 +17,10 @@
         <div :id="id" class="page-content" v-html="renderer.content"></div>
       </div>
 
+      <div v-else-if="renderer.mode === 'html'" class="page-content-container">
+        <div class="page-content html-content" v-html="renderer.content"></div>
+      </div>
+
       <img v-else-if="renderer.mode === 'image'" :src="renderer.source" alt="Image preview" class="image-preview" />
       <video v-else-if="renderer.mode === 'video'" :src="renderer.source" controls class="video-preview"></video>
       <audio v-else-if="renderer.mode === 'audio'" :src="renderer.source" controls class="audio-preview"></audio>
@@ -128,6 +132,10 @@ function renderFile(file) {
     return { mode: 'markdown', content: renderMarkdownContent(file.rawData) };
   }
 
+  if (file.renderMode === 'html') {
+    return { mode: 'html', content: typeof file.rawData === 'string' ? file.rawData : '' };
+  }
+
   if (file.renderMode === 'text') {
     return { mode: 'text', content: formatTextContent(file.rawData) };
   }
@@ -231,6 +239,11 @@ onBeforeUnmount(() => {
   @apply text-red-500 font-bold;
 }
 
+.html-content {
+  filter: none;
+  padding: 0;
+}
+
 .page-content ul {
   @apply list-disc pl-6 mb-4;
 }
@@ -244,7 +257,7 @@ onBeforeUnmount(() => {
 }
 
 .page-content h1 {
-  @apply mb-5;
+  @apply text-2xl font-bold text-primary-base mb-5;
 }
 
 .page-content h2 {
