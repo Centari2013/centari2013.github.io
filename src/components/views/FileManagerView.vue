@@ -270,7 +270,7 @@ setup(props) {
 }
 
 .nav-button:hover {
-  filter: drop-shadow(0 0 5px #0098db) drop-shadow(0 0 10px #0098db);
+  filter: drop-shadow(0 0 5px var(--color-alerts-base)) drop-shadow(0 0 10px var(--color-alerts-base));
   @apply text-alerts-base;
 }
 

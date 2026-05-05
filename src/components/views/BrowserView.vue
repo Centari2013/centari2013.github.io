@@ -9,6 +9,11 @@
           <BrowserBackIcon class="browser-icon"/>
         </button>
 
+        <!-- Forward button -->
+        <button class="browser-button" @click="goForward" :disabled="!canGoForward">
+          <BrowserForwardIcon class="browser-icon"/>
+        </button>
+
         <!-- Reload button -->
         <button class="browser-button" @click="reloadPage">
           <BrowserRefreshIcon class="browser-icon refresh"/>
@@ -38,6 +43,7 @@
 import { computed, ref, useTemplateRef, watch } from 'vue';
 import { extractAndDecodeBase64 } from '@/components/utilities/decode'
 import BrowserBackIcon from '@/assets/icons/browserBack.svg'
+import BrowserForwardIcon from '@/assets/icons/browserForward.svg'
 import BrowserNewTabIcon from '@/assets/icons/browserNewTab.svg'
 import BrowserRefreshIcon from '@/assets/icons/browserRefresh.svg'
 
@@ -90,11 +96,17 @@ watch(
 );
 
 const canGoBack = computed(() => historyIndex.value > 0);
+const canGoForward = computed(() => historyIndex.value < history.value.length - 1);
 
 const goBack = () => {
   if (historyIndex.value <= 0) return;
-
   historyIndex.value -= 1;
+  currentUrl.value = history.value[historyIndex.value];
+};
+
+const goForward = () => {
+  if (historyIndex.value >= history.value.length - 1) return;
+  historyIndex.value += 1;
   currentUrl.value = history.value[historyIndex.value];
 };
 
@@ -123,14 +135,14 @@ const reloadPage = () => {
 }
 
 .browser-icon {
-  filter: drop-shadow(0 0 1px #ff0546) drop-shadow(0 0 5px #ff0546);
+  filter: drop-shadow(0 0 1px var(--color-primary-accent-bright)) drop-shadow(0 0 5px var(--color-primary-accent-bright));
   cursor: pointer;
   height: 20px;
   width: 20px;
 }
 
 .browser-icon:hover {
-  filter: drop-shadow(0 0 5px #0098db) drop-shadow(0 0 10px #0098db);
+  filter: drop-shadow(0 0 5px var(--color-alerts-base)) drop-shadow(0 0 10px var(--color-alerts-base));
 }
 
 .browser-icon:hover circle,
