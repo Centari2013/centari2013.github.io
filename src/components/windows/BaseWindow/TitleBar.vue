@@ -100,12 +100,12 @@ const { isMobile } = useIsMobile();
 }
 
 .title-icon {
-  filter: drop-shadow(0 0 1px #ff0546) drop-shadow(0 0 5px #ff0546);
+  filter: drop-shadow(0 0 1px var(--color-primary-accent-bright)) drop-shadow(0 0 5px var(--color-primary-accent-bright));
 }
 
 
 .title-icon:hover {
-  filter: drop-shadow(0 0 5px #0098db) drop-shadow(0 0 10px #0098db);
+  filter: drop-shadow(0 0 5px var(--color-alerts-base)) drop-shadow(0 0 10px var(--color-alerts-base));
 }
 .title-icon:hover circle,
 .title-icon:hover line,

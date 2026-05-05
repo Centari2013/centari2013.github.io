@@ -363,7 +363,7 @@ defineExpose({
 
 .base-window {
   @apply flex overflow-hidden max-h-full max-w-full fixed;
-  --aug-border-bg: #ff0546;
+  --aug-border-bg: var(--color-primary-accent-bright);
   --aug-border-opacity: 0.25;
 }
 

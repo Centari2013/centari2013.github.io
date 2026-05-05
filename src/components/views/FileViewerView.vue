@@ -213,7 +213,6 @@ onBeforeUnmount(() => {
 
 .page-content {
   @apply relative text-primary-dark-base p-8 h-full overflow-auto;
-  filter: brightness(0.5);
   line-height: 1.8rem;
 }
 
@@ -221,13 +220,11 @@ onBeforeUnmount(() => {
   @apply w-auto h-auto max-w-full max-h-full p-3;
   object-fit: contain;
   display: block;
-  filter: brightness(0.5);
 }
 
 .video-preview,
 .audio-preview {
   @apply w-full max-w-4xl;
-  filter: brightness(0.5);
 }
 
 .pdf-frame {
@@ -240,7 +237,6 @@ onBeforeUnmount(() => {
 }
 
 .html-content {
-  filter: none;
   padding: 0;
 }
 
