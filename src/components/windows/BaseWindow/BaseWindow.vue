@@ -230,11 +230,13 @@ function watchPosition(el, callback) {
   };
 }
 
-// Snap to minimized position if needed
-const snapToMin = async () => {
-  if (props.getMinimized() && !state.isRestoring) {
-    await animateSnapToMinimized("center", 0.1);
-  }
+// Track filebar position — directly sync state so minimized windows move with the drawer
+const snapToMin = () => {
+  if (!props.getMinimized() || state.isRestoring || state.isMinimizing) return;
+  killWindowTween();
+  const mini_pos = props.getMiniPos();
+  state.currentDimensions.position.left = mini_pos.x - state.minSize.width / 2;
+  state.currentDimensions.position.top = mini_pos.y - state.minSize.height / 2;
 }
 
 // Lifecycle hooks

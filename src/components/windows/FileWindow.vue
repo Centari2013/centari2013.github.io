@@ -77,11 +77,10 @@ const getMiniPos = () => {
 
   const rect = filebarWinContainer.getBoundingClientRect();
 
-  // Clamp to viewport — filebar may be off-screen when hidden via GSAP translateX
-  const x = Math.max(rect.width / 2, rect.left + rect.width / 2);
-  const y = Math.max(rect.height / 2, Math.min(window.innerHeight - rect.height / 2, rect.top + rect.height / 2));
-
-  return { x, y };
+  return {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+  };
 };
 
 
