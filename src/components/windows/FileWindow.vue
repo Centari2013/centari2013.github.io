@@ -73,14 +73,15 @@ const downloadFile = async () => {
 const getMiniPos = () => {
   const filebarWinContainer = document.getElementById(`filewin-${props.item.object.$$.ptr}`);
 
-  if (!filebarWinContainer) return { x: 0, y: 0 };
+  if (!filebarWinContainer) return { x: 40, y: window.innerHeight / 2 };
 
   const rect = filebarWinContainer.getBoundingClientRect();
 
-  return {
-    x: rect.left + rect.width / 2,
-    y: rect.top + rect.height / 2,
-  };
+  // Clamp to viewport — filebar may be off-screen when hidden via GSAP translateX
+  const x = Math.max(rect.width / 2, rect.left + rect.width / 2);
+  const y = Math.max(rect.height / 2, Math.min(window.innerHeight - rect.height / 2, rect.top + rect.height / 2));
+
+  return { x, y };
 };
 
 

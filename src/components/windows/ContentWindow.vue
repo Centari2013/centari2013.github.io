@@ -80,14 +80,14 @@ const getMiniPos = () => {
   const taskbarEl = document.getElementById("taskbar");
   const iconEl = document.getElementById(props.id + "Icon");
 
-  if (!taskbarEl || !iconEl) return { x: 0, y: 0 };
+  if (!taskbarEl || !iconEl) return { x: window.innerWidth / 2, y: window.innerHeight };
 
   const taskbarRect = taskbarEl.getBoundingClientRect();
   const iconRect = iconEl.getBoundingClientRect();
 
   return {
-    x: iconRect.x + iconRect.width / 2,
-    y: taskbarRect.y,
+    x: Math.max(0, Math.min(window.innerWidth, iconRect.x + iconRect.width / 2)),
+    y: Math.min(window.innerHeight, taskbarRect.y),
   };
 };
 

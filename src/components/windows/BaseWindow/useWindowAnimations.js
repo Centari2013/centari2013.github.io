@@ -31,6 +31,8 @@ export function useWindowAnimations(
     const offset_y = min_size.height / 2;
     const el = resizableWindow.value;
     const el2 = restoreOverlay.value;
+    const targetLeft = mini_pos.x - offset_x;
+    const targetTop = mini_pos.y - offset_y;
 
     return gsap.to([el, el2], {
       width: `${min_size.width}`,
@@ -40,12 +42,16 @@ export function useWindowAnimations(
       ease: "power1.out",
     }).then(() => {
       return gsap.to([el, el2], {
-        left: `${mini_pos.x - offset_x}`,
-        top: `${mini_pos.y - offset_y}`,
+        left: `${targetLeft}`,
+        top: `${targetTop}`,
         duration,
         ease: "power1.out",
         scale,
         transformOrigin: origin,
+        onComplete: () => {
+          state.currentDimensions.position.left = targetLeft;
+          state.currentDimensions.position.top = targetTop;
+        },
       });
     });
   }
