@@ -32,7 +32,7 @@ It is part terminal emulator, part desktop manager, part portfolio, and part tec
 - Bridges multiple technologies:
   - WebAssembly module powered by C++ (compiled with Emscripten)
   - JavaScript interoperability with a custom shell engine and real-time rendering
-- Loads portfolio filesystem content from Sanity, allowing the presentation layer and content structure to evolve independently
+- Loads the portfolio filesystem from a GitHub-managed JSON manifest, keeping the presentation layer and content structure independent
 
 ---
 
@@ -45,7 +45,7 @@ It is part terminal emulator, part desktop manager, part portfolio, and part tec
 | Animations  | [GSAP](https://greensock.com/gsap/)                                         |
 | Terminal    | [Xterm.js](https://xtermjs.org/) + `@xterm/addon-fit`                       |
 | Markdown    | [marked](https://marked.js.org/) + `marked-emoji`                           |
-| Content     | Sanity                                                                      |
+| Content     | GitHub-managed JSON manifest + overrides                                     |
 | Bundler     | [Vite](https://vitejs.dev/)                                                 |
 | WASM Bridge | C++ compiled via [Emscripten](https://emscripten.org/)                      |
 
@@ -68,7 +68,7 @@ The current portfolio is increasingly focused on the work I enjoy most: understa
 - 🌲 Dynamic file-tree system written in Vue
 - 🖥️ Terminal supporting real commands and simulated filesystem navigation
 - 🌐 C++ and JavaScript integration through Emscripten and WebAssembly
-- 🗂️ Sanity-backed portfolio filesystem and content model
+- 🗂️ GitHub-managed portfolio filesystem manifest and override layer
 - 🎛️ Custom icon dock and boot animations
 - ✨ Cyberpunk-adjacent visual theme, because beige was never going to happen
 
@@ -92,7 +92,7 @@ No Emscripten required unless you're going under the hood.
 
 ### 🗂️ Authoring filesystem shortcuts
 
-If you're editing the manifest in Sanity, any entry whose `kind` is set to `shortcut` exposes a `shortcutTargetPath` field. Point it at the absolute or `~`-relative path of the file you want to open, such as `/home/SpicyKneecaps/Documents/Resume.md` or `~/Documents/Resume.md`. The WebAssembly loader resolves that path at boot so shortcuts behave like real desktop aliases without duplicating content.
+The portfolio filesystem is defined in `public/portfolioManifest.json`. Any entry whose `kind` is set to `shortcut` can use a `shortcutTargetPath` field. Point it at the absolute or `~`-relative path of the file you want to open, such as `/home/SpicyKneecaps/Documents/Resume.md` or `~/Documents/Resume.md`. The WebAssembly loader resolves that path at boot so shortcuts behave like real desktop aliases without duplicating content.
 
 Need a shortcut that launches the File Manager in a folder instead? Set `shortcutTargetType` to `directory`. SpicyOS renders the folder shortcut icon and opens the requested directory directly.
 
