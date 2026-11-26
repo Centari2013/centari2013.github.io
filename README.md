@@ -7,17 +7,17 @@
 ![C++](https://img.shields.io/badge/Engineered%20in-C++-00599C?logo=c%2B%2B&logoColor=white)
 ![Open Source Love](https://img.shields.io/badge/made%20with-strife%20💀-black)
 
+**SpicyOS** is a cyberpunk-inspired portfolio built as an interactive operating-system interface in the browser. It combines systems thinking, information architecture, interaction design, and hands-on engineering in one deliberately unconventional experience.
 
-**SpicyOS** is a cyberpunk-inspired, fake operating system built entirely in the browser — serving as an unconventional developer portfolio and UI playground. It’s part terminal emulator, part desktop manager, part fever dream. Designed to break from the tired grid of “minimalist” portfolio sites, SpicyOS is fully interactive, highly stylized, and packed with hand-built components.
+It is part terminal emulator, part desktop manager, part portfolio, and part technical experiment. The point is not just to show what I can build, but how I structure complex systems, connect technical layers, and turn an idea into something people can actually interact with.
 
 ![SpicyOS Preview](https://github.com/user-attachments/assets/04156c32-4d07-4a04-aeee-f0080c815355)
-
 
 ---
 
 ## 🔗 Live Demo
 
-**👉 [Try SpicyOS on GitHub Pages](https://centari2013.github.io/)**  
+**👉 [Try SpicyOS on GitHub Pages](https://centari2013.github.io/)**
 
 ---
 
@@ -31,7 +31,8 @@
   - `cd`, `ls`, `echo`, `pwd`, `clear`, `exit`, `tree`, `type`, `man`
 - Bridges multiple technologies:
   - WebAssembly module powered by C++ (compiled with Emscripten)
-  - JS interop with a custom shell engine and real-time rendering
+  - JavaScript interoperability with a custom shell engine and real-time rendering
+- Loads portfolio filesystem content from Sanity, allowing the presentation layer and content structure to evolve independently
 
 ---
 
@@ -44,6 +45,7 @@
 | Animations  | [GSAP](https://greensock.com/gsap/)                                         |
 | Terminal    | [Xterm.js](https://xtermjs.org/) + `@xterm/addon-fit`                       |
 | Markdown    | [marked](https://marked.js.org/) + `marked-emoji`                           |
+| Content     | Sanity                                                                      |
 | Bundler     | [Vite](https://vitejs.dev/)                                                 |
 | WASM Bridge | C++ compiled via [Emscripten](https://emscripten.org/)                      |
 
@@ -53,24 +55,27 @@
 
 > Traditional portfolio sites bored me. So I built a fake OS instead.
 
-SpicyOS is meant to signal range — showcasing not just what I can build, but how I think about interaction, storytelling, and cross-platform experimentation. It started as a POSIX shell challenge (via CodeCrafters) and spiraled into a hybrid OS–portfolio built from scratch.
+SpicyOS is meant to demonstrate range without reducing that range to a wall of technology logos. The project combines software engineering, systems design, information architecture, interface design, and content modeling inside a single coherent metaphor.
 
-As a nod to my roots in C++, my first and favorite programming language, I compiled my backend with Emscripten instead of relying solely on JavaScript. By compiling with Emscripten into WebAssembly, I honored the low-level systems side of me while bringing it into the browser world.
+It started as a POSIX shell challenge through CodeCrafters and grew into a browser-based operating-system portfolio. As a nod to my roots in C++, I compiled the shell layer to WebAssembly with Emscripten rather than rebuilding the entire experience in JavaScript.
+
+The current portfolio is increasingly focused on the work I enjoy most: understanding complicated systems, identifying where they break down, designing better structures and workflows, and using technology to make those designs real.
 
 ---
 
 ## 🧠 Notable Features
 
-- 🌲 Fully dynamic file tree system written from scratch in Vue
-- 🖥️ Terminal supports real commands + simulated file system navigation
-- 🌐 Bridges C++ and JS using Emscripten and WebAssembly
+- 🌲 Dynamic file-tree system written in Vue
+- 🖥️ Terminal supporting real commands and simulated filesystem navigation
+- 🌐 C++ and JavaScript integration through Emscripten and WebAssembly
+- 🗂️ Sanity-backed portfolio filesystem and content model
 - 🎛️ Custom icon dock and boot animations
-- ✨ Cyberpunk-adjacent visual theme (because dark mode’s not enough)
+- ✨ Cyberpunk-adjacent visual theme, because beige was never going to happen
 
 ---
 ## 🧰 Dev Setup Notes
 
-SpicyOS includes a custom file system backend written in C++, compiled to WebAssembly using [Emscripten](https://emscripten.org/). That said — **if you're not modifying the C++ shell**, you don’t need to worry about any of that.
+SpicyOS includes a custom file system backend written in C++, compiled to WebAssembly using [Emscripten](https://emscripten.org/). That said, **if you're not modifying the C++ shell**, you don’t need to worry about any of that.
 
 ### 🔧 Standard Setup (No C++ Changes)
 
@@ -87,24 +92,22 @@ No Emscripten required unless you're going under the hood.
 
 ### 🗂️ Authoring filesystem shortcuts
 
-If you're editing the manifest in Sanity, any entry whose `kind` is set to `shortcut` now exposes a `shortcutTargetPath` field. Point it at the absolute path of the file you want to open (e.g. `/home/SpicyKneecaps/Documents/Resume.md` or `~/Documents/Resume.md`). The WebAssembly loader resolves that path at boot so shortcuts behave like real desktop aliases without duplicating content. Paths with spaces are supported—either type the literal space or use shell-style escapes (e.g. `/Users/Zaria\ Burton/Documents/Resume.md`) and the loader will normalize them automatically.
+If you're editing the manifest in Sanity, any entry whose `kind` is set to `shortcut` exposes a `shortcutTargetPath` field. Point it at the absolute or `~`-relative path of the file you want to open, such as `/home/SpicyKneecaps/Documents/Resume.md` or `~/Documents/Resume.md`. The WebAssembly loader resolves that path at boot so shortcuts behave like real desktop aliases without duplicating content.
 
-Need a shortcut that launches the File Manager in a folder instead? Flip the `shortcutTargetType` field to `directory`. SpicyOS will render the new folder shortcut icon on the desktop/File Manager, and double-clicking it opens the requested directory rather than a file preview window.
+Need a shortcut that launches the File Manager in a folder instead? Set `shortcutTargetType` to `directory`. SpicyOS renders the folder shortcut icon and opens the requested directory directly.
 
 ---
 
 ### ⚙️ Recompiling the Shell Backend (C++)
 
-If you **do** plan to modify the C++ backend (like the files in `./shell_src_for_emcc/`), you’ll need to recompile the system using Emscripten.
+If you **do** plan to modify the C++ backend, you’ll need to recompile the system using Emscripten.
 
-#### Requirements:
+#### Requirements
 
 - Emscripten installed and configured
-- Python 3 (for pre-encoding the filesystem)
+- Python 3 for pre-encoding the filesystem
 
-#### Recompile Process:
-
-Use the included shell script:
+#### Recompile Process
 
 ```bash
 cd ./shell_src_for_emcc
@@ -114,39 +117,29 @@ cd ./shell_src_for_emcc
 This will:
 
 1. Run a Python script to base64-encode the initial filesystem
-2. Compile the C++ files using Emscripten into:
-   - `system.js`
-   - `system.wasm`
-   - `system.data`
-3. Move those artifacts to their correct locations:
-   - `system.js` → `src/assets/js/terminal/`
-   - `system.wasm` + `system.data` → `public/`
-4. Append `window.SystemModule = Module;` to `system.js` to expose it to the frontend
+2. Compile the C++ files using Emscripten into `system.js`, `system.wasm`, and `system.data`
+3. Move the artifacts into their expected frontend locations
+4. Expose the compiled module to the browser runtime
 
-> ⚠️ The script must be executed from within `./shell_src_for_emcc/`. Running it elsewhere will break path assumptions.
-
----
-
-If by some miracle you're interested in contributing, open an issue or reach out. I’ll walk you through it!
-
+> ⚠️ The script must be executed from within `./shell_src_for_emcc/` because it relies on relative path assumptions.
 
 ---
 
 ## 🧪 Author
 
 **Zaria Burton**  
-- Creative Full Stack Developer & Systems Tinkerer  
-- 🔗 [LinkedIn](https://www.linkedin.com/in/zariaburton) | [GitHub](https://github.com/centari2013)  
-- 📍 Miami, FL
+Business Systems & Technology Professional | Technical Builder  
+[LinkedIn](https://www.linkedin.com/in/zariaburton) | [GitHub](https://github.com/centari2013)  
+Miami, FL | Open to Atlanta relocation
 
 ---
 
 ## 🪪 License
 
-MIT — remix, fork, deploy, just don’t be a copycat.
+MIT — remix, fork, deploy, just don’t pretend you made it.
 
 ---
 
 ## 🫀 Why This Matters
 
-SpicyOS isn’t just aesthetic. It’s a technically ambitious, UI-forward portfolio meant to demonstrate breadth — from frontend creativity to tech stack integration.
+SpicyOS is more than a themed portfolio. It is a working demonstration of how I approach complicated problems: define the structure, understand the moving parts, connect the layers, prototype the experience, and make the system understandable to the person using it.
