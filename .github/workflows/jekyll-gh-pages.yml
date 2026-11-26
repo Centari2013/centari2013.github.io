@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -21,6 +21,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,101 +32,11 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Export production portfolio manifest
-        run: |
-          node <<'NODE'
-          const fs = require('fs');
-
-          (async () => {
-            const projectId = 'hafqxoal';
-            const dataset = 'production';
-            const apiVersion = 'v2023-05-03';
-            const query = encodeURIComponent('*[_type == "portfolioManifest"][0]');
-            const url = `https://${projectId}.api.sanity.io/${apiVersion}/data/query/${dataset}?query=${query}`;
-
-            const response = await fetch(url);
-            if (!response.ok) {
-              throw new Error(`Sanity export failed: ${response.status} ${response.statusText}`);
-            }
-
-            const payload = await response.json();
-            if (!payload.result) {
-              throw new Error('Sanity export returned no portfolioManifest.');
-            }
-
-            function buildAssetUrl(ref) {
-              if (!ref) return null;
-
-              let match = /^file-([^-]+)-([a-zA-Z0-9]+)$/.exec(ref);
-              if (match) {
-                return `https://cdn.sanity.io/files/${projectId}/${dataset}/${match[1]}.${match[2]}`;
-              }
-
-              match = /^image-([^-]+)-(\d+x\d+)-([a-zA-Z0-9]+)$/.exec(ref);
-              if (match) {
-                return `https://cdn.sanity.io/images/${projectId}/${dataset}/${match[1]}-${match[2]}.${match[3]}`;
-              }
-
-              return null;
-            }
-
-            function hydrate(node) {
-              if (Array.isArray(node)) {
-                node.forEach(hydrate);
-                return;
-              }
-
-              if (!node || typeof node !== 'object') return;
-
-              if (node._type === 'portfolioEntry') {
-                const ref = node.asset?.asset?._ref;
-                const assetUrl = buildAssetUrl(ref);
-                if (assetUrl) {
-                  node.asset.url = assetUrl;
-                  node.assetUrl = assetUrl;
-                  if (!node.content) {
-                    node.content = assetUrl;
-                    node.contentMode = 'url';
-                  }
-                }
-              }
-
-              if (Array.isArray(node.entries)) hydrate(node.entries);
-            }
-
-            hydrate(payload.result);
-
-            fs.writeFileSync(
-              'public/portfolioManifest.json',
-              JSON.stringify(payload.result, null, 2) + '\n'
-            );
-          })().catch((error) => {
-            console.error(error);
-            process.exit(1);
-          });
-          NODE
-
-      - name: Persist exported manifest to repository
-        run: |
-          if git diff --quiet -- public/portfolioManifest.json; then
-            echo "Manifest already matches production export."
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add public/portfolioManifest.json
-            git commit -m "Sync production portfolio manifest [skip ci]"
-            git push
-          fi
-
       - name: Install dependencies
         run: npm ci
 
       - name: Build
         run: npm run build
-        env:
-          VITE_SANITY_PROJECT_ID: ${{ secrets.VITE_SANITY_PROJECT_ID }}
-          VITE_SANITY_DATASET: ${{ secrets.VITE_SANITY_DATASET }}
-          VITE_SANITY_API_VERSION: ${{ secrets.VITE_SANITY_API_VERSION }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
